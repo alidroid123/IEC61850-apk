@@ -143,6 +143,99 @@ tasks.register('publishReleaseToGit') {
         stagedApk.delete()
         logger.lifecycle("==> Release ${tag} published: https://github.com/alidroid123/IEC61850-apk/releases/tag/${tag}")
         logger.lifecycle("==> version.properties bumped - next release build will be v${vMajor}.${vMinor}.${nextPatch}")
+
+        sendFcmTopicPush(
+                "Update Tersedia",
+                "Versi ${tag} sudah tersedia. Buka aplikasi untuk update."
+        )
+    }
+}
+
+/**
+ * Signs a JWT (RS256) assertion for a Google service account, exchanges it for an OAuth2 access
+ * token, then sends a data-only FCM push to the "app_updates" topic - implemented with plain
+ * JDK crypto/HTTP (no extra Gradle dependency) since Google's legacy FCM server-key HTTP API was
+ * shut down in June 2024; the HTTP v1 API requires this OAuth2 bearer-token exchange instead.
+ * No-ops (with a log line) if firebase-service-account.json isn't present - see
+ * project_fcm_push_notifications memory for how to obtain that key.
+ */
+def sendFcmTopicPush(String title, String body) {
+    def keyFile = rootProject.file('firebase-service-account.json')
+    if (!keyFile.exists()) {
+        logger.lifecycle("==> firebase-service-account.json not found - skipping push notification send.")
+        return
+    }
+    try {
+        def sa = new groovy.json.JsonSlurper().parse(keyFile)
+
+        long nowSec = System.currentTimeMillis() / 1000L
+        String headerJson = groovy.json.JsonOutput.toJson([alg: "RS256", typ: "JWT"])
+        String claimsJson = groovy.json.JsonOutput.toJson([
+                iss  : sa.client_email,
+                scope: "https://www.googleapis.com/auth/firebase.messaging",
+                aud  : sa.token_uri,
+                iat  : nowSec,
+                exp  : nowSec + 3600L
+        ])
+
+        String headerB64 = Base64.getUrlEncoder().withoutPadding().encodeToString(headerJson.getBytes("UTF-8"))
+        String claimsB64 = Base64.getUrlEncoder().withoutPadding().encodeToString(claimsJson.getBytes("UTF-8"))
+        String signingInput = "${headerB64}.${claimsB64}"
+
+        String pkcs8 = (sa.private_key as String)
+                .replace("-----BEGIN PRIVATE KEY-----", "")
+                .replace("-----END PRIVATE KEY-----", "")
+                .replaceAll("\\s", "")
+        def keySpec = new java.security.spec.PKCS8EncodedKeySpec(Base64.getDecoder().decode(pkcs8))
+        def privateKey = java.security.KeyFactory.getInstance("RSA").generatePrivate(keySpec)
+
+        def signer = java.security.Signature.getInstance("SHA256withRSA")
+        signer.initSign(privateKey)
+        signer.update(signingInput.getBytes("UTF-8"))
+        String signatureB64 = Base64.getUrlEncoder().withoutPadding().encodeToString(signer.sign())
+        String jwt = "${signingInput}.${signatureB64}"
+
+        // --- Exchange the JWT for an OAuth2 access token ---
+        HttpURLConnection tokenConn = (HttpURLConnection) new URL(sa.token_uri as String).openConnection()
+        tokenConn.setRequestMethod("POST")
+        tokenConn.setDoOutput(true)
+        tokenConn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded")
+        String formBody = "grant_type=" + URLEncoder.encode("urn:ietf:params:oauth:grant-type:jwt-bearer", "UTF-8") +
+                "&assertion=" + URLEncoder.encode(jwt, "UTF-8")
+        tokenConn.getOutputStream().write(formBody.getBytes("UTF-8"))
+
+        int tokenCode = tokenConn.getResponseCode()
+        String tokenResp = (tokenCode in 200..299 ? tokenConn.getInputStream() : tokenConn.getErrorStream()).getText("UTF-8")
+        if (!(tokenCode in 200..299)) {
+            logger.lifecycle("==> FCM token exchange failed (HTTP ${tokenCode}): ${tokenResp}")
+            return
+        }
+        String accessToken = new groovy.json.JsonSlurper().parseText(tokenResp).access_token
+
+        // --- Send the push to the "app_updates" topic (data-only, so AppFcmService always
+        // handles it itself rather than the OS auto-displaying a bare system notification) ---
+        String payload = groovy.json.JsonOutput.toJson([
+                message: [
+                        topic: "app_updates",
+                        data : [title: title, body: body]
+                ]
+        ])
+        HttpURLConnection sendConn = (HttpURLConnection) new URL("https://fcm.googleapis.com/v1/projects/${sa.project_id}/messages:send").openConnection()
+        sendConn.setRequestMethod("POST")
+        sendConn.setDoOutput(true)
+        sendConn.setRequestProperty("Content-Type", "application/json; charset=UTF-8")
+        sendConn.setRequestProperty("Authorization", "Bearer ${accessToken}")
+        sendConn.getOutputStream().write(payload.getBytes("UTF-8"))
+
+        int sendCode = sendConn.getResponseCode()
+        String sendResp = (sendCode in 200..299 ? sendConn.getInputStream() : sendConn.getErrorStream()).getText("UTF-8")
+        if (sendCode in 200..299) {
+            logger.lifecycle("==> Push notification sent to topic 'app_updates': ${sendResp}")
+        } else {
+            logger.lifecycle("==> Push notification send FAILED (HTTP ${sendCode}): ${sendResp}")
+        }
+    } catch (Exception e) {
+        logger.lifecycle("==> Push notification send error: ${e}")
     }
 }
 

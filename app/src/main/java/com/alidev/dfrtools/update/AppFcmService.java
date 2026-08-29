@@ -36,6 +36,12 @@ public class AppFcmService extends FirebaseMessagingService {
 
         String title = getString(R.string.ttl_all_update_available);
         String body = getString(R.string.msg_push_update_available);
+
+        // The release-publish send is data-only (see sendFcmTopicPush in app/build.gradle), so
+        // prefer the data payload; fall back to a "notification" block for anyone sending a push
+        // manually from the Firebase Console instead.
+        if (message.getData().containsKey("title")) title = message.getData().get("title");
+        if (message.getData().containsKey("body")) body = message.getData().get("body");
         if (message.getNotification() != null) {
             if (message.getNotification().getTitle() != null) title = message.getNotification().getTitle();
             if (message.getNotification().getBody() != null) body = message.getNotification().getBody();
