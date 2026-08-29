@@ -9,6 +9,7 @@
     <string name="btn_abt_back">Back</string>
     <string name="btn_all_add">ADD</string>
     <string name="btn_all_cancel">CANCEL</string>
+    <string name="btn_all_check_update">Cek Update</string>
     <string name="btn_all_close">CLOSE</string>
     <string name="btn_all_delete">DELETE</string>
     <string name="btn_all_grant_permission">Grant Permission</string>
@@ -230,6 +231,7 @@
     <string name="lbl_view_menu_config">Edit Configuration</string>
     <string name="lbl_view_menu_res">Edit Resolution</string>
     <string name="lbl_view_menu_reset">Reset Zoom</string>
+    <string name="lbl_view_menu_companion">File Pendukung</string>
     <string name="lbl_view_phase_in">IN</string>
     <string name="lbl_view_phase_it">IT</string>
     <string name="lbl_view_phase_vn">VN</string>
@@ -249,6 +251,8 @@
     <string name="msg_all_fields_required">All fields must be filled</string>
     <string name="msg_all_update_available">Versi %1$s sudah tersedia. Update sekarang untuk mendapatkan perbaikan dan fitur terbaru.</string>
     <string name="msg_all_update_grant_install">Izinkan aplikasi ini menginstal update, lalu coba lagi.</string>
+    <string name="msg_all_update_checking">Memeriksa update…</string>
+    <string name="msg_all_update_none">Tidak ada update baru, atau gagal memeriksa koneksi</string>
     <string name="msg_all_share_fail">Failed to share file</string>
     <string name="msg_dev_export_empty">No data to export</string>
     <string name="msg_dev_export_fail">Failed to export CSV: %s</string>
@@ -311,6 +315,8 @@
     <string name="msg_view_cursor_unlocked">Cursor Unlocked</string>
     <string name="msg_view_dat_load_fail">Failed to load DAT: %s</string>
     <string name="msg_view_dat_not_found">.dat file not found automatically, please select manually</string>
+    <string name="msg_view_no_companion_files">Tidak ada file pendukung (.hdr/.inf/.xml) yang ditemukan untuk record ini</string>
+    <string name="msg_view_needs_cfg_pair">File ini perlu dibuka bersama pasangan .cfg-nya, tapi .cfg tidak ditemukan di folder yang sama</string>
     <string name="msg_view_empty_data">Empty data</string>
     <string name="msg_view_file_load_fail">Failed to load .cfg: %s</string>
     <string name="msg_view_file_not_found">.cfg file not found</string>
@@ -351,6 +357,7 @@
     <string name="ttl_home_app_title">IEC61850 UTILITY</string>
     <string name="ttl_mms_explorer_adv">IED Explorer</string>
     <string name="ttl_view_channel_config">Channel Configuration</string>
+    <string name="ttl_view_companion_files">File Pendukung</string>
     <string name="ttl_view_main">DFR Viewer</string>
     <string name="ttl_view_pick_source">Choose .cfg File Source</string>
     <string name="ttl_view_res_detail">Resolution Detail</string>

@@ -20,6 +20,11 @@
     <integer name="config_dfr_export_batch_size">2</integer>
     <integer name="config_dfr_export_width_px">1400</integer>
     <integer name="config_dfr_export_frame_delay_ms">10</integer>
+    <!-- A4 portrait @200dpi (210x297mm), used to lay out PDF export pages -->
+    <integer name="config_pdf_page_width_px">1654</integer>
+    <integer name="config_pdf_page_height_px">2339</integer>
+    <integer name="config_pdf_page_margin_px">60</integer>
+    <integer name="config_pdf_item_spacing_px">24</integer>
 
     <!-- // General App Settings -->
     <integer name="config_ui_toast_duration_short_ms">2000</integer>

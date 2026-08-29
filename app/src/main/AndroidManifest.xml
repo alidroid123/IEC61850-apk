@@ -78,6 +78,12 @@
                 <data android:mimeType="*/*" />
                 <data android:pathPattern=".*\\.cfg" />
                 <data android:pathPattern=".*\\.CFG" />
+                <data android:pathPattern=".*\\.dat" />
+                <data android:pathPattern=".*\\.DAT" />
+                <data android:pathPattern=".*\\.hdr" />
+                <data android:pathPattern=".*\\.HDR" />
+                <data android:pathPattern=".*\\.inf" />
+                <data android:pathPattern=".*\\.INF" />
             </intent-filter>
         </activity>
 

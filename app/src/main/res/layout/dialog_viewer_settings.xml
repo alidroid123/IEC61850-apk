@@ -111,6 +111,32 @@
                 android:textSize="@dimen/text_size_body" />
         </LinearLayout>
 
+        <!-- Companion Files (.hdr/.inf/.xml) -->
+        <LinearLayout
+            android:id="@+id/btnMenuCompanion"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingVertical="@dimen/spacing_m"
+            android:paddingHorizontal="@dimen/spacing_s"
+            android:clickable="true"
+            android:focusable="true"
+            android:background="?attr/selectableItemBackground">
+            <ImageView
+                android:layout_width="@dimen/icon_size_m"
+                android:layout_height="@dimen/icon_size_m"
+                android:src="@drawable/ic_file_open"
+                app:tint="@color/status_safe" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/spacing_l"
+                android:text="@string/lbl_view_menu_companion"
+                android:textColor="@color/text_primary"
+                android:textSize="@dimen/text_size_body" />
+        </LinearLayout>
+
         <Button
             android:id="@+id/btnMenuCancel"
             style="@style/Widget.MaterialComponents.Button.TextButton"

@@ -161,6 +161,8 @@ public class DfrViewerActivity extends BaseActivity {
 
     private boolean isAutoLoading = false;
     private Uri pendingDatUri = null;
+    private static final String[] COMPANION_EXTENSIONS = {".hdr", ".inf", ".xml"};
+    private final java.util.LinkedHashMap<String, Uri> companionFileUris = new java.util.LinkedHashMap<>();
 
     // State persistence for assessment section
     private static class AssessmentState {
@@ -207,8 +209,22 @@ public class DfrViewerActivity extends BaseActivity {
 
             if (intent.getData() != null) {
                 Uri uri = intent.getData();
-                if (uri.toString().toLowerCase().endsWith(".cfg")) {
+                String lowUri = uri.toString().toLowerCase();
+                if (lowUri.endsWith(".cfg")) {
                     loadCfg(uri);
+                } else {
+                    // Opened via an external VIEW intent on a .dat/.hdr/.inf/.xml companion file
+                    // rather than the .cfg itself - locate the sibling .cfg and load that instead.
+                    Uri cfgUri = null;
+                    for (String ext : new String[]{".dat", ".hdr", ".inf", ".xml"}) {
+                        if (lowUri.endsWith(ext)) { cfgUri = findSiblingFile(uri, ext, ".cfg"); break; }
+                    }
+                    if (cfgUri != null) {
+                        loadCfg(cfgUri);
+                    } else {
+                        Toast.makeText(this, R.string.msg_view_needs_cfg_pair, Toast.LENGTH_LONG).show();
+                        pickCfgFile();
+                    }
                 }
             } else if (!isAutoLoading) {
                 checkLastOpened();
@@ -331,6 +347,11 @@ public class DfrViewerActivity extends BaseActivity {
         dialogView.findViewById(R.id.btnMenuReset).setOnClickListener(v1 -> {
             dialog.dismiss();
             resetZoom();
+        });
+
+        dialogView.findViewById(R.id.btnMenuCompanion).setOnClickListener(v1 -> {
+            dialog.dismiss();
+            showCompanionFilesDialog();
         });
 
         dialogView.findViewById(R.id.btnMenuCancel).setOnClickListener(v1 -> dialog.dismiss());
@@ -512,6 +533,96 @@ public class DfrViewerActivity extends BaseActivity {
         return result;
     }
 
+    /**
+     * Looks for a sibling document next to `sourceUri` (which must end in `sourceExtLower`),
+     * with the same base name but `targetExtLower` instead. Tries, in order: a DocumentsContract
+     * document-id swap (works when the provider's doc id encodes a real relative path, e.g. the
+     * system Files picker), then raw URI string substitution, then (file:// only) a direct File
+     * lookup - checking both the given case and the upper-cased extension, since DFRs are often
+     * saved with all-caps extensions. Returns null if no readable sibling is found.
+     */
+    private Uri findSiblingFile(Uri sourceUri, String sourceExtLower, String targetExtLower) {
+        if (sourceUri == null) return null;
+        if ("content".equals(sourceUri.getScheme())) {
+            try {
+                String docId = android.provider.DocumentsContract.getDocumentId(sourceUri);
+                if (docId != null && docId.length() > sourceExtLower.length()
+                        && docId.regionMatches(true, docId.length() - sourceExtLower.length(), sourceExtLower, 0, sourceExtLower.length())) {
+                    String siblingDocId = docId.substring(0, docId.length() - sourceExtLower.length()) + targetExtLower;
+                    Uri candidate = android.provider.DocumentsContract.buildDocumentUri(sourceUri.getAuthority(), siblingDocId);
+                    try (InputStream test = getContentResolver().openInputStream(candidate)) {
+                        if (test != null) return candidate;
+                    } catch (Exception ignored) {
+                        // Provider doesn't expose a path-based document ID (e.g. Drive, Downloads)
+                        // - fall through to the naive string-substitution below.
+                    }
+                }
+            } catch (Exception ignored) {}
+        }
+
+        String sourceUriString = sourceUri.toString();
+        if (!sourceUriString.toLowerCase().endsWith(sourceExtLower)) return null;
+        String targetUriString = sourceUriString.substring(0, sourceUriString.length() - sourceExtLower.length()) + targetExtLower;
+        try {
+            Uri candidate = Uri.parse(targetUriString);
+            try (InputStream test = getContentResolver().openInputStream(candidate)) {
+                if (test != null) return candidate;
+            } catch (Exception ignored) {
+                if ("file".equals(sourceUri.getScheme())) {
+                    File sourceFile = new File(sourceUri.getPath());
+                    String base = sourceFile.getName();
+                    int dot = base.lastIndexOf('.');
+                    if (dot != -1) base = base.substring(0, dot);
+                    File targetFile = new File(sourceFile.getParent(), base + targetExtLower);
+                    if (targetFile.exists()) return Uri.fromFile(targetFile);
+                    File targetFileUpper = new File(sourceFile.getParent(), base + targetExtLower.toUpperCase());
+                    if (targetFileUpper.exists()) return Uri.fromFile(targetFileUpper);
+                }
+            }
+        } catch (Exception ignored) {}
+        return null;
+    }
+
+    private void showCompanionFilesDialog() {
+        if (companionFileUris.isEmpty()) {
+            Toast.makeText(this, R.string.msg_view_no_companion_files, Toast.LENGTH_SHORT).show();
+            return;
+        }
+        String[] labels = new String[companionFileUris.size()];
+        Uri[] uris = new Uri[companionFileUris.size()];
+        int i = 0;
+        for (java.util.Map.Entry<String, Uri> entry : companionFileUris.entrySet()) {
+            String name = getFileName(entry.getValue());
+            labels[i] = name != null ? name : entry.getKey();
+            uris[i] = entry.getValue();
+            i++;
+        }
+        new AlertDialog.Builder(this, R.style.Theme_Comtrade_Dialog)
+                .setTitle(R.string.ttl_view_companion_files)
+                .setItems(labels, (d, which) -> openCompanionFile(uris[which]))
+                .setNegativeButton(R.string.btn_all_cancel, null)
+                .show();
+    }
+
+    private void openCompanionFile(Uri uri) {
+        try {
+            Uri viewUri = uri;
+            String mime = null;
+            if ("file".equals(uri.getScheme())) {
+                viewUri = androidx.core.content.FileProvider.getUriForFile(this, getPackageName() + ".fileprovider", new File(uri.getPath()));
+            } else {
+                mime = getContentResolver().getType(uri);
+            }
+            if (mime == null) mime = "*/*";
+            Intent intent = new Intent(Intent.ACTION_VIEW);
+            intent.setDataAndType(viewUri, mime);
+            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            startActivity(intent);
+        } catch (Exception e) {
+            Toast.makeText(this, R.string.msg_view_picker_fail, Toast.LENGTH_SHORT).show();
+        }
+    }
+
     private void loadCfg(Uri uri) {
         if (isFinishing()) return;
         runOnUiThread(() -> progressBar.setVisibility(View.VISIBLE));
@@ -528,64 +639,14 @@ public class DfrViewerActivity extends BaseActivity {
                 parser.parseCfg(cfgLines);
                 getSharedPreferences("dfr_prefs", MODE_PRIVATE).edit().putString("last_cfg_uri", uri.toString()).apply();
                 
-                // Try to find matching .dat if not already pending. Primary strategy: resolve the
-                // real sibling document via DocumentsContract (works when the provider's document
-                // ID encodes an actual relative path, e.g. the standard external-storage "Files"
-                // picker - this is what makes "pick .cfg only" work for files chosen through the
-                // system picker, not just ones already in this app's own download history).
-                if (pendingDatUri == null && "content".equals(uri.getScheme())) {
-                    try {
-                        String docId = android.provider.DocumentsContract.getDocumentId(uri);
-                        if (docId != null && docId.length() > 4
-                                && docId.regionMatches(true, docId.length() - 4, ".cfg", 0, 4)) {
-                            String siblingDocId = docId.substring(0, docId.length() - 4) + ".dat";
-                            Uri candidate = android.provider.DocumentsContract.buildDocumentUri(uri.getAuthority(), siblingDocId);
-                            try (InputStream test = getContentResolver().openInputStream(candidate)) {
-                                if (test != null) pendingDatUri = candidate;
-                            } catch (Exception ignored) {
-                                // Provider doesn't expose a path-based document ID (e.g. Drive,
-                                // Downloads) - fall through to the naive string-substitution below.
-                            }
-                        }
-                    } catch (Exception ignored) {}
-                }
-
-                // Fallback: naive string substitution on the URI itself (works for plain file://
-                // paths, and for providers that happen to echo the path directly in the URI).
-                if (pendingDatUri == null) {
-                    try {
-                        String cfgUriString = uri.toString();
-                        String lowUri = cfgUriString.toLowerCase();
-                        if (lowUri.endsWith(".cfg")) {
-                            // Try common patterns for .dat file mapping
-                            String datUriString = null;
-                            if (cfgUriString.endsWith(".cfg")) {
-                                datUriString = cfgUriString.substring(0, cfgUriString.length() - 4) + ".dat";
-                            } else if (cfgUriString.endsWith(".CFG")) {
-                                datUriString = cfgUriString.substring(0, cfgUriString.length() - 4) + ".DAT";
-                            } else {
-                                // mixed case, just use lowercase mapping
-                                datUriString = cfgUriString.substring(0, cfgUriString.length() - 4) + ".dat";
-                            }
-                            
-                            if (datUriString != null) {
-                                Uri potentialDat = Uri.parse(datUriString);
-                                // Verify if we can open it
-                                try (InputStream test = getContentResolver().openInputStream(potentialDat)) {
-                                    if (test != null) {
-                                        pendingDatUri = potentialDat;
-                                    }
-                                } catch (Exception ignored) {
-                                    // Fallback: search by filename if it's a file path
-                                    if ("file".equals(uri.getScheme())) {
-                                        File cfgFile = new File(uri.getPath());
-                                        File datFile = new File(cfgFile.getParent(), cfgFile.getName().substring(0, cfgFile.getName().lastIndexOf('.')) + ".dat");
-                                        if (datFile.exists()) pendingDatUri = Uri.fromFile(datFile);
-                                    }
-                                }
-                            }
-                        }
-                    } catch (Exception ignored) {}
+                // Try to find matching .dat if not already pending, and pick up any companion
+                // files (.hdr/.inf/.xml - vendor/standard auxiliary files that sometimes ship
+                // alongside a COMTRADE record) sitting next to the .cfg, via findSiblingFile().
+                if (pendingDatUri == null) pendingDatUri = findSiblingFile(uri, ".cfg", ".dat");
+                companionFileUris.clear();
+                for (String ext : COMPANION_EXTENSIONS) {
+                    Uri companion = findSiblingFile(uri, ".cfg", ext);
+                    if (companion != null) companionFileUris.put(ext, companion);
                 }
 
                 runOnUiThread(() -> {
@@ -1044,9 +1105,18 @@ public class DfrViewerActivity extends BaseActivity {
         float[] data;
         if (isRms) data = parser.calculateRms(rawDataList, idx, samples);
         else { data = new float[rawDataList.size()]; for (int j = 0; j < data.length; j++) data[j] = (rawDataList.get(j).length > idx) ? rawDataList.get(j)[idx] : 0; }
-        if (isPrimary && parser.primaryRatios != null && parser.secondaryRatios != null && idx < parser.primaryRatios.length && idx < parser.secondaryRatios.length) { 
-            float ratio = parser.primaryRatios[idx] / Math.max(0.001f, parser.secondaryRatios[idx]); 
-            for (int j = 0; j < data.length; j++) data[j] *= ratio; 
+        // IEEE C37.111 PS flag: 'S' means the file already stores secondary-side values (the
+        // common case - multiply by primary/secondary ratio to get primary), 'P' means the file
+        // already stores primary-side values (divide by the ratio to get secondary instead, and
+        // leave primary mode untouched). Ignoring this flag double-scales PS='P' files.
+        boolean storedAsPrimary = parser.unitModes != null && idx < parser.unitModes.length && parser.unitModes[idx] == 'P';
+        if (parser.primaryRatios != null && parser.secondaryRatios != null && idx < parser.primaryRatios.length && idx < parser.secondaryRatios.length) {
+            float ratio = parser.primaryRatios[idx] / Math.max(0.001f, parser.secondaryRatios[idx]);
+            if (isPrimary && !storedAsPrimary) {
+                for (int j = 0; j < data.length; j++) data[j] *= ratio;
+            } else if (!isPrimary && storedAsPrimary) {
+                for (int j = 0; j < data.length; j++) data[j] /= ratio;
+            }
         }
         List<Entry> entries = new ArrayList<>();
         int totalPoints = data.length;
@@ -2172,15 +2242,54 @@ public class DfrViewerActivity extends BaseActivity {
                 v.draw(canvas); return b;
             }
 
+            /**
+             * Lays each bitmap onto fixed A4-portrait pages (config_pdf_page_*), packing as many
+             * consecutive items as fit within a page's content height before starting a new page,
+             * instead of the old 1-bitmap-per-arbitrarily-sized-page behavior - this both gives a
+             * real, consistent paper size and minimizes the page count / wasted whitespace.
+             */
             private void saveAsPdf(List<android.graphics.Bitmap> bitmaps) {
                 try {
+                    int pageWidth = getResources().getInteger(R.integer.config_pdf_page_width_px);
+                    int pageHeight = getResources().getInteger(R.integer.config_pdf_page_height_px);
+                    int margin = getResources().getInteger(R.integer.config_pdf_page_margin_px);
+                    int spacing = getResources().getInteger(R.integer.config_pdf_item_spacing_px);
+                    int contentWidth = pageWidth - 2 * margin;
+                    int contentHeight = pageHeight - 2 * margin;
+
                     android.graphics.pdf.PdfDocument document = new android.graphics.pdf.PdfDocument();
-                    for (int i = 0; i < bitmaps.size(); i++) {
-                        android.graphics.Bitmap b = bitmaps.get(i);
-                        android.graphics.pdf.PdfDocument.PageInfo pageInfo = new android.graphics.pdf.PdfDocument.PageInfo.Builder(b.getWidth(), b.getHeight(), i + 1).create();
-                        android.graphics.pdf.PdfDocument.Page page = document.startPage(pageInfo);
-                        page.getCanvas().drawBitmap(b, 0, 0, null); document.finishPage(page);
+                    int pageNum = 1;
+                    android.graphics.pdf.PdfDocument.Page page = null;
+                    float cursorY = margin;
+
+                    for (android.graphics.Bitmap b : bitmaps) {
+                        float scale = Math.min(1f, (float) contentWidth / b.getWidth());
+                        float drawW = b.getWidth() * scale;
+                        float drawH = b.getHeight() * scale;
+                        if (drawH > contentHeight) {
+                            // Taller than a whole page on its own - shrink further to fit height instead.
+                            scale = Math.min(scale, (float) contentHeight / b.getHeight());
+                            drawW = b.getWidth() * scale;
+                            drawH = b.getHeight() * scale;
+                        }
+
+                        if (page == null || cursorY + drawH > margin + contentHeight) {
+                            if (page != null) document.finishPage(page);
+                            android.graphics.pdf.PdfDocument.PageInfo pageInfo =
+                                    new android.graphics.pdf.PdfDocument.PageInfo.Builder(pageWidth, pageHeight, pageNum++).create();
+                            page = document.startPage(pageInfo);
+                            cursorY = margin;
+                        }
+
+                        float left = margin + (contentWidth - drawW) / 2f;
+                        android.graphics.Matrix matrix = new android.graphics.Matrix();
+                        matrix.postScale(scale, scale);
+                        matrix.postTranslate(left, cursorY);
+                        page.getCanvas().drawBitmap(b, matrix, null);
+                        cursorY += drawH + spacing;
                     }
+                    if (page != null) document.finishPage(page);
+
                     String fileName = "DFR_Report_" + System.currentTimeMillis() + ".pdf";
                     java.io.File file = new java.io.File(getExternalFilesDir(null), fileName);
                     java.io.FileOutputStream fos = new java.io.FileOutputStream(file);
