@@ -3,6 +3,7 @@ package com.alidev.dfrtools.dfr;
 import android.Manifest;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
@@ -124,9 +125,20 @@ public class HomeActivity extends BaseActivity {
         tvStatAlarmCount = findViewById(R.id.tvStatAlarmCount);
         imgStatAlarm = findViewById(R.id.imgStatAlarm);
 
+        findViewById(R.id.fabAbout).setOnClickListener(v -> startActivity(new Intent(this, AboutActivity.class)));
+        bindBottomBanner();
+
         checkForAppUpdate();
         requestNotificationPermissionIfNeeded();
         FirebaseMessaging.getInstance().subscribeToTopic(AppFcmService.TOPIC_APP_UPDATES);
+    }
+
+    private void bindBottomBanner() {
+        try {
+            PackageInfo pInfo = getPackageManager().getPackageInfo(getPackageName(), 0);
+            ((TextView) findViewById(R.id.tvBottomBanner)).setText(
+                    getString(R.string.lbl_home_bottom_banner, getString(R.string.ttl_home_app_title), pInfo.versionName));
+        } catch (PackageManager.NameNotFoundException ignored) {}
     }
 
     private static final int REQUEST_NOTIFICATION_PERMISSION = 2001;

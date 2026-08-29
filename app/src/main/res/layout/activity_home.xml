@@ -75,6 +75,11 @@
                 app:tint="@color/white" />
         </LinearLayout>
 
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1">
+
         <ScrollView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -328,7 +333,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
-                    android:paddingVertical="@dimen/spacing_ms"
+                    android:paddingVertical="@dimen/spacing_xs"
                     android:paddingHorizontal="@dimen/spacing_m">
 
                     <LinearLayout
@@ -339,8 +344,8 @@
                         android:gravity="center">
 
                         <ImageView
-                            android:layout_width="@dimen/icon_size_m"
-                            android:layout_height="@dimen/icon_size_m"
+                            android:layout_width="@dimen/icon_size_s"
+                            android:layout_height="@dimen/icon_size_s"
                             android:src="@drawable/ic_location"
                             app:tint="?attr/colorPrimary" />
 
@@ -351,7 +356,7 @@
                             android:layout_marginTop="@dimen/spacing_xs"
                             android:text="0"
                             android:textColor="@color/text_primary"
-                            android:textSize="@dimen/text_size_title"
+                            android:textSize="@dimen/text_size_title_small"
                             android:fontFamily="sans-serif-medium"
                             android:textStyle="bold" />
 
@@ -378,8 +383,8 @@
                         android:gravity="center">
 
                         <ImageView
-                            android:layout_width="@dimen/icon_size_m"
-                            android:layout_height="@dimen/icon_size_m"
+                            android:layout_width="@dimen/icon_size_s"
+                            android:layout_height="@dimen/icon_size_s"
                             android:src="@drawable/ic_list"
                             app:tint="?attr/colorPrimary" />
 
@@ -390,7 +395,7 @@
                             android:layout_marginTop="@dimen/spacing_xs"
                             android:text="0/0"
                             android:textColor="@color/text_primary"
-                            android:textSize="@dimen/text_size_title"
+                            android:textSize="@dimen/text_size_title_small"
                             android:fontFamily="sans-serif-medium"
                             android:textStyle="bold" />
 
@@ -418,8 +423,8 @@
 
                         <ImageView
                             android:id="@+id/imgStatAlarm"
-                            android:layout_width="@dimen/icon_size_m"
-                            android:layout_height="@dimen/icon_size_m"
+                            android:layout_width="@dimen/icon_size_s"
+                            android:layout_height="@dimen/icon_size_s"
                             android:src="@drawable/ic_warning"
                             app:tint="?attr/colorPrimary" />
 
@@ -430,7 +435,7 @@
                             android:layout_marginTop="@dimen/spacing_xs"
                             android:text="0"
                             android:textColor="@color/text_primary"
-                            android:textSize="@dimen/text_size_title"
+                            android:textSize="@dimen/text_size_title_small"
                             android:fontFamily="sans-serif-medium"
                             android:textStyle="bold" />
 
@@ -449,6 +454,38 @@
 
             </LinearLayout>
         </ScrollView>
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/fabAbout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|end"
+            android:layout_margin="@dimen/spacing_xxl"
+            app:fabSize="mini"
+            android:contentDescription="@string/ttl_abt_main"
+            android:src="@drawable/ic_info"
+            app:backgroundTint="?attr/colorPrimary"
+            app:tint="@color/white" />
+        </FrameLayout>
+
+        <!-- Bottom app/version banner -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_bottom_banner"
+            android:gravity="center"
+            android:paddingVertical="@dimen/spacing_ms">
+
+            <TextView
+                android:id="@+id/tvBottomBanner"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/white"
+                android:textSize="@dimen/text_size_body"
+                android:fontFamily="sans-serif-medium"
+                android:textStyle="bold"
+                android:letterSpacing="0.03" />
+        </LinearLayout>
     </LinearLayout>
 
     <!-- Refactored Drawer Layout: LinearLayout Wrapper for absolute control -->

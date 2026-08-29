@@ -239,10 +239,12 @@ public class RelayTemplateEditActivity extends BaseActivity {
             List<MonitoredNode> groupNodes = entry.getValue();
             MonitoringManager.DeviceHeaderData header = MonitoringManager.getDeviceHeaderData(this, ip);
             String title = header != null ? (header.title + " (" + header.device + ")") : ip;
+            String merkType = header != null && !header.merk.isEmpty() ? (header.merk + " " + header.type + " • ") : "";
+            String subtitle = merkType + ip + " • " + groupNodes.size() + " point";
 
             View row = getLayoutInflater().inflate(R.layout.item_dialog_pick_row, container, false);
             ((TextView) row.findViewById(R.id.tvPickRowTitle)).setText(title);
-            ((TextView) row.findViewById(R.id.tvPickRowSubtitle)).setText(ip + " • " + groupNodes.size() + " point");
+            ((TextView) row.findViewById(R.id.tvPickRowSubtitle)).setText(subtitle);
             row.setOnClickListener(view -> {
                 dialog.dismiss();
                 showAddTemplateFromGroupDialog(groupNodes);
