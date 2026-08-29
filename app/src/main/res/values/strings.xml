@@ -263,6 +263,8 @@
     <string name="msg_all_update_grant_install">Izinkan aplikasi ini menginstal update, lalu coba lagi.</string>
     <string name="msg_all_update_checking">Memeriksa update…</string>
     <string name="msg_all_update_none">Tidak ada update baru, atau gagal memeriksa koneksi</string>
+    <string name="msg_push_update_available">Versi baru ComtradeDownloader sudah tersedia. Buka aplikasi untuk update.</string>
+    <string name="lbl_push_update_channel">Notifikasi Update Aplikasi</string>
     <string name="msg_all_share_fail">Failed to share file</string>
     <string name="msg_dev_export_empty">No data to export</string>
     <string name="msg_dev_export_fail">Failed to export CSV: %s</string>

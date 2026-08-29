@@ -1,20 +1,26 @@
 package com.alidev.dfrtools.dfr;
 
+import android.Manifest;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import com.alidev.dfrtools.R;
+import com.alidev.dfrtools.update.AppFcmService;
 import com.alidev.dfrtools.update.UpdateChecker;
 import com.alidev.dfrtools.update.UpdateFlow;
 import com.alidev.dfrtools.update.UpdatePrefs;
 import com.google.android.material.navigation.NavigationView;
+import com.google.firebase.messaging.FirebaseMessaging;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -119,6 +125,17 @@ public class HomeActivity extends BaseActivity {
         imgStatAlarm = findViewById(R.id.imgStatAlarm);
 
         checkForAppUpdate();
+        requestNotificationPermissionIfNeeded();
+        FirebaseMessaging.getInstance().subscribeToTopic(AppFcmService.TOPIC_APP_UPDATES);
+    }
+
+    private static final int REQUEST_NOTIFICATION_PERMISSION = 2001;
+
+    private void requestNotificationPermissionIfNeeded() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
+                && ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.POST_NOTIFICATIONS}, REQUEST_NOTIFICATION_PERMISSION);
+        }
     }
 
     @Override
