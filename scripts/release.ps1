@@ -1,12 +1,13 @@
 <#
-Bumps version.properties (patch += 1), builds a signed release APK, commits +
-tags + pushes to origin/master, and publishes a GitHub Release with the APK
-attached. Requires keystore.properties (release signing) and an authenticated
-`gh` CLI to already be set up locally (see .claude/skills for context).
+Triggers a release build. Version bump, git commit/tag/push, and the GitHub Release publish
+(with the built APK attached) all now happen automatically as part of the `assembleRelease`
+Gradle task itself (see the `publishReleaseToGit` task + `finalizedBy` wiring in app/build.gradle)
+- this script is just a convenience entrypoint for the command line, since the project has no
+gradlew wrapper. Requires keystore.properties (release signing) and an authenticated `gh` CLI to
+already be set up locally (see .claude/skills for context). Building the release variant from
+Android Studio directly (with the "release" build variant selected) triggers the exact same
+Gradle hook, so this script and the IDE stay in sync automatically.
 #>
-param(
-    [string]$Notes = "Automated release"
-)
 
 $ErrorActionPreference = "Stop"
 $repoRoot = Split-Path -Parent $PSScriptRoot
@@ -20,55 +21,9 @@ if (-not (Test-Path $gradle)) {
 }
 if (-not (Test-Path $gradle)) { throw "Could not locate gradle.bat - update scripts/release.ps1" }
 
-$gh = "C:\Program Files\GitHub CLI\gh.exe"
-if (-not (Test-Path $gh)) { $gh = "gh" }
-
 if (-not (Test-Path (Join-Path $repoRoot "keystore.properties"))) {
     throw "keystore.properties not found - release build would be unsigned. Aborting."
 }
 
-# --- Bump version.properties ---
-$versionFile = Join-Path $repoRoot "version.properties"
-$props = @{}
-Get-Content $versionFile | ForEach-Object {
-    if ($_ -match '^(\w+)=(\d+)$') { $props[$matches[1]] = [int]$matches[2] }
-}
-$props['versionPatch'] += 1
-$versionName = "$($props['versionMajor']).$($props['versionMinor']).$($props['versionPatch'])"
-$tag = "v$versionName"
-
-@(
-    "versionMajor=$($props['versionMajor'])"
-    "versionMinor=$($props['versionMinor'])"
-    "versionPatch=$($props['versionPatch'])"
-) | Set-Content -Path $versionFile -Encoding ascii
-
-Write-Host "==> Releasing $tag"
-
-# --- Build signed release APK ---
 & $gradle -p $repoRoot assembleRelease --console=plain
-if ($LASTEXITCODE -ne 0) { throw "Gradle build failed" }
-
-$apkSrc = Join-Path $repoRoot "app\build\outputs\apk\release\app-release.apk"
-if (-not (Test-Path $apkSrc)) { throw "Release APK not found at $apkSrc" }
-
-# Staged outside the repo so it can never accidentally get committed.
-$apkDest = Join-Path $env:TEMP "ComtradeDownloader-$versionName.apk"
-Copy-Item $apkSrc $apkDest -Force
-
-# --- Commit, tag, push ---
-Push-Location $repoRoot
-try {
-    git add -A
-    git commit -m "Release $tag"
-    git tag $tag
-    git push origin master
-    git push origin $tag
-
-    & $gh release create $tag $apkDest --title $tag --notes $Notes
-} finally {
-    Pop-Location
-    Remove-Item $apkDest -Force -ErrorAction SilentlyContinue
-}
-
-Write-Host "==> Release $tag published: https://github.com/alidroid123/IEC61850-apk/releases/tag/$tag"
+if ($LASTEXITCODE -ne 0) { throw "Gradle build (or the publishReleaseToGit hook it triggers) failed" }

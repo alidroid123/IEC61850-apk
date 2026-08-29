@@ -143,6 +143,7 @@ public class HomeActivity extends BaseActivity {
     protected void onResume() {
         super.onResume();
         refreshDashboardStats();
+        updateFlow.onResume();
     }
 
     /**

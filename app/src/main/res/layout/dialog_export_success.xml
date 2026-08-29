@@ -56,6 +56,20 @@
                 android:textSize="@dimen/text_size_body_large"
                 android:gravity="center" />
 
+            <Button
+                android:id="@+id/btnSaveAs"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/large_button_height"
+                android:layout_marginTop="@dimen/spacing_ms"
+                android:visibility="gone"
+                android:text="@string/btn_all_save_as"
+                android:textSize="@dimen/text_size_small"
+                android:textColor="@color/text_primary"
+                app:strokeColor="@color/divider"
+                app:strokeWidth="1.5dp"
+                app:cornerRadius="@dimen/card_corner_radius_medium" />
+
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

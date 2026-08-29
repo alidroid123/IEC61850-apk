@@ -187,6 +187,8 @@ public class SettingsActivity extends BaseActivity {
     }
 
     private static final int REQUEST_IMPORT_CONFIG = 1001;
+    private static final int REQUEST_SAVE_CONFIG = 1002;
+    private File pendingExportSourceFile;
 
     private void exportConfig() {
         try {
@@ -230,7 +232,43 @@ public class SettingsActivity extends BaseActivity {
             dialog.dismiss();
         });
 
+        View btnSaveAs = dialogView.findViewById(R.id.btnSaveAs);
+        btnSaveAs.setVisibility(View.VISIBLE);
+        btnSaveAs.setOnClickListener(v -> {
+            dialog.dismiss();
+            launchSaveConfigPicker(file);
+        });
+
         dialog.show();
+    }
+
+    private void launchSaveConfigPicker(File file) {
+        pendingExportSourceFile = file;
+        Intent intent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        intent.setType("application/json");
+        intent.putExtra(Intent.EXTRA_TITLE, file.getName());
+        try {
+            startActivityForResult(intent, REQUEST_SAVE_CONFIG);
+        } catch (Exception e) {
+            Toast.makeText(this, R.string.msg_view_picker_fail, Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void writeExportToUri(Uri destUri) {
+        if (pendingExportSourceFile == null) return;
+        try (InputStream in = new java.io.FileInputStream(pendingExportSourceFile);
+             java.io.OutputStream out = getContentResolver().openOutputStream(destUri)) {
+            if (out == null) throw new Exception("openOutputStream returned null");
+            byte[] buffer = new byte[8192];
+            int read;
+            while ((read = in.read(buffer)) != -1) out.write(buffer, 0, read);
+            Toast.makeText(this, R.string.msg_backup_save_as_ok, Toast.LENGTH_SHORT).show();
+        } catch (Exception e) {
+            Toast.makeText(this, getString(R.string.msg_backup_export_fail, e.getMessage()), Toast.LENGTH_LONG).show();
+        } finally {
+            pendingExportSourceFile = null;
+        }
     }
 
     private void shareConfigFile(File file) {
@@ -259,6 +297,8 @@ public class SettingsActivity extends BaseActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_IMPORT_CONFIG && resultCode == Activity.RESULT_OK && data != null && data.getData() != null) {
             importConfigFromUri(data.getData());
+        } else if (requestCode == REQUEST_SAVE_CONFIG && resultCode == Activity.RESULT_OK && data != null && data.getData() != null) {
+            writeExportToUri(data.getData());
         }
     }
 

@@ -16,6 +16,7 @@
     <string name="btn_all_later">Later</string>
     <string name="btn_all_open">OPEN</string>
     <string name="btn_all_save_small">Save</string>
+    <string name="btn_all_save_as">Simpan Sebagai…</string>
     <string name="btn_all_share">SHARE</string>
     <string name="btn_all_update">Update</string>
     <string name="btn_base_toggle_mode">Toggle to %s</string>
@@ -180,6 +181,7 @@
     <string name="ttl_backup_share_chooser">Share Backup File</string>
     <string name="msg_backup_export_ok">Configuration exported successfully</string>
     <string name="msg_backup_export_fail">Export failed: %1$s</string>
+    <string name="msg_backup_save_as_ok">File konfigurasi berhasil disimpan</string>
     <string name="msg_backup_import_ok">Import complete: %1$d device(s), %2$d monitoring point(s), %3$d template(s) added</string>
     <string name="msg_backup_import_fail">Import failed: file is not a valid backup (%1$s)</string>
     <string name="ttl_tmpl_edit_main">Edit Relay Template</string>
@@ -212,6 +214,13 @@
     <string name="msg_tmpl_template_deleted">Template \'%1$s\' deleted</string>
     <string name="ttl_tmpl_delete_row_confirm">Delete Row?</string>
     <string name="msg_tmpl_delete_row_confirm">Delete row \'%1$s\'?</string>
+    <string name="ttl_tmpl_add_choice">Tambah Template</string>
+    <string name="opt_tmpl_add_blank">Template Baru (Kosong)</string>
+    <string name="opt_tmpl_add_from_monitoring">Ambil dari IED Monitoring</string>
+    <string name="ttl_tmpl_pick_group">Pilih Device / Group</string>
+    <string name="msg_tmpl_no_monitoring_groups">Belum ada device yang dimonitor di IED Monitoring</string>
+    <string name="ttl_tmpl_add_from_monitoring_dialog">Template dari IED Monitoring</string>
+    <string name="msg_tmpl_added_from_monitoring">Template \'%1$s\' dibuat dengan %2$d point dari IED Monitoring</string>
     <string name="lbl_view_additional_info">Additional Info :</string>
     <string name="lbl_view_analog_channel_header">ANALOG CHANNEL</string>
     <string name="lbl_view_arus">CURRENT</string>

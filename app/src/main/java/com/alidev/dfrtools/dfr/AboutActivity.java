@@ -45,6 +45,12 @@ public class AboutActivity extends BaseActivity {
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+        updateFlow.onResume();
+    }
+
+    @Override
     protected void onDestroy() {
         super.onDestroy();
         updateFlow.onDestroy();

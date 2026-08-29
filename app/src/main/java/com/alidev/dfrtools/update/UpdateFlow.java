@@ -31,9 +31,32 @@ public class UpdateFlow {
     private final Activity activity;
     private BroadcastReceiver downloadReceiver;
     private long downloadId = -1;
+    private UpdateChecker.UpdateInfo pendingInfo;
+    private boolean waitingForInstallPermission = false;
 
     public UpdateFlow(Activity activity) {
         this.activity = activity;
+    }
+
+    /**
+     * Call from the host Activity's onResume(). If the user was sent to
+     * Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES to grant the "install unknown apps" permission,
+     * this resumes the update automatically as soon as they come back with it granted - either
+     * installing the already-downloaded APK directly, or (re)starting the download if it isn't
+     * there yet - instead of silently doing nothing until the user taps "Update Sekarang" again.
+     */
+    public void onResume() {
+        if (!waitingForInstallPermission) return;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && !activity.getPackageManager().canRequestPackageInstalls()) {
+            return; // still not granted - keep waiting
+        }
+        waitingForInstallPermission = false;
+        File apkFile = new File(activity.getExternalFilesDir(null), "update.apk");
+        if (apkFile.exists()) {
+            installDownloadedApk();
+        } else if (pendingInfo != null) {
+            startDownload(pendingInfo);
+        }
     }
 
     public void showUpdateDialog(UpdateChecker.UpdateInfo info) {
@@ -62,6 +85,8 @@ public class UpdateFlow {
 
     private void startDownload(UpdateChecker.UpdateInfo info) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && !activity.getPackageManager().canRequestPackageInstalls()) {
+            pendingInfo = info;
+            waitingForInstallPermission = true;
             Toast.makeText(activity, R.string.msg_all_update_grant_install, Toast.LENGTH_LONG).show();
             activity.startActivity(new Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES,
                     Uri.parse("package:" + activity.getPackageName())));

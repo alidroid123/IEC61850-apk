@@ -59,7 +59,7 @@ public class RelayTemplateEditActivity extends BaseActivity {
         llTemplateRows = findViewById(R.id.llTemplateRows);
 
         findViewById(R.id.btnBack).setOnClickListener(v -> finish());
-        findViewById(R.id.btnAddTemplateHeader).setOnClickListener(v -> showAddTemplateDialog());
+        findViewById(R.id.btnAddTemplateHeader).setOnClickListener(v -> showAddTemplateChoiceDialog());
         findViewById(R.id.btnDuplicateTemplateHeader).setOnClickListener(v -> showDuplicateTemplateDialog());
         findViewById(R.id.btnDeleteTemplate).setOnClickListener(v -> confirmDeleteTemplate());
         findViewById(R.id.btnAddRow).setOnClickListener(v -> addRow());
@@ -184,6 +184,130 @@ public class RelayTemplateEditActivity extends BaseActivity {
     private void addRow() {
         currentPoints.add(new RelayTemplates.Point("", "", "float", "", 1f));
         renderRows();
+    }
+
+    private void showAddTemplateChoiceDialog() {
+        String[] options = {
+                getString(R.string.opt_tmpl_add_blank),
+                getString(R.string.opt_tmpl_add_from_monitoring)
+        };
+        new AlertDialog.Builder(this, R.style.Theme_Comtrade_Dialog)
+                .setTitle(R.string.ttl_tmpl_add_choice)
+                .setItems(options, (d, which) -> {
+                    if (which == 0) showAddTemplateDialog();
+                    else showPickMonitoringGroupDialog();
+                })
+                .setNegativeButton(R.string.btn_all_cancel, null)
+                .show();
+    }
+
+    private void showPickMonitoringGroupDialog() {
+        List<MonitoredNode> allNodes = new MonitoringManager(this).getNodes();
+        java.util.LinkedHashMap<String, List<MonitoredNode>> grouped = new java.util.LinkedHashMap<>();
+        for (MonitoredNode n : allNodes) {
+            List<MonitoredNode> list = grouped.get(n.ipAddress);
+            if (list == null) { list = new ArrayList<>(); grouped.put(n.ipAddress, list); }
+            list.add(n);
+        }
+        if (grouped.isEmpty()) {
+            Toast.makeText(this, R.string.msg_tmpl_no_monitoring_groups, Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        List<String> ips = new ArrayList<>(grouped.keySet());
+        String[] labels = new String[ips.size()];
+        for (int i = 0; i < ips.size(); i++) {
+            String ip = ips.get(i);
+            MonitoringManager.DeviceHeaderData header = MonitoringManager.getDeviceHeaderData(this, ip);
+            int count = grouped.get(ip).size();
+            String title = header != null ? (header.title + " (" + header.device + ")") : ip;
+            labels[i] = title + " - " + ip + " [" + count + "]";
+        }
+
+        new AlertDialog.Builder(this, R.style.Theme_Comtrade_Dialog)
+                .setTitle(R.string.ttl_tmpl_pick_group)
+                .setItems(labels, (d, which) -> showAddTemplateFromGroupDialog(grouped.get(ips.get(which))))
+                .setNegativeButton(R.string.btn_all_cancel, null)
+                .show();
+    }
+
+    private void showAddTemplateFromGroupDialog(List<MonitoredNode> groupNodes) {
+        View v = getLayoutInflater().inflate(R.layout.dialog_add_template, null);
+        AlertDialog dialog = new AlertDialog.Builder(this, R.style.Theme_Comtrade_Dialog)
+                .setView(v)
+                .create();
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+            dialog.getWindow().setGravity(android.view.Gravity.CENTER);
+        }
+
+        ((TextView) v.findViewById(R.id.tvAddTemplateDialogTitle)).setText(R.string.ttl_tmpl_add_from_monitoring_dialog);
+        EditText etName = v.findViewById(R.id.etTemplateName);
+
+        v.findViewById(R.id.btnCancelAddTemplate).setOnClickListener(view -> dialog.dismiss());
+        v.findViewById(R.id.btnConfirmAddTemplate).setOnClickListener(view -> {
+            String name = etName.getText().toString().trim();
+            if (name.isEmpty()) {
+                etName.setError(getString(R.string.msg_tmpl_name_required));
+                return;
+            }
+            boolean added = RelayTemplates.addTemplate(this, name);
+            if (!added) {
+                Toast.makeText(this, getString(R.string.msg_tmpl_name_exists, name), Toast.LENGTH_SHORT).show();
+                return;
+            }
+            List<RelayTemplates.Point> points = buildPointsFromMonitoringGroup(groupNodes);
+            RelayTemplates.savePoints(this, name, points);
+            Toast.makeText(this, getString(R.string.msg_tmpl_added_from_monitoring, name, points.size()), Toast.LENGTH_SHORT).show();
+            dialog.dismiss();
+            reloadTemplateNames(name);
+        });
+
+        dialog.show();
+    }
+
+    /**
+     * Converts one IED Monitoring group's live points into portable template Points. A template
+     * Point's path must be LDInst/LN.DO.DA only (no IEDName - see RelayTemplates), but a
+     * MonitoredNode.fullPath's domain segment is "IEDName+LDInst" concatenated with no separator
+     * (standard IEC 61850 MMS domain-id), so IEDName can't be split off from a single path alone.
+     * Since one physical device's IEDName is constant across all its logical devices while LDInst
+     * varies, the longest common prefix across every distinct domain in this group IS the IEDName
+     * - as long as the group spans 2+ logical devices. If it only spans one, there's no reliable
+     * way to tell the two apart from the data alone, so the whole domain is kept as-is (the point
+     * will still work if the template is re-applied to this same device, just not portably).
+     */
+    private List<RelayTemplates.Point> buildPointsFromMonitoringGroup(List<MonitoredNode> nodes) {
+        java.util.LinkedHashSet<String> domains = new java.util.LinkedHashSet<>();
+        for (MonitoredNode n : nodes) {
+            int slash = n.fullPath.indexOf('/');
+            if (slash > 0) domains.add(n.fullPath.substring(0, slash));
+        }
+        String iedNamePrefix = domains.size() > 1 ? longestCommonPrefix(domains) : "";
+
+        List<RelayTemplates.Point> points = new ArrayList<>();
+        for (MonitoredNode n : nodes) {
+            int slash = n.fullPath.indexOf('/');
+            if (slash <= 0) continue;
+            String domain = n.fullPath.substring(0, slash);
+            String suffix = n.fullPath.substring(slash); // includes leading '/'
+            String ldInst = (!iedNamePrefix.isEmpty() && domain.length() > iedNamePrefix.length())
+                    ? domain.substring(iedNamePrefix.length()) : domain;
+            points.add(new RelayTemplates.Point(ldInst + suffix, n.customName, n.type, n.unit, n.multiplier));
+        }
+        return points;
+    }
+
+    private String longestCommonPrefix(java.util.Set<String> strings) {
+        String prefix = null;
+        for (String s : strings) {
+            if (prefix == null) { prefix = s; continue; }
+            int i = 0;
+            while (i < prefix.length() && i < s.length() && prefix.charAt(i) == s.charAt(i)) i++;
+            prefix = prefix.substring(0, i);
+            if (prefix.isEmpty()) break;
+        }
+        return prefix != null ? prefix : "";
     }
 
     private void showAddTemplateDialog() {
