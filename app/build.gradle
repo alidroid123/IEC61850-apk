@@ -77,12 +77,20 @@ android {
 
 dependencies {
     implementation platform('com.google.firebase:firebase-bom:34.18.0')
-    implementation 'com.google.firebase:firebase-analytics'
-    implementation 'com.google.firebase:firebase-messaging'
-    // Firebase Installations (a transitive dependency of firebase-messaging) uses
-    // PreferenceDataStoreDelegateKt at runtime but doesn't pull this in itself - without it the
-    // app crashes on launch with NoClassDefFoundError as soon as Firebase starts initializing.
-    implementation 'androidx.datastore:datastore-preferences:1.1.1'
+    // Firebase Installations (pulled in transitively by both of these) declares
+    // androidx.datastore:datastore-preferences but its own resolution path picks the "-jvm" KMP
+    // variant (no Context-based classes at all) instead of "-android" - excluded here so only
+    // our own explicit "-android" declaration below is used; without exclusion, both variants
+    // land on the classpath at once and either duplicate-class-fail the build or (with only the
+    // bad "-jvm" one present) crash on launch with NoClassDefFoundError as soon as Firebase
+    // starts initializing (PreferenceDataStoreDelegateKt missing).
+    implementation('com.google.firebase:firebase-analytics') {
+        exclude group: 'androidx.datastore', module: 'datastore-preferences'
+    }
+    implementation('com.google.firebase:firebase-messaging') {
+        exclude group: 'androidx.datastore', module: 'datastore-preferences'
+    }
+    implementation 'androidx.datastore:datastore-preferences-android:1.1.7'
     implementation 'androidx.appcompat:appcompat:1.6.1'
     implementation 'com.google.android.material:material:1.11.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
