@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <com.google.android.material.card.MaterialCardView
+        android:layout_width="320dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_margin="@dimen/spacing_l"
+        app:cardCornerRadius="@dimen/card_corner_radius_huge"
+        app:cardBackgroundColor="@color/bg_card"
+        app:strokeColor="@color/brand_primary"
+        app:strokeWidth="2dp"
+        app:cardElevation="@dimen/card_elevation_huge">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="@dimen/spacing_ms"
+            android:gravity="center">
+
+            <ImageView
+                android:layout_width="@dimen/icon_size_huge"
+                android:layout_height="@dimen/icon_size_huge"
+                android:src="@drawable/ic_download"
+                app:tint="@color/status_safe"
+                android:background="@drawable/bg_spinner"
+                android:padding="@dimen/spacing_l"
+                app:backgroundTint="#203FB950" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_xl"
+                android:text="@string/ttl_dl_success"
+                android:textColor="@color/brand_primary"
+                android:textSize="@dimen/text_size_title_small"
+                android:fontFamily="sans-serif-medium"
+                android:textStyle="bold"
+                android:letterSpacing="0.1" />
+
+            <TextView
+                android:id="@+id/tvDownloadMessage"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_s"
+                android:text="@string/msg_dl_download_success"
+                android:textColor="@color/text_secondary"
+                android:textSize="@dimen/text_size_body_large"
+                android:gravity="center"
+                android:lineSpacingExtra="@dimen/spacing_tiny" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_ms"
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/btnOpenFolder"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                    android:layout_width="0dp"
+                    android:layout_height="@dimen/large_button_height"
+                    android:layout_weight="1"
+                    android:layout_marginEnd="@dimen/spacing_xs"
+                    android:text="@string/btn_dl_folder"
+                    android:textSize="@dimen/text_size_small"
+                    android:textColor="@color/text_primary"
+                    app:strokeColor="@color/divider"
+                    app:strokeWidth="1.5dp"
+                    app:cornerRadius="@dimen/card_corner_radius_medium" />
+
+                <Button
+                    android:id="@+id/btnShare"
+                    style="@style/Widget.DFRtools.Button"
+                    android:layout_width="0dp"
+                    android:layout_height="@dimen/large_button_height"
+                    android:layout_weight="1"
+                    android:layout_marginStart="@dimen/spacing_xs"
+                    android:backgroundTint="@null"
+                    android:background="@drawable/bg_button_gradient"
+                    android:text="@string/btn_all_share"
+                    android:textSize="@dimen/text_size_small"
+                    app:cornerRadius="@dimen/card_corner_radius_medium" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+</FrameLayout>

@@ -1,0 +1,485 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.drawerlayout.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/drawerLayout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/bg_app"
+        android:orientation="vertical">
+
+        <!-- Modern Header -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_header_industrial"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingHorizontal="@dimen/spacing_xl"
+            android:paddingTop="@dimen/header_padding_top"
+            android:paddingBottom="@dimen/header_padding_bottom">
+
+            <FrameLayout
+                android:layout_width="@dimen/icon_size_xxl"
+                android:layout_height="@dimen/icon_size_xxl"
+                android:background="@drawable/bg_icon_badge_circle">
+
+                <ImageView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:padding="@dimen/spacing_xs"
+                    android:src="@mipmap/ic_launcher" />
+            </FrameLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/spacing_l"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="sans-serif-black"
+                    android:text="@string/ttl_home_app_title"
+                    android:textColor="@color/white"
+                    android:textSize="@dimen/text_size_header"
+                    android:letterSpacing="0.05" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="1dp"
+                    android:fontFamily="sans-serif-medium"
+                    android:text="@string/lbl_home_mms_retrieval_sub"
+                    android:textColor="#B3FFFFFF"
+                    android:textSize="@dimen/text_size_caption"
+                    android:letterSpacing="0.15" />
+            </LinearLayout>
+
+            <ImageButton
+                android:id="@+id/btnMenu"
+                android:layout_width="@dimen/icon_size_xl"
+                android:layout_height="@dimen/icon_size_xl"
+                android:padding="@dimen/spacing_s"
+                android:background="@drawable/bg_icon_badge_circle"
+                android:foreground="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="Menu"
+                android:src="@drawable/ic_menu"
+                app:tint="@color/white" />
+        </LinearLayout>
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:clipToPadding="false"
+            android:padding="@dimen/spacing_m">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+            <GridLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:columnCount="3"
+                android:alignmentMode="alignMargins"
+                android:useDefaultMargins="true">
+
+                <!-- DFR Downloader Card -->
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/cardDownload"
+                    style="@style/Widget.DFRtools.CardView"
+                    android:layout_width="0dp"
+                    android:layout_height="110dp"
+                    android:layout_columnWeight="1"
+                    android:clickable="true"
+                    android:focusable="true"
+                    app:cardCornerRadius="@dimen/card_corner_radius_large">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="center"
+                        android:orientation="vertical"
+                        android:padding="@dimen/spacing_s">
+
+                        <ImageView
+                            android:layout_width="@dimen/icon_size_l"
+                            android:layout_height="@dimen/icon_size_l"
+                            android:src="@drawable/ic_download"
+                            app:tint="?attr/colorPrimary" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="@dimen/spacing_s"
+                            android:fontFamily="sans-serif-medium"
+                            android:text="@string/menu_home_download_dfr"
+                            android:textColor="@color/text_primary"
+                            android:textSize="@dimen/text_size_small"
+                            android:textStyle="bold"
+                            android:gravity="center" />
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+                <!-- DFR Viewer Card -->
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/cardViewer"
+                    style="@style/Widget.DFRtools.CardView"
+                    android:layout_width="0dp"
+                    android:layout_height="110dp"
+                    android:layout_columnWeight="1"
+                    android:clickable="true"
+                    android:focusable="true"
+                    app:cardCornerRadius="@dimen/card_corner_radius_large">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="center"
+                        android:orientation="vertical"
+                        android:padding="@dimen/spacing_s">
+
+                        <ImageView
+                            android:layout_width="@dimen/icon_size_l"
+                            android:layout_height="@dimen/icon_size_l"
+                            android:src="@drawable/ic_dfr_chart"
+                            app:tint="?attr/colorPrimary" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="@dimen/spacing_s"
+                            android:fontFamily="sans-serif-medium"
+                            android:text="@string/menu_home_dfr_viewer"
+                            android:textColor="@color/text_primary"
+                            android:textSize="@dimen/text_size_small"
+                            android:textStyle="bold"
+                            android:gravity="center" />
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+                <!-- MMS Explorer Card -->
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/cardMms"
+                    style="@style/Widget.DFRtools.CardView"
+                    android:layout_width="0dp"
+                    android:layout_height="110dp"
+                    android:layout_columnWeight="1"
+                    android:clickable="true"
+                    android:focusable="true"
+                    app:cardCornerRadius="@dimen/card_corner_radius_large">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="center"
+                        android:orientation="vertical"
+                        android:padding="@dimen/spacing_s">
+
+                        <ImageView
+                            android:layout_width="@dimen/icon_size_l"
+                            android:layout_height="@dimen/icon_size_l"
+                            android:src="@drawable/ic_mms"
+                            app:tint="?attr/customAccentColor" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="@dimen/spacing_s"
+                            android:fontFamily="sans-serif-medium"
+                            android:text="@string/menu_home_mms_explorer"
+                            android:textColor="@color/text_primary"
+                            android:textSize="@dimen/text_size_small"
+                            android:textStyle="bold"
+                            android:gravity="center" />
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+                <!-- IED Monitoring Card -->
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/cardMonitoring"
+                    style="@style/Widget.DFRtools.CardView"
+                    android:layout_width="0dp"
+                    android:layout_height="110dp"
+                    android:layout_columnWeight="1"
+                    android:clickable="true"
+                    android:focusable="true"
+                    app:cardCornerRadius="@dimen/card_corner_radius_large">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="center"
+                        android:orientation="vertical"
+                        android:padding="@dimen/spacing_s">
+
+                        <ImageView
+                            android:layout_width="@dimen/icon_size_l"
+                            android:layout_height="@dimen/icon_size_l"
+                            android:src="@drawable/ic_ied_monitor"
+                            app:tint="?attr/customAccentColor" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="@dimen/spacing_s"
+                            android:fontFamily="sans-serif-medium"
+                            android:text="@string/menu_home_monitoring"
+                            android:textColor="@color/text_primary"
+                            android:textSize="@dimen/text_size_small"
+                            android:textStyle="bold"
+                            android:gravity="center" />
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+                <!-- File Manager Card -->
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/cardFiles"
+                    style="@style/Widget.DFRtools.CardView"
+                    android:layout_width="0dp"
+                    android:layout_height="110dp"
+                    android:layout_columnWeight="1"
+                    android:clickable="true"
+                    android:focusable="true"
+                    app:cardCornerRadius="@dimen/card_corner_radius_large">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="center"
+                        android:orientation="vertical"
+                        android:padding="@dimen/spacing_s">
+
+                        <ImageView
+                            android:layout_width="@dimen/icon_size_l"
+                            android:layout_height="@dimen/icon_size_l"
+                            android:src="@drawable/ic_history"
+                            app:tint="?attr/colorSecondary" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="@dimen/spacing_s"
+                            android:fontFamily="sans-serif-medium"
+                            android:text="@string/menu_home_history"
+                            android:textColor="@color/text_primary"
+                            android:textSize="@dimen/text_size_small"
+                            android:textStyle="bold"
+                            android:gravity="center" />
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+                <!-- Device Database Card -->
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/cardDevices"
+                    style="@style/Widget.DFRtools.CardView"
+                    android:layout_width="0dp"
+                    android:layout_height="110dp"
+                    android:layout_columnWeight="1"
+                    android:clickable="true"
+                    android:focusable="true"
+                    app:cardCornerRadius="@dimen/card_corner_radius_large">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="center"
+                        android:orientation="vertical"
+                        android:padding="@dimen/spacing_s">
+
+                        <ImageView
+                            android:layout_width="@dimen/icon_size_l"
+                            android:layout_height="@dimen/icon_size_l"
+                            android:src="@drawable/ic_list"
+                            app:tint="?attr/colorSecondary" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="@dimen/spacing_s"
+                            android:fontFamily="sans-serif-medium"
+                            android:text="@string/menu_home_devices"
+                            android:textColor="@color/text_primary"
+                            android:textSize="@dimen/text_size_small"
+                            android:textStyle="bold"
+                            android:gravity="center" />
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+            </GridLayout>
+
+            <!-- Dashboard Summary Banner -->
+            <com.google.android.material.card.MaterialCardView
+                style="@style/Widget.DFRtools.CardView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_s"
+                app:cardCornerRadius="@dimen/card_corner_radius_large">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:paddingVertical="@dimen/spacing_ms"
+                    android:paddingHorizontal="@dimen/spacing_m">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:gravity="center">
+
+                        <ImageView
+                            android:layout_width="@dimen/icon_size_m"
+                            android:layout_height="@dimen/icon_size_m"
+                            android:src="@drawable/ic_location"
+                            app:tint="?attr/colorPrimary" />
+
+                        <TextView
+                            android:id="@+id/tvStatGiCount"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="@dimen/spacing_xs"
+                            android:text="0"
+                            android:textColor="@color/text_primary"
+                            android:textSize="@dimen/text_size_title"
+                            android:fontFamily="sans-serif-medium"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/lbl_home_stat_gi"
+                            android:textColor="@color/text_secondary"
+                            android:textSize="@dimen/text_size_tiny"
+                            android:textStyle="bold"
+                            android:letterSpacing="0.03" />
+                    </LinearLayout>
+
+                    <View
+                        android:layout_width="1dp"
+                        android:layout_height="match_parent"
+                        android:background="@color/divider" />
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:gravity="center">
+
+                        <ImageView
+                            android:layout_width="@dimen/icon_size_m"
+                            android:layout_height="@dimen/icon_size_m"
+                            android:src="@drawable/ic_list"
+                            app:tint="?attr/colorPrimary" />
+
+                        <TextView
+                            android:id="@+id/tvStatDeviceCount"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="@dimen/spacing_xs"
+                            android:text="0/0"
+                            android:textColor="@color/text_primary"
+                            android:textSize="@dimen/text_size_title"
+                            android:fontFamily="sans-serif-medium"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/lbl_home_stat_device"
+                            android:textColor="@color/text_secondary"
+                            android:textSize="@dimen/text_size_tiny"
+                            android:textStyle="bold"
+                            android:letterSpacing="0.03" />
+                    </LinearLayout>
+
+                    <View
+                        android:layout_width="1dp"
+                        android:layout_height="match_parent"
+                        android:background="@color/divider" />
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:gravity="center">
+
+                        <ImageView
+                            android:id="@+id/imgStatAlarm"
+                            android:layout_width="@dimen/icon_size_m"
+                            android:layout_height="@dimen/icon_size_m"
+                            android:src="@drawable/ic_warning"
+                            app:tint="?attr/colorPrimary" />
+
+                        <TextView
+                            android:id="@+id/tvStatAlarmCount"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="@dimen/spacing_xs"
+                            android:text="0"
+                            android:textColor="@color/text_primary"
+                            android:textSize="@dimen/text_size_title"
+                            android:fontFamily="sans-serif-medium"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/lbl_home_stat_alarm"
+                            android:textColor="@color/text_secondary"
+                            android:textSize="@dimen/text_size_tiny"
+                            android:textStyle="bold"
+                            android:letterSpacing="0.03" />
+                    </LinearLayout>
+
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            </LinearLayout>
+        </ScrollView>
+    </LinearLayout>
+
+    <!-- Refactored Drawer Layout: LinearLayout Wrapper for absolute control -->
+    <LinearLayout
+        android:layout_width="@dimen/drawer_width"
+        android:layout_height="match_parent"
+        android:layout_gravity="start"
+        android:orientation="vertical"
+        android:background="@color/bg_card"
+        android:clickable="true"
+        android:focusable="true">
+
+        <include layout="@layout/nav_header" />
+
+        <include layout="@layout/drawer_theme_grid" />
+
+        <com.google.android.material.navigation.NavigationView
+            android:id="@+id/navigationView"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:background="@color/bg_card"
+            app:itemIconPadding="@dimen/spacing_l"
+            app:itemHorizontalPadding="@dimen/spacing_m"
+            app:itemVerticalPadding="@dimen/spacing_ml"
+            app:itemIconTint="?attr/colorPrimary"
+            app:itemTextColor="@color/text_primary"
+            app:itemShapeAppearanceOverlay="@style/ShapeAppearance.App.SmallComponent"
+            app:itemShapeFillColor="@color/brand_accent_glow"
+            app:menu="@menu/drawer_menu" />
+
+    </LinearLayout>
+
+</androidx.drawerlayout.widget.DrawerLayout>

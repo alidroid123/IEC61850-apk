@@ -1,0 +1,46 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Base application theme for Night mode. -->
+    <style name="Theme.DFRtools" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="android:statusBarColor">?attr/colorPrimary</item>
+        <item name="android:windowBackground">?attr/customBackgroundColor</item>
+        <item name="textInputStyle">@style/Widget.App.TextInputLayout</item>
+        <item name="alertDialogTheme">@style/Theme.Comtrade.Dialog</item>
+    </style>
+
+    <!-- Dark Variants of the 4 Themes -->
+    <style name="Theme.DFRtools.Blue" parent="Theme.DFRtools">
+        <item name="colorPrimary">#3B82F6</item>
+        <item name="colorSecondary">#1D4ED8</item>
+        <item name="customBackgroundColor">#0F172A</item>
+        <item name="customSurfaceColor">#1E293B</item>
+        <item name="customTextPrimaryColor">#F8FAFC</item>
+        <item name="customAccentColor">#F59E0B</item>
+    </style>
+
+    <style name="Theme.DFRtools.Emerald" parent="Theme.DFRtools">
+        <item name="colorPrimary">#10B981</item>
+        <item name="colorSecondary">#047857</item>
+        <item name="customBackgroundColor">#111827</item>
+        <item name="customSurfaceColor">#1F2937</item>
+        <item name="customTextPrimaryColor">#F9FAFB</item>
+        <item name="customAccentColor">#F97316</item>
+    </style>
+
+    <style name="Theme.DFRtools.Purple" parent="Theme.DFRtools">
+        <item name="colorPrimary">#8B5CF6</item>
+        <item name="colorSecondary">#6D28D9</item>
+        <item name="customBackgroundColor">#18181B</item>
+        <item name="customSurfaceColor">#27272A</item>
+        <item name="customTextPrimaryColor">#FAFAFA</item>
+        <item name="customAccentColor">#22C55E</item>
+    </style>
+
+    <style name="Theme.DFRtools.Red" parent="Theme.DFRtools">
+        <item name="colorPrimary">#EF4444</item>
+        <item name="colorSecondary">#B91C1C</item>
+        <item name="customBackgroundColor">#111827</item>
+        <item name="customSurfaceColor">#1F2937</item>
+        <item name="customTextPrimaryColor">#F9FAFB</item>
+        <item name="customAccentColor">#0EA5E9</item>
+    </style>
+</resources>

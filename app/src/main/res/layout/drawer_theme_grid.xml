@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/containerThemeGrid"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:paddingTop="@dimen/spacing_m"
+    android:paddingBottom="@dimen/spacing_m"
+    android:paddingStart="@dimen/drawer_item_padding_start"
+    android:paddingEnd="@dimen/spacing_l">
+
+    <!-- Item Label & Icon (Left Aligned with standard menu) -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingVertical="@dimen/spacing_ml">
+
+        <ImageView
+            android:layout_width="@dimen/drawer_icon_size"
+            android:layout_height="@dimen/drawer_icon_size"
+            android:src="@drawable/ic_palette"
+            android:alpha="0.8" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/drawer_text_margin_start"
+            android:text="@string/lbl_base_color_scheme"
+            android:textColor="@color/text_primary"
+            android:textSize="@dimen/text_size_body_large"
+            android:fontFamily="sans-serif-medium" />
+    </LinearLayout>
+
+    <!-- Color Dots (Strict Left Aligned with the icon above) -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_marginTop="@dimen/spacing_xs"
+        android:paddingStart="0dp">
+
+        <!-- Modern Blue -->
+        <FrameLayout
+            android:id="@+id/theme_btn_0"
+            android:layout_width="@dimen/icon_size_ms"
+            android:layout_height="@dimen/icon_size_ms"
+            android:layout_marginEnd="@dimen/spacing_m"
+            android:clickable="true"
+            android:focusable="true">
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@drawable/bg_theme_color_circle"
+                android:backgroundTint="#3B82F6" />
+            <ImageView
+                android:id="@+id/check_0"
+                android:layout_width="@dimen/icon_size_xs"
+                android:layout_height="@dimen/icon_size_xs"
+                android:layout_gravity="center"
+                android:src="@drawable/ic_check"
+                android:visibility="gone" />
+        </FrameLayout>
+
+        <!-- Emerald Green -->
+        <FrameLayout
+            android:id="@+id/theme_btn_1"
+            android:layout_width="@dimen/icon_size_ms"
+            android:layout_height="@dimen/icon_size_ms"
+            android:layout_marginEnd="@dimen/spacing_m"
+            android:clickable="true"
+            android:focusable="true">
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@drawable/bg_theme_color_circle"
+                android:backgroundTint="#10B981" />
+            <ImageView
+                android:id="@+id/check_1"
+                android:layout_width="@dimen/icon_size_xs"
+                android:layout_height="@dimen/icon_size_xs"
+                android:layout_gravity="center"
+                android:src="@drawable/ic_check"
+                android:visibility="gone" />
+        </FrameLayout>
+
+        <!-- Purple Premium -->
+        <FrameLayout
+            android:id="@+id/theme_btn_2"
+            android:layout_width="@dimen/icon_size_ms"
+            android:layout_height="@dimen/icon_size_ms"
+            android:layout_marginEnd="@dimen/spacing_m"
+            android:clickable="true"
+            android:focusable="true">
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@drawable/bg_theme_color_circle"
+                android:backgroundTint="#8B5CF6" />
+            <ImageView
+                android:id="@+id/check_2"
+                android:layout_width="@dimen/icon_size_xs"
+                android:layout_height="@dimen/icon_size_xs"
+                android:layout_gravity="center"
+                android:src="@drawable/ic_check"
+                android:visibility="gone" />
+        </FrameLayout>
+
+        <!-- Red Energy -->
+        <FrameLayout
+            android:id="@+id/theme_btn_3"
+            android:layout_width="@dimen/icon_size_ms"
+            android:layout_height="@dimen/icon_size_ms"
+            android:clickable="true"
+            android:focusable="true">
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@drawable/bg_theme_color_circle"
+                android:backgroundTint="#EF4444" />
+            <ImageView
+                android:id="@+id/check_3"
+                android:layout_width="@dimen/icon_size_xs"
+                android:layout_height="@dimen/icon_size_xs"
+                android:layout_gravity="center"
+                android:src="@drawable/ic_check"
+                android:visibility="gone" />
+        </FrameLayout>
+    </LinearLayout>
+</LinearLayout>

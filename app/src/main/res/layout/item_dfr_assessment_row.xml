@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:gravity="center_vertical"
+    android:layout_marginBottom="@dimen/spacing_xs">
+
+    <CheckBox
+        android:id="@+id/checkInclude"
+        android:layout_width="@dimen/spacing_xxl"
+        android:layout_height="@dimen/spacing_xxl"
+        android:checked="false"
+        android:buttonTint="@color/brand_primary"
+        android:visibility="gone" />
+
+    <TextView
+        android:id="@+id/txtRowNo"
+        android:layout_width="@dimen/spacing_xxl"
+        android:layout_height="wrap_content"
+        android:text="@string/lbl_all_one_dot"
+        android:textColor="@color/dfr_text_primary"
+        android:textSize="@dimen/text_size_caption"
+        android:gravity="center" />
+
+    <TextView
+        android:id="@+id/txtRowParameter"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1.2"
+        android:text="@string/lbl_all_parameter"
+        android:textColor="@color/dfr_text_primary"
+        android:textSize="@dimen/text_size_small" />
+
+    <EditText
+        android:id="@+id/etRowParameter"
+        android:layout_width="0dp"
+        android:layout_height="36dp"
+        android:layout_weight="1.2"
+        android:hint="@string/hint_view_input"
+        android:textColor="@color/dfr_text_primary"
+        android:textColorHint="@color/dfr_text_secondary"
+        android:background="@drawable/bg_edit_text"
+        android:paddingHorizontal="@dimen/spacing_s"
+        android:gravity="center_vertical"
+        android:textSize="@dimen/text_size_small"
+        android:singleLine="true"
+        android:visibility="gone" />
+
+    <Spinner
+        android:id="@+id/spChannelMap"
+        android:layout_width="0dp"
+        android:layout_height="36dp"
+        android:layout_weight="1"
+        android:layout_marginHorizontal="@dimen/spacing_tiny"
+        android:background="@drawable/bg_spinner"
+        android:visibility="gone" />
+
+    <Spinner
+        android:id="@+id/spRowValue"
+        android:layout_width="0dp"
+        android:layout_height="36dp"
+        android:layout_weight="1.5"
+        android:background="@drawable/bg_spinner" />
+
+    <EditText
+        android:id="@+id/etRowValue"
+        android:layout_width="0dp"
+        android:layout_height="36dp"
+        android:layout_weight="1.5"
+        android:hint="@string/hint_view_value_ms"
+        android:textColor="@color/dfr_text_primary"
+        android:textColorHint="@color/dfr_text_secondary"
+        android:background="@drawable/bg_edit_text"
+        android:paddingHorizontal="@dimen/spacing_s"
+        android:gravity="center_vertical"
+        android:textSize="@dimen/text_size_small"
+        android:singleLine="true"
+        android:visibility="gone" />
+
+</LinearLayout>

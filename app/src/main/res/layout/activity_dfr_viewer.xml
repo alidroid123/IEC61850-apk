@@ -1,0 +1,403 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/dfr_background">
+
+    <!-- Header -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/bg_header_industrial"
+        android:paddingHorizontal="@dimen/spacing_s"
+        android:paddingVertical="@dimen/spacing_m"
+        android:gravity="center_vertical">
+
+        <ImageView
+            android:id="@+id/btnBack"
+            android:layout_width="@dimen/icon_size_xl"
+            android:layout_height="@dimen/icon_size_xl"
+            android:padding="@dimen/spacing_s"
+            android:src="@drawable/ic_arrow_back"
+            android:clickable="true"
+            android:focusable="true"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            app:tint="@color/white" />
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:padding="@dimen/spacing_xs"
+            android:layout_marginStart="@dimen/spacing_xs"
+            android:orientation="vertical">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/white"
+                android:textSize="@dimen/text_size_title_small"
+                android:textStyle="bold"
+                android:text="@string/ttl_view_main" />
+            <TextView
+                android:id="@+id/txtFileName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/msg_view_no_file_loaded"
+                android:textColor="#CCFFFFFF"
+                android:textSize="@dimen/text_size_caption"
+                android:maxLines="1"
+                android:ellipsize="middle" />
+        </LinearLayout>
+
+        <!-- Tool Icons (Back-to-back for tidy look) -->
+        <ImageView
+            android:id="@+id/btnLockZoom"
+            android:layout_width="@dimen/icon_size_xl"
+            android:layout_height="@dimen/icon_size_xl"
+            android:padding="@dimen/spacing_s"
+            android:src="@drawable/ic_zoom"
+            android:clickable="true"
+            android:focusable="true"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            app:tint="@color/white" />
+
+        <ImageView
+            android:id="@+id/btnLockCursor"
+            android:layout_width="@dimen/icon_size_xl"
+            android:layout_height="@dimen/icon_size_xl"
+            android:padding="@dimen/spacing_s"
+            android:src="@drawable/ic_cursor"
+            android:clickable="true"
+            android:focusable="true"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            app:tint="@color/white" />
+
+        <ImageView
+            android:id="@+id/btnOpenCfg"
+            android:layout_width="@dimen/icon_size_xl"
+            android:layout_height="@dimen/icon_size_xl"
+            android:padding="@dimen/spacing_s"
+            android:src="@drawable/ic_folder"
+            android:clickable="true"
+            android:focusable="true"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            app:tint="@color/white" />
+
+        <ImageView
+            android:id="@+id/btnSettings"
+            android:layout_width="@dimen/icon_size_xl"
+            android:layout_height="@dimen/icon_size_xl"
+            android:padding="@dimen/spacing_s"
+            android:src="@drawable/ic_settings"
+            android:clickable="true"
+            android:focusable="true"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            app:tint="@color/white" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/controlsLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="@dimen/spacing_s"
+        android:background="@color/dfr_surface"
+        android:visibility="gone">
+
+        <TextView
+            android:id="@+id/txtFolderHeader"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="FOLDER NAME"
+            android:textColor="?attr/colorPrimary"
+            android:textSize="@dimen/text_size_body_small"
+            android:textStyle="bold"
+            android:gravity="center_horizontal"
+            android:textAllCaps="true"
+            android:visibility="gone"
+            android:layout_marginBottom="@dimen/spacing_s" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/lbl_view_cursor_select_label"
+                android:textColor="@color/dfr_text_secondary"
+                android:textSize="@dimen/text_size_tiny"
+                android:layout_marginEnd="@dimen/spacing_xs"/>
+
+            <RadioGroup
+                android:id="@+id/rgCursorSelection"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+                <RadioButton
+                    android:id="@+id/rbCursor1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/lbl_view_label_c1"
+                    android:textColor="@color/dfr_chart_cursor_c1"
+                    android:buttonTint="@color/dfr_chart_cursor_c1"
+                    android:textSize="@dimen/text_size_tiny"
+                    android:minHeight="0dp"
+                    android:minWidth="0dp"
+                    android:paddingHorizontal="@dimen/spacing_tiny"
+                    android:checked="true"/>
+                <RadioButton
+                    android:id="@+id/rbCursor2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/lbl_view_label_c2"
+                    android:textColor="@color/dfr_chart_cursor_c2"
+                    android:buttonTint="@color/dfr_chart_cursor_c2"
+                    android:textSize="@dimen/text_size_tiny"
+                    android:minHeight="0dp"
+                    android:minWidth="0dp"
+                    android:paddingHorizontal="@dimen/spacing_tiny"
+                    android:layout_marginStart="@dimen/spacing_tiny"/>
+                <RadioButton
+                    android:id="@+id/rbCtim1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/lbl_view_label_t1"
+                    android:textColor="@color/dfr_chart_cursor_time"
+                    android:buttonTint="@color/dfr_chart_cursor_time"
+                    android:textSize="@dimen/text_size_tiny"
+                    android:minHeight="0dp"
+                    android:minWidth="0dp"
+                    android:paddingHorizontal="@dimen/spacing_xs"
+                    android:layout_marginStart="@dimen/spacing_tiny"/>
+                <RadioButton
+                    android:id="@+id/rbCtim2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/lbl_view_label_t2"
+                    android:textColor="@color/dfr_chart_cursor_time"
+                    android:buttonTint="@color/dfr_chart_cursor_time"
+                    android:textSize="@dimen/text_size_tiny"
+                    android:minHeight="0dp"
+                    android:minWidth="0dp"
+                    android:paddingHorizontal="@dimen/spacing_tiny"
+                    android:layout_marginStart="@dimen/spacing_tiny"/>
+            </RadioGroup>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="@dimen/spacing_xs"
+            android:gravity="center_vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/lbl_view_chart_type"
+                android:textColor="@color/dfr_text_secondary"
+                android:textSize="@dimen/text_size_tiny"
+                android:layout_marginEnd="@dimen/spacing_xs"/>
+
+            <Spinner
+                android:id="@+id/spinnerValueType"
+                android:layout_width="wrap_content"
+                android:paddingHorizontal="@dimen/spacing_xs"
+                android:layout_height="@dimen/spacing_giant"
+                android:background="@drawable/bg_spinner" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/lbl_view_chart_view"
+                android:textColor="@color/dfr_text_secondary"
+                android:textSize="@dimen/text_size_tiny"
+                android:layout_marginStart="@dimen/spacing_m"
+                android:layout_marginEnd="@dimen/spacing_xs"/>
+
+            <Spinner
+                android:id="@+id/spinnerScaleType"
+                android:layout_width="wrap_content"
+                android:layout_height="@dimen/spacing_giant"
+                android:paddingHorizontal="@dimen/spacing_xs"
+                android:background="@drawable/bg_spinner" />
+
+            <!-- Resolution Info (Elegant Button style) -->
+            <TextView
+                android:id="@+id/txtResolutionInfo"
+                android:layout_width="wrap_content"
+                android:layout_height="32dp"
+                android:text="RES 10%"
+                android:textColor="@color/white"
+                android:textSize="@dimen/text_size_tiny"
+                android:textStyle="bold"
+                android:paddingHorizontal="@dimen/spacing_m"
+                android:gravity="center"
+                android:background="@drawable/bg_button_gradient"
+                android:elevation="@dimen/spacing_xs"
+                android:layout_marginStart="@dimen/spacing_xl"
+                android:clickable="true"
+                android:focusable="true" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/layoutIncidentInfo"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingHorizontal="@dimen/spacing_l"
+        android:paddingVertical="@dimen/spacing_m"
+        android:background="@color/dfr_surface"
+        android:visibility="gone">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+            <TextView
+                android:layout_width="100dp"
+                android:layout_height="wrap_content"
+                android:text="@string/lbl_view_incident_title_label"
+                android:textColor="@color/dfr_text_secondary"
+                android:textSize="@dimen/text_size_small" />
+            <EditText
+                android:id="@+id/etTopTitle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="@drawable/bg_edit_text"
+                android:hint="@string/hint_view_enter_title"
+                android:padding="@dimen/spacing_xs"
+                android:textColor="@color/dfr_text_primary"
+                android:textColorHint="#44888888"
+                android:textSize="@dimen/text_size_small" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_xs"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+            <TextView
+                android:layout_width="100dp"
+                android:layout_height="wrap_content"
+                android:text="@string/lbl_view_date_label"
+                android:textColor="@color/dfr_text_secondary"
+                android:textSize="@dimen/text_size_small" />
+            <TextView
+                android:id="@+id/txtTopDate"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/val_all_dash"
+                android:textColor="@color/dfr_text_primary"
+                android:textSize="@dimen/text_size_small"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_xs"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+            <TextView
+                android:layout_width="100dp"
+                android:layout_height="wrap_content"
+                android:text="@string/lbl_view_trigger_time_label"
+                android:textColor="@color/dfr_text_secondary"
+                android:textSize="@dimen/text_size_small" />
+            <TextView
+                android:id="@+id/txtTopTrigger"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/val_all_dash"
+                android:textColor="@color/dfr_text_primary"
+                android:textSize="@dimen/text_size_small"
+                android:textStyle="bold" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <ProgressBar
+        android:id="@+id/progressBar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginVertical="@dimen/spacing_l"
+        android:visibility="gone" />
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvCharts"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:clipToPadding="false"
+            android:paddingBottom="@dimen/spacing_giant" />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|center_horizontal"
+            android:layout_marginBottom="@dimen/spacing_l"
+            android:orientation="vertical"
+            android:gravity="center_horizontal">
+
+            <!-- Floating Zoom Info -->
+            <LinearLayout
+                android:id="@+id/layoutFloatingZoom"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_spinner"
+                android:backgroundTint="#CC0A0E14"
+                android:paddingHorizontal="@dimen/spacing_l"
+                android:paddingVertical="@dimen/spacing_xs"
+                android:gravity="center_vertical"
+                android:layout_marginBottom="@dimen/spacing_s"
+                android:visibility="gone"
+                android:elevation="@dimen/spacing_xs">
+                <ImageView
+                    android:layout_width="@dimen/icon_size_s"
+                    android:layout_height="@dimen/icon_size_s"
+                    android:src="@drawable/ic_zoom"
+                    app:tint="@color/white"
+                    android:layout_marginEnd="@dimen/spacing_s" />
+                <TextView
+                    android:id="@+id/txtFloatingZoom"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="1.00 X"
+                    android:textColor="@color/white"
+                    android:textSize="@dimen/text_size_body_small"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <!-- Floating Delta Info -->
+            <TextView
+                android:id="@+id/txtCursorDelta"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_spinner"
+                android:backgroundTint="#CC0A0E14"
+                android:paddingHorizontal="@dimen/spacing_l"
+                android:paddingVertical="@dimen/spacing_s"
+                android:text="@string/lbl_view_cursor_delta_default"
+                android:textColor="@color/status_warning"
+                android:textSize="@dimen/text_size_body_large"
+                android:textStyle="bold"
+                android:elevation="@dimen/spacing_xs"
+                android:visibility="gone" />
+        </LinearLayout>
+    </FrameLayout>
+
+</LinearLayout>

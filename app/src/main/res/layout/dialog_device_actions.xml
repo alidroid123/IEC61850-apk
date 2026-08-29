@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <com.google.android.material.card.MaterialCardView
+        android:layout_width="320dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_margin="@dimen/spacing_l"
+        app:cardCornerRadius="@dimen/card_corner_radius_huge"
+        app:cardBackgroundColor="@color/bg_card"
+        app:strokeColor="?attr/colorPrimary"
+        app:strokeWidth="1dp"
+        app:cardElevation="@dimen/card_elevation_huge">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="@dimen/spacing_l">
+
+            <TextView
+                android:id="@+id/tvActionTitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/spacing_m"
+                android:textColor="?attr/colorPrimary"
+                android:textSize="@dimen/text_size_body_large"
+                android:textStyle="bold"
+                android:gravity="center"
+                tools:text="Pilih Aksi: Device - GI Bay" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/divider"
+                android:layout_marginBottom="@dimen/spacing_s"
+                android:alpha="0.3" />
+
+            <!-- Ping Action -->
+            <LinearLayout
+                android:id="@+id/btnActionPing"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingVertical="@dimen/spacing_m"
+                android:paddingHorizontal="@dimen/spacing_s"
+                android:clickable="true"
+                android:focusable="true"
+                android:background="?attr/selectableItemBackground">
+                <ImageView
+                    android:layout_width="@dimen/icon_size_m"
+                    android:layout_height="@dimen/icon_size_m"
+                    android:src="@drawable/ic_bulk_ping"
+                    android:contentDescription="Ping"
+                    app:tint="@color/status_info" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/spacing_l"
+                    android:text="@string/btn_dev_action_ping"
+                    android:textColor="@color/text_primary"
+                    android:textSize="@dimen/text_size_body" />
+            </LinearLayout>
+
+            <!-- Explorer Action -->
+            <LinearLayout
+                android:id="@+id/btnActionExplorer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingVertical="@dimen/spacing_m"
+                android:paddingHorizontal="@dimen/spacing_s"
+                android:clickable="true"
+                android:focusable="true"
+                android:background="?attr/selectableItemBackground">
+                <ImageView
+                    android:layout_width="@dimen/icon_size_m"
+                    android:layout_height="@dimen/icon_size_m"
+                    android:src="@drawable/ic_mms"
+                    android:contentDescription="Explorer"
+                    app:tint="?attr/customAccentColor" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/spacing_l"
+                    android:text="@string/btn_dev_action_explorer"
+                    android:textColor="@color/text_primary"
+                    android:textSize="@dimen/text_size_body" />
+            </LinearLayout>
+
+            <!-- Download Action -->
+            <LinearLayout
+                android:id="@+id/btnActionDownload"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingVertical="@dimen/spacing_m"
+                android:paddingHorizontal="@dimen/spacing_s"
+                android:clickable="true"
+                android:focusable="true"
+                android:background="?attr/selectableItemBackground">
+                <ImageView
+                    android:layout_width="@dimen/icon_size_m"
+                    android:layout_height="@dimen/icon_size_m"
+                    android:src="@drawable/ic_download"
+                    android:contentDescription="Download"
+                    app:tint="?attr/colorPrimary" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/spacing_l"
+                    android:text="@string/btn_dev_action_download"
+                    android:textColor="@color/text_primary"
+                    android:textSize="@dimen/text_size_body" />
+            </LinearLayout>
+
+            <!-- Edit Action -->
+            <LinearLayout
+                android:id="@+id/btnActionEdit"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingVertical="@dimen/spacing_m"
+                android:paddingHorizontal="@dimen/spacing_s"
+                android:clickable="true"
+                android:focusable="true"
+                android:background="?attr/selectableItemBackground">
+                <ImageView
+                    android:layout_width="@dimen/icon_size_m"
+                    android:layout_height="@dimen/icon_size_m"
+                    android:src="@drawable/ic_edit_small"
+                    android:contentDescription="Edit"
+                    app:tint="?attr/colorPrimary" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/spacing_l"
+                    android:text="@string/btn_dev_action_edit"
+                    android:textColor="@color/text_primary"
+                    android:textSize="@dimen/text_size_body" />
+            </LinearLayout>
+
+            <!-- Delete Action -->
+            <LinearLayout
+                android:id="@+id/btnActionDelete"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingVertical="@dimen/spacing_m"
+                android:paddingHorizontal="@dimen/spacing_s"
+                android:clickable="true"
+                android:focusable="true"
+                android:background="?attr/selectableItemBackground">
+                <ImageView
+                    android:layout_width="@dimen/icon_size_m"
+                    android:layout_height="@dimen/icon_size_m"
+                    android:src="@drawable/ic_delete"
+                    android:contentDescription="Delete"
+                    app:tint="@color/status_danger" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/spacing_l"
+                    android:text="@string/btn_dev_action_delete"
+                    android:textColor="@color/status_danger"
+                    android:textSize="@dimen/text_size_body" />
+            </LinearLayout>
+
+            <Button
+                android:id="@+id/btnActionCancel"
+                style="@style/Widget.MaterialComponents.Button.TextButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_s"
+                android:text="@string/btn_all_cancel"
+                android:textColor="@color/text_secondary"
+                android:textSize="@dimen/text_size_body_small" />
+
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+</FrameLayout>

@@ -1,0 +1,249 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/bg_app">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/bg_header_industrial"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingHorizontal="@dimen/spacing_l"
+        android:paddingVertical="@dimen/spacing_s">
+
+        <ImageButton
+            android:id="@+id/btnBack"
+            android:layout_width="@dimen/icon_size_xl"
+            android:layout_height="@dimen/icon_size_xl"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@drawable/ic_arrow_back"
+            android:contentDescription="Kembali"
+            app:tint="@color/white" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginStart="@dimen/spacing_m"
+            android:text="@string/ttl_dev_database"
+            android:textColor="@color/white"
+            android:textSize="@dimen/text_size_title_small"
+            android:fontFamily="sans-serif-medium"
+            android:textStyle="bold" />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center_horizontal">
+            <ImageButton
+                android:id="@+id/btnPingAll"
+                android:layout_width="@dimen/icon_size_xl"
+                android:layout_height="@dimen/icon_size_xl"
+                android:padding="@dimen/spacing_s"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:src="@drawable/ic_bulk_ping"
+                android:contentDescription="Ping All"
+                app:tint="@color/white" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/btn_dev_ping"
+                android:textColor="@color/white"
+                android:textSize="@dimen/text_size_tiny" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/layoutExport"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center_horizontal"
+            android:layout_marginStart="@dimen/spacing_xs">
+            <ImageButton
+                android:id="@+id/btnExportCsv"
+                android:layout_width="@dimen/icon_size_xl"
+                android:layout_height="@dimen/icon_size_xl"
+                android:padding="@dimen/spacing_s"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:src="@drawable/ic_export"
+                android:contentDescription="Export CSV"
+                app:tint="@color/white" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/btn_dev_export"
+                android:textColor="@color/white"
+                android:textSize="@dimen/text_size_tiny" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center_horizontal"
+            android:layout_marginStart="@dimen/spacing_xs">
+            <ImageButton
+                android:id="@+id/btnImportCsv"
+                android:layout_width="@dimen/icon_size_xl"
+                android:layout_height="@dimen/icon_size_xl"
+                android:padding="@dimen/spacing_s"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:src="@drawable/ic_import"
+                android:contentDescription="Import CSV"
+                app:tint="@color/white" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/btn_dev_import"
+                android:textColor="@color/white"
+                android:textSize="@dimen/text_size_tiny" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- Elegant Filter Section -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="@dimen/spacing_m"
+        android:background="@color/bg_navy_dim">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <Spinner
+                android:id="@+id/spinnerGi"
+                android:layout_width="0dp"
+                android:layout_height="@dimen/input_field_height"
+                android:layout_weight="1"
+                android:layout_marginEnd="@dimen/spacing_xs"
+                android:background="@drawable/bg_spinner"
+                android:spinnerMode="dropdown" />
+
+            <Spinner
+                android:id="@+id/spinnerBay"
+                android:layout_width="0dp"
+                android:layout_height="@dimen/input_field_height"
+                android:layout_weight="1"
+                android:background="@drawable/bg_spinner"
+                android:spinnerMode="dropdown" />
+        </LinearLayout>
+
+        <Spinner
+            android:id="@+id/spinnerDevice"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/input_field_height"
+            android:layout_marginTop="@dimen/spacing_xs"
+            android:background="@drawable/bg_spinner"
+            android:spinnerMode="dropdown" />
+
+        <!-- Summary Info Cards -->
+        <HorizontalScrollView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_m"
+            android:scrollbars="none">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <!-- Total Devices Badge -->
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_badge_primary"
+                    android:paddingHorizontal="@dimen/spacing_m"
+                    android:paddingVertical="@dimen/spacing_xs"
+                    android:gravity="center"
+                    android:layout_marginEnd="@dimen/spacing_s">
+                    <TextView
+                        android:id="@+id/tvStatTotal"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="0 Devices"
+                        android:textColor="@color/white"
+                        android:textSize="@dimen/text_size_tiny"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+                <!-- Online & Port Status -->
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_badge_soft_success"
+                    android:paddingHorizontal="@dimen/spacing_m"
+                    android:paddingVertical="@dimen/spacing_xs"
+                    android:gravity="center"
+                    android:layout_marginEnd="@dimen/spacing_s">
+                    <TextView
+                        android:id="@+id/tvStatOnline"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="0 Online"
+                        android:textColor="@color/status_safe"
+                        android:textSize="@dimen/text_size_tiny"
+                        android:textStyle="bold" />
+                    <View
+                        android:layout_width="1dp"
+                        android:layout_height="10dp"
+                        android:background="@color/status_safe"
+                        android:alpha="0.35"
+                        android:layout_marginHorizontal="@dimen/spacing_s" />
+                    <TextView
+                        android:id="@+id/tvStatOpen"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="0 Open"
+                        android:textColor="@color/status_safe"
+                        android:textSize="@dimen/text_size_tiny"
+                        android:textStyle="bold" />
+                    <TextView
+                        android:id="@+id/tvStatClosed"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/spacing_xs"
+                        android:text="0 Closed"
+                        android:textColor="@color/status_danger"
+                        android:textSize="@dimen/text_size_tiny"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+                <!-- Offline Badge -->
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_badge_soft_danger"
+                    android:paddingHorizontal="@dimen/spacing_m"
+                    android:paddingVertical="@dimen/spacing_xs"
+                    android:gravity="center">
+                    <TextView
+                        android:id="@+id/tvStatOffline"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="0 Offline"
+                        android:textColor="@color/status_danger"
+                        android:textSize="@dimen/text_size_tiny"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+            </LinearLayout>
+        </HorizontalScrollView>
+    </LinearLayout>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvDevices"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:clipToPadding="false"
+        android:paddingVertical="@dimen/spacing_s" />
+
+</LinearLayout>

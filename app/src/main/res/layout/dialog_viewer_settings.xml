@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="320dp"
+    android:layout_height="wrap_content"
+    android:layout_gravity="center"
+    app:cardCornerRadius="@dimen/card_corner_radius_huge"
+    app:cardBackgroundColor="@color/bg_card"
+    app:strokeColor="?attr/colorPrimary"
+    app:strokeWidth="1dp"
+    app:cardElevation="@dimen/card_elevation_huge">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="@dimen/spacing_l">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Pengaturan Viewer"
+            android:textColor="?attr/colorPrimary"
+            android:textSize="@dimen/text_size_body_large"
+            android:textStyle="bold"
+            android:gravity="center"
+            android:layout_marginBottom="@dimen/spacing_m" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/divider"
+            android:layout_marginBottom="@dimen/spacing_s"
+            android:alpha="0.3" />
+
+        <!-- Edit Configuration -->
+        <LinearLayout
+            android:id="@+id/btnMenuConfig"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingVertical="@dimen/spacing_m"
+            android:paddingHorizontal="@dimen/spacing_s"
+            android:clickable="true"
+            android:focusable="true"
+            android:background="?attr/selectableItemBackground">
+            <ImageView
+                android:layout_width="@dimen/icon_size_m"
+                android:layout_height="@dimen/icon_size_m"
+                android:src="@drawable/ic_settings"
+                app:tint="?attr/colorPrimary" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/spacing_l"
+                android:text="@string/lbl_view_menu_config"
+                android:textColor="@color/text_primary"
+                android:textSize="@dimen/text_size_body" />
+        </LinearLayout>
+
+        <!-- Edit Resolution -->
+        <LinearLayout
+            android:id="@+id/btnMenuRes"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingVertical="@dimen/spacing_m"
+            android:paddingHorizontal="@dimen/spacing_s"
+            android:clickable="true"
+            android:focusable="true"
+            android:background="?attr/selectableItemBackground">
+            <ImageView
+                android:layout_width="@dimen/icon_size_m"
+                android:layout_height="@dimen/icon_size_m"
+                android:src="@drawable/ic_bulk_ping"
+                app:tint="?attr/customAccentColor" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/spacing_l"
+                android:text="@string/lbl_view_menu_res"
+                android:textColor="@color/text_primary"
+                android:textSize="@dimen/text_size_body" />
+        </LinearLayout>
+
+        <!-- Reset Zoom -->
+        <LinearLayout
+            android:id="@+id/btnMenuReset"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingVertical="@dimen/spacing_m"
+            android:paddingHorizontal="@dimen/spacing_s"
+            android:clickable="true"
+            android:focusable="true"
+            android:background="?attr/selectableItemBackground">
+            <ImageView
+                android:layout_width="@dimen/icon_size_m"
+                android:layout_height="@dimen/icon_size_m"
+                android:src="@drawable/ic_zoom"
+                app:tint="@color/status_info" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/spacing_l"
+                android:text="@string/lbl_view_menu_reset"
+                android:textColor="@color/text_primary"
+                android:textSize="@dimen/text_size_body" />
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/btnMenuCancel"
+            style="@style/Widget.MaterialComponents.Button.TextButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_s"
+            android:text="@string/btn_all_cancel"
+            android:textColor="@color/text_secondary"
+            android:textSize="@dimen/text_size_body_small" />
+
+    </LinearLayout>
+</com.google.android.material.card.MaterialCardView>

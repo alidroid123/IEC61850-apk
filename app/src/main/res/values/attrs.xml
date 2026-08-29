@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <attr name="customPrimaryColor" format="color" />
+    <attr name="customSecondaryColor" format="color" />
+    <attr name="customBackgroundColor" format="color" />
+    <attr name="customSurfaceColor" format="color" />
+    <attr name="customTextPrimaryColor" format="color" />
+    <attr name="customAccentColor" format="color" />
+</resources>

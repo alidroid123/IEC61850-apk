@@ -1,0 +1,158 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Base application theme. -->
+    <style name="Theme.DFRtools" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="android:statusBarColor">?attr/colorPrimary</item>
+        <item name="android:windowBackground">?attr/customBackgroundColor</item>
+        <item name="textInputStyle">@style/Widget.App.TextInputLayout</item>
+        <item name="alertDialogTheme">@style/Theme.Comtrade.Dialog</item>
+    </style>
+
+    <!-- Theme 1 - MODERN BLUE -->
+    <style name="Theme.DFRtools.Blue" parent="Theme.DFRtools">
+        <item name="colorPrimary">#1D4ED8</item>
+        <item name="colorSecondary">#1E3A8A</item>
+        <item name="customBackgroundColor">#F8FAFC</item>
+        <item name="customSurfaceColor">#FFFFFF</item>
+        <item name="customTextPrimaryColor">#0F172A</item>
+        <item name="customAccentColor">#D97706</item>
+    </style>
+
+    <!-- Theme 2 - EMERALD -->
+    <style name="Theme.DFRtools.Emerald" parent="Theme.DFRtools">
+        <item name="colorPrimary">#047857</item>
+        <item name="colorSecondary">#064E3B</item>
+        <item name="customBackgroundColor">#F9FAFB</item>
+        <item name="customSurfaceColor">#FFFFFF</item>
+        <item name="customTextPrimaryColor">#111827</item>
+        <item name="customAccentColor">#EA580C</item>
+    </style>
+
+    <!-- Theme 3 - PURPLE PREMIUM -->
+    <style name="Theme.DFRtools.Purple" parent="Theme.DFRtools">
+        <item name="colorPrimary">#6D28D9</item>
+        <item name="colorSecondary">#4C1D95</item>
+        <item name="customBackgroundColor">#FAFAFA</item>
+        <item name="customSurfaceColor">#FFFFFF</item>
+        <item name="customTextPrimaryColor">#111827</item>
+        <item name="customAccentColor">#16A34A</item>
+    </style>
+
+    <!-- Theme 4 - RED ENERGY -->
+    <style name="Theme.DFRtools.Red" parent="Theme.DFRtools">
+        <item name="colorPrimary">#B91C1C</item>
+        <item name="colorSecondary">#7F1D1D</item>
+        <item name="customBackgroundColor">#FAFAFA</item>
+        <item name="customSurfaceColor">#FFFFFF</item>
+        <item name="customTextPrimaryColor">#111827</item>
+        <item name="customAccentColor">#0284C7</item>
+    </style>
+
+    <style name="Theme.Comtrade.Dialog" parent="Theme.MaterialComponents.DayNight.Dialog.Alert">
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:background">@android:color/transparent</item>
+        <item name="android:windowIsFloating">true</item>
+        <item name="android:windowAnimationStyle">@android:style/Animation.Dialog</item>
+        <item name="android:windowMinWidthMajor">320dp</item>
+        <item name="android:windowMinWidthMinor">320dp</item>
+        <item name="android:gravity">center</item>
+        <item name="android:layout_gravity">center</item>
+        <item name="colorAccent">?attr/colorPrimary</item>
+    </style>
+
+    <style name="ShapeAppearance.App.MediumComponent" parent="ShapeAppearance.MaterialComponents.MediumComponent">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">20dp</item>
+    </style>
+
+    <style name="Widget.App.TextInputLayout" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+        <item name="boxStrokeColor">?attr/colorPrimary</item>
+        <item name="boxStrokeWidth">1.5dp</item>
+        <item name="boxStrokeWidthFocused">2.5dp</item>
+        <item name="hintTextColor">?attr/colorPrimary</item>
+    </style>
+
+    <style name="Widget.DFRtools.CardView" parent="Widget.MaterialComponents.CardView">
+        <item name="cardBackgroundColor">?attr/customSurfaceColor</item>
+        <item name="cardCornerRadius">16dp</item>
+        <item name="cardElevation">4dp</item>
+        <item name="strokeColor">@color/divider</item>
+        <item name="strokeWidth">1.5dp</item>
+    </style>
+
+    <style name="Widget.DFRtools.Button" parent="Widget.MaterialComponents.Button">
+        <item name="cornerRadius">12dp</item>
+        <item name="backgroundTint">?attr/colorPrimary</item>
+        <item name="android:insetTop">0dp</item>
+        <item name="android:insetBottom">0dp</item>
+        <item name="android:textAllCaps">true</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="ShapeAppearance.App.SmallComponent" parent="ShapeAppearance.MaterialComponents.SmallComponent">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">12dp</item>
+    </style>
+
+    <style name="Theme.Comtrade.Splash" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="android:windowBackground">@drawable/bg_splash_starting</item>
+        <item name="android:statusBarColor">#0F172A</item>
+        <item name="android:windowTranslucentStatus">false</item>
+        <item name="android:windowFullscreen">false</item>
+    </style>
+
+    <style name="Theme.DFRtools.Viewer" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="colorPrimary">#2563EB</item>
+        <item name="colorSecondary">#64748B</item>
+        <item name="android:statusBarColor">#0D1117</item>
+        <item name="android:windowBackground">@color/dfr_background</item>
+        <item name="customBackgroundColor">@color/dfr_background</item>
+        <item name="customSurfaceColor">@color/dfr_surface</item>
+        <item name="customTextPrimaryColor">@color/dfr_text_primary</item>
+    </style>
+
+    <style name="ToolbarTitle">
+        <item name="android:textColor">@color/white</item>
+        <item name="android:textSize">20sp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="SectionLabel">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textColor">@color/text_secondary</item>
+        <item name="android:textSize">13sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:letterSpacing">0.05</item>
+    </style>
+
+    <style name="CardTitle">
+        <item name="android:textColor">?attr/customTextPrimaryColor</item>
+        <item name="android:textSize">15sp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="CardSubtitle">
+        <item name="android:textColor">@color/text_secondary</item>
+        <item name="android:textSize">12sp</item>
+    </style>
+
+    <style name="SettingsLabel">
+        <item name="android:textColor">?attr/colorPrimary</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:layout_marginTop">16dp</item>
+        <item name="android:layout_marginBottom">4dp</item>
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+    </style>
+
+    <style name="SettingsInput">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">50dp</item>
+        <item name="android:background">@drawable/bg_edit_text</item>
+        <item name="android:paddingStart">16dp</item>
+        <item name="android:paddingEnd">16dp</item>
+        <item name="android:textColor">@color/text_primary</item>
+        <item name="android:textSize">15sp</item>
+    </style>
+</resources>

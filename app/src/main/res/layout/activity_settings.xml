@@ -1,0 +1,283 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/bg_app">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/bg_header_gradient"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingTop="@dimen/spacing_giant"
+        android:paddingBottom="@dimen/spacing_xxl"
+        android:paddingHorizontal="@dimen/spacing_l">
+
+        <ImageButton
+            android:id="@+id/btnBack"
+            android:layout_width="@dimen/icon_size_xl"
+            android:layout_height="@dimen/icon_size_xl"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@drawable/ic_arrow_back"
+            android:contentDescription="Back"
+            app:tint="@color/white" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/spacing_s"
+            android:text="@string/ttl_set_main"
+            android:textColor="@color/white"
+            android:textSize="@dimen/text_size_title"
+            android:fontFamily="sans-serif-medium"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="@dimen/spacing_m">
+
+            <!-- General Section -->
+            <TextView
+                style="@style/SectionLabel"
+                android:text="@string/lbl_set_section_general"
+                android:layout_marginStart="@dimen/spacing_s"
+                android:layout_marginBottom="@dimen/spacing_s" />
+
+            <com.google.android.material.card.MaterialCardView
+                style="@style/Widget.DFRtools.CardView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/spacing_l">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="@dimen/spacing_l">
+
+                    <TextView
+                        style="@style/SettingsLabel"
+                        android:layout_marginTop="0dp"
+                        android:text="@string/lbl_set_language" />
+
+                    <Spinner
+                        android:id="@+id/spLanguage"
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/input_field_height"
+                        android:background="@drawable/bg_spinner" />
+
+                    <TextView
+                        style="@style/SettingsLabel"
+                        android:text="@string/lbl_set_thread_pool" />
+
+                    <EditText
+                        android:id="@+id/etThreadPool"
+                        style="@style/SettingsInput"
+                        android:inputType="number"
+                        android:hint="1-5" />
+
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Connection Section -->
+            <TextView
+                style="@style/SectionLabel"
+                android:text="@string/lbl_set_section_connection"
+                android:layout_marginStart="@dimen/spacing_s"
+                android:layout_marginBottom="@dimen/spacing_s" />
+
+            <com.google.android.material.card.MaterialCardView
+                style="@style/Widget.DFRtools.CardView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/spacing_l">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="@dimen/spacing_l">
+
+                    <TextView
+                        style="@style/SettingsLabel"
+                        android:layout_marginTop="0dp"
+                        android:text="@string/lbl_set_mms_port" />
+                    <EditText
+                        android:id="@+id/etMmsPort"
+                        style="@style/SettingsInput"
+                        android:inputType="number" />
+
+                    <TextView
+                        style="@style/SettingsLabel"
+                        android:text="@string/lbl_set_intranet_ip" />
+                    <EditText
+                        android:id="@+id/etIntranetIp"
+                        style="@style/SettingsInput"
+                        android:inputType="text" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginTop="@dimen/spacing_m">
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical"
+                            android:layout_marginEnd="@dimen/spacing_s">
+                            <TextView
+                                style="@style/SettingsLabel"
+                                android:layout_marginTop="0dp"
+                                android:text="@string/lbl_set_ping_count_single" />
+                            <EditText
+                                android:id="@+id/etPingSingle"
+                                style="@style/SettingsInput"
+                                android:inputType="number" />
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+                            <TextView
+                                style="@style/SettingsLabel"
+                                android:layout_marginTop="0dp"
+                                android:text="@string/lbl_set_ping_count_bulk" />
+                            <EditText
+                                android:id="@+id/etPingBulk"
+                                style="@style/SettingsInput"
+                                android:inputType="number" />
+                        </LinearLayout>
+                    </LinearLayout>
+
+                    <TextView
+                        style="@style/SettingsLabel"
+                        android:text="@string/lbl_set_mon_interval" />
+                    <EditText
+                        android:id="@+id/etMonInterval"
+                        style="@style/SettingsInput"
+                        android:inputType="number"
+                        android:hint="Default: 5" />
+
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- DFR Section -->
+            <TextView
+                style="@style/SectionLabel"
+                android:text="@string/lbl_set_section_dfr"
+                android:layout_marginStart="@dimen/spacing_s"
+                android:layout_marginBottom="@dimen/spacing_s" />
+
+            <com.google.android.material.card.MaterialCardView
+                style="@style/Widget.DFRtools.CardView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/spacing_xl">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="@dimen/spacing_l">
+
+                    <TextView
+                        style="@style/SettingsLabel"
+                        android:layout_marginTop="0dp"
+                        android:text="@string/lbl_set_dfr_points" />
+                    <EditText
+                        android:id="@+id/etDfrPoints"
+                        style="@style/SettingsInput"
+                        android:inputType="number" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnClearCache"
+                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/standard_button_height"
+                        android:layout_marginTop="@dimen/spacing_l"
+                        android:text="@string/lbl_set_clear_cache"
+                        android:textColor="@color/status_danger"
+                        app:strokeColor="@color/status_danger"
+                        app:cornerRadius="@dimen/card_corner_radius_medium" />
+
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Backup & Restore Section -->
+            <TextView
+                style="@style/SectionLabel"
+                android:text="@string/lbl_set_section_backup"
+                android:layout_marginStart="@dimen/spacing_s"
+                android:layout_marginBottom="@dimen/spacing_s" />
+
+            <com.google.android.material.card.MaterialCardView
+                style="@style/Widget.DFRtools.CardView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/spacing_xl">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="@dimen/spacing_l">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/lbl_set_backup_desc"
+                        android:textColor="@color/text_secondary"
+                        android:textSize="@dimen/text_size_body_small"
+                        android:layout_marginBottom="@dimen/spacing_m" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnExportConfig"
+                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/standard_button_height"
+                        android:text="@string/btn_set_export_config"
+                        app:icon="@drawable/ic_download"
+                        app:cornerRadius="@dimen/card_corner_radius_medium" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnImportConfig"
+                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/standard_button_height"
+                        android:layout_marginTop="@dimen/spacing_s"
+                        android:text="@string/btn_set_import_config"
+                        app:icon="@drawable/ic_import"
+                        app:cornerRadius="@dimen/card_corner_radius_medium" />
+
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+        </LinearLayout>
+    </ScrollView>
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnSave"
+        style="@style/Widget.DFRtools.Button"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/large_button_height"
+        android:layout_margin="@dimen/spacing_l"
+        android:text="@string/btn_all_save_small"
+        app:cornerRadius="@dimen/card_corner_radius_medium"
+        app:elevation="@dimen/spacing_s" />
+
+</LinearLayout>

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Soft translucent circular backdrop for a header icon/button, so it reads as a badge rather
+     than a bare icon floating on the gradient. Size comes entirely from the host view. -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="oval">
+    <solid android:color="#26FFFFFF" />
+    <stroke android:width="1dp" android:color="#40FFFFFF" />
+</shape>

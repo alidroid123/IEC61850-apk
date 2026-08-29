@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <com.google.android.material.card.MaterialCardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/spacing_l"
+        app:cardCornerRadius="@dimen/card_corner_radius_huge"
+        app:cardBackgroundColor="?attr/customSurfaceColor"
+        app:strokeColor="?attr/colorPrimary"
+        app:strokeWidth="1dp"
+        app:cardElevation="@dimen/card_elevation_huge">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="@dimen/spacing_l">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                <TextView
+                    android:id="@+id/tvBulkEditTitle"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/ttl_mon_bulk_edit"
+                    android:textColor="?attr/colorPrimary"
+                    android:textSize="@dimen/text_size_body_large"
+                    android:textStyle="bold" />
+
+                <ImageButton
+                    android:id="@+id/btnBulkImportCsv"
+                    android:layout_width="@dimen/icon_size_m"
+                    android:layout_height="@dimen/icon_size_m"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:src="@drawable/ic_import"
+                    app:tint="?attr/colorSecondary"
+                    android:contentDescription="@string/ttl_mon_import_csv" />
+
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/tvBulkEditSubtitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:layout_marginBottom="@dimen/spacing_m"
+                android:textColor="@color/text_secondary"
+                android:textSize="@dimen/text_size_body_small"
+                android:maxLines="1"
+                android:ellipsize="end" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/divider"
+                android:alpha="0.4"
+                android:layout_marginBottom="@dimen/spacing_s" />
+
+            <HorizontalScrollView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:scrollbars="horizontal">
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:paddingBottom="@dimen/spacing_xs">
+
+                        <TextView
+                            android:layout_width="@dimen/bulk_col_name_width"
+                            android:layout_height="wrap_content"
+                            android:layout_marginEnd="@dimen/spacing_xs"
+                            android:text="@string/lbl_tmpl_col_name"
+                            android:textColor="@color/text_secondary"
+                            android:textSize="@dimen/text_size_micro"
+                            android:textStyle="bold"
+                            android:gravity="center" />
+
+                        <TextView
+                            android:layout_width="@dimen/bulk_col_path_width"
+                            android:layout_height="wrap_content"
+                            android:layout_marginEnd="@dimen/spacing_xs"
+                            android:text="@string/lbl_tmpl_col_path"
+                            android:textColor="@color/text_secondary"
+                            android:textSize="@dimen/text_size_micro"
+                            android:textStyle="bold"
+                            android:gravity="center" />
+
+                        <TextView
+                            android:layout_width="@dimen/bulk_col_type_width"
+                            android:layout_height="wrap_content"
+                            android:layout_marginEnd="@dimen/spacing_xs"
+                            android:text="@string/lbl_tmpl_col_type"
+                            android:textColor="@color/text_secondary"
+                            android:textSize="@dimen/text_size_micro"
+                            android:textStyle="bold"
+                            android:gravity="center" />
+
+                        <TextView
+                            android:layout_width="@dimen/bulk_col_unit_width"
+                            android:layout_height="wrap_content"
+                            android:layout_marginEnd="@dimen/spacing_xs"
+                            android:text="@string/lbl_tmpl_col_unit"
+                            android:textColor="@color/text_secondary"
+                            android:textSize="@dimen/text_size_micro"
+                            android:textStyle="bold"
+                            android:gravity="center" />
+
+                        <TextView
+                            android:layout_width="@dimen/bulk_col_mult_width"
+                            android:layout_height="wrap_content"
+                            android:layout_marginEnd="@dimen/spacing_xs"
+                            android:text="@string/lbl_tmpl_col_multiplier"
+                            android:textColor="@color/text_secondary"
+                            android:textSize="@dimen/text_size_micro"
+                            android:textStyle="bold"
+                            android:gravity="center" />
+
+                        <View
+                            android:layout_width="@dimen/bulk_col_delete_width"
+                            android:layout_height="1dp" />
+
+                    </LinearLayout>
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="@color/divider" />
+
+                    <ScrollView
+                        android:layout_width="wrap_content"
+                        android:layout_height="@dimen/bulk_rows_max_height">
+
+                        <LinearLayout
+                            android:id="@+id/llBulkEditRows"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            android:paddingTop="@dimen/spacing_xs" />
+
+                    </ScrollView>
+
+                </LinearLayout>
+
+            </HorizontalScrollView>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="@dimen/spacing_m"
+                android:gravity="end">
+
+                <Button
+                    android:id="@+id/btnCancelBulkEdit"
+                    style="@style/Widget.MaterialComponents.Button.TextButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/btn_all_cancel"
+                    android:textColor="@color/text_secondary" />
+
+                <Button
+                    android:id="@+id/btnSaveBulkEdit"
+                    style="@style/Widget.DFRtools.Button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/spacing_s"
+                    android:text="@string/btn_all_save_small"
+                    android:paddingHorizontal="@dimen/spacing_l" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+</FrameLayout>

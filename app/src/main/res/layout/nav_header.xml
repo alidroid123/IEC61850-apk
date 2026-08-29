@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="180dp"
+    android:background="@drawable/bg_header_industrial"
+    android:gravity="bottom"
+    android:orientation="vertical"
+    android:padding="@dimen/spacing_l">
+
+    <FrameLayout
+        android:layout_width="@dimen/icon_size_huge"
+        android:layout_height="@dimen/icon_size_huge"
+        android:background="@drawable/bg_icon_badge_circle"
+        android:elevation="@dimen/spacing_xs">
+
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:padding="@dimen/spacing_s"
+            android:src="@mipmap/ic_launcher" />
+    </FrameLayout>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/spacing_m"
+        android:text="@string/ttl_home_app_title"
+        android:textColor="@color/white"
+        android:textSize="@dimen/text_size_title_small"
+        android:fontFamily="sans-serif-medium"
+        android:textStyle="bold"
+        android:letterSpacing="0.1" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/spacing_xs"
+        android:background="@drawable/bg_badge_translucent_pill"
+        android:paddingHorizontal="@dimen/spacing_s"
+        android:paddingVertical="2dp"
+        android:text="@string/val_mms_utility_version"
+        android:textColor="#E0FFFFFF"
+        android:textSize="@dimen/text_size_small"
+        android:fontFamily="sans-serif-condensed"
+        android:letterSpacing="0.2" />
+
+</LinearLayout>

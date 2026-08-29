@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Same as bg_monitoring_group_header but darkened, so the header pinned at the top of the
+     list while scrolling is visually distinct from the ones still sitting inline in the list. -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <shape>
+            <solid android:color="?attr/colorPrimary" />
+            <corners android:radius="@dimen/card_corner_radius_medium" />
+        </shape>
+    </item>
+    <item>
+        <shape>
+            <solid android:color="#40000000" />
+            <corners android:radius="@dimen/card_corner_radius_medium" />
+        </shape>
+    </item>
+</layer-list>

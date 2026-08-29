@@ -1,0 +1,55 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+
+    <!-- Bingkai daftar/history DFR -->
+    <path
+        android:fillColor="@android:color/transparent"
+        android:strokeColor="@android:color/white"
+        android:strokeWidth="1.6"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="M4,5
+                          H15
+                          M4,19
+                          H15
+                          M4,5
+                          V19" />
+
+    <!-- Waveform DFR -->
+    <path
+        android:fillColor="@android:color/transparent"
+        android:strokeColor="@android:color/white"
+        android:strokeWidth="1.5"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="M5.5,12
+                          H7
+                          C7.7,12 7.8,9 8.6,9
+                          C9.4,9 9.5,15 10.3,15
+                          C11.1,15 11.2,12 12,12
+                          H14.5" />
+
+    <!-- History arc -->
+    <path
+        android:fillColor="@android:color/transparent"
+        android:strokeColor="@android:color/white"
+        android:strokeWidth="1.6"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="M18.5,8.5
+                          A5,5 0,1 1,16.2 17.5" />
+
+    <!-- History arrow -->
+    <path
+        android:fillColor="@android:color/white"
+        android:pathData="M15.2,7.5
+                          H19.5
+                          V11.8
+                          L18,10.3
+                          L16.7,9
+                          Z" />
+
+</vector>

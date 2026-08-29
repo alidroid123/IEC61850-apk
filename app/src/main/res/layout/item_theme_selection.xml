@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/rootThemeItem"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:padding="@dimen/spacing_l"
+    android:gravity="center_vertical"
+    android:layout_marginBottom="@dimen/spacing_m"
+    android:background="@drawable/bg_theme_item">
+
+    <FrameLayout
+        android:layout_width="@dimen/icon_size_l"
+        android:layout_height="@dimen/icon_size_l">
+        <View
+            android:id="@+id/viewThemeColor"
+            android:layout_width="@dimen/spacing_ms"
+            android:layout_height="@dimen/spacing_ms"
+            android:layout_gravity="center"
+            android:background="@drawable/bg_theme_color_circle" />
+    </FrameLayout>
+
+    <TextView
+        android:id="@+id/tvThemeName"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:layout_marginStart="@dimen/spacing_l"
+        android:textColor="?attr/customTextPrimaryColor"
+        android:textSize="@dimen/text_size_medium"
+        android:fontFamily="sans-serif-medium" />
+
+    <ImageView
+        android:id="@+id/ivCheck"
+        android:layout_width="@dimen/icon_size_ms"
+        android:layout_height="@dimen/icon_size_ms"
+        android:src="@drawable/ic_check"
+        android:visibility="gone"
+        android:contentDescription="Selected"
+        app:tint="?attr/colorPrimary" />
+
+</LinearLayout>

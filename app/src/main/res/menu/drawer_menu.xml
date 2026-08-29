@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/nav_mode"
+        android:icon="@drawable/ic_day_night"
+        android:title="@string/lbl_base_toggle_mode" />
+
+    <item
+        android:id="@+id/nav_settings"
+        android:icon="@drawable/ic_settings"
+        android:title="@string/menu_all_settings" />
+
+    <item
+        android:id="@+id/nav_monitoring"
+        android:icon="@drawable/ic_ied_monitor"
+        android:title="@string/menu_home_monitoring" />
+
+    <item
+        android:id="@+id/nav_edit_template"
+        android:icon="@drawable/ic_template"
+        android:title="@string/menu_home_edit_template" />
+
+    <group android:id="@+id/group_bottom">
+        <item
+            android:id="@+id/nav_vpn"
+            android:icon="@drawable/ic_vpn"
+            android:title="@string/menu_all_vpn" />
+        <item
+            android:id="@+id/nav_help"
+            android:icon="@drawable/ic_help"
+            android:title="@string/menu_all_help" />
+        <item
+            android:id="@+id/nav_about"
+            android:icon="@drawable/ic_info"
+            android:title="@string/lbl_abt_about" />
+    </group>
+
+</menu>

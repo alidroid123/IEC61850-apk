@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:gravity="center_vertical"
+    android:background="@drawable/bg_edit_text"
+    android:paddingHorizontal="@dimen/spacing_s"
+    android:paddingVertical="@dimen/spacing_xs">
+
+    <EditText
+        android:id="@+id/etIp1"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:background="@null"
+        android:gravity="center"
+        android:hint="192"
+        android:inputType="number"
+        android:maxLength="3"
+        android:textColor="@color/text_primary"
+        android:textSize="@dimen/text_size_body_large" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="."
+        android:textColor="@color/text_secondary"
+        android:textStyle="bold" />
+
+    <EditText
+        android:id="@+id/etIp2"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:background="@null"
+        android:gravity="center"
+        android:hint="168"
+        android:inputType="number"
+        android:maxLength="3"
+        android:textColor="@color/text_primary"
+        android:textSize="@dimen/text_size_body_large" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="."
+        android:textColor="@color/text_secondary"
+        android:textStyle="bold" />
+
+    <EditText
+        android:id="@+id/etIp3"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:background="@null"
+        android:gravity="center"
+        android:hint="1"
+        android:inputType="number"
+        android:maxLength="3"
+        android:textColor="@color/text_primary"
+        android:textSize="@dimen/text_size_body_large" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="."
+        android:textColor="@color/text_secondary"
+        android:textStyle="bold" />
+
+    <EditText
+        android:id="@+id/etIp4"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:background="@null"
+        android:gravity="center"
+        android:hint="10"
+        android:inputType="number"
+        android:maxLength="3"
+        android:textColor="@color/text_primary"
+        android:textSize="@dimen/text_size_body_large" />
+
+</LinearLayout>

@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingVertical="@dimen/spacing_xs">
+
+        <EditText
+            android:id="@+id/etRowName"
+            android:layout_width="@dimen/bulk_col_name_width"
+            android:layout_height="@dimen/bulk_row_input_height"
+            android:layout_marginEnd="@dimen/spacing_xs"
+            android:background="@drawable/bg_edit_text"
+            android:paddingHorizontal="@dimen/spacing_xs"
+            android:textColor="@color/text_primary"
+            android:textSize="@dimen/text_size_caption"
+            android:singleLine="true" />
+
+        <EditText
+            android:id="@+id/etRowPath"
+            android:layout_width="@dimen/bulk_col_path_width"
+            android:layout_height="@dimen/bulk_row_input_height"
+            android:layout_marginEnd="@dimen/spacing_xs"
+            android:background="@drawable/bg_edit_text"
+            android:paddingHorizontal="@dimen/spacing_xs"
+            android:textColor="@color/text_primary"
+            android:textSize="@dimen/text_size_caption"
+            android:singleLine="true"
+            android:gravity="end|center_vertical" />
+
+        <TextView
+            android:id="@+id/txtRowType"
+            android:layout_width="@dimen/bulk_col_type_width"
+            android:layout_height="@dimen/bulk_row_input_height"
+            android:layout_marginEnd="@dimen/spacing_xs"
+            android:gravity="center"
+            android:textColor="@color/text_secondary"
+            android:textSize="@dimen/text_size_micro"
+            android:textStyle="bold" />
+
+        <EditText
+            android:id="@+id/etRowUnit"
+            android:layout_width="@dimen/bulk_col_unit_width"
+            android:layout_height="@dimen/bulk_row_input_height"
+            android:layout_marginEnd="@dimen/spacing_xs"
+            android:background="@drawable/bg_edit_text"
+            android:paddingHorizontal="@dimen/spacing_xs"
+            android:textColor="@color/text_primary"
+            android:textSize="@dimen/text_size_caption"
+            android:singleLine="true" />
+
+        <EditText
+            android:id="@+id/etRowMultiplier"
+            android:layout_width="@dimen/bulk_col_mult_width"
+            android:layout_height="@dimen/bulk_row_input_height"
+            android:layout_marginEnd="@dimen/spacing_xs"
+            android:background="@drawable/bg_edit_text"
+            android:paddingHorizontal="@dimen/spacing_xs"
+            android:textColor="@color/text_primary"
+            android:textSize="@dimen/text_size_caption"
+            android:singleLine="true"
+            android:inputType="numberDecimal|numberSigned" />
+
+        <ImageButton
+            android:id="@+id/btnRowDelete"
+            android:layout_width="@dimen/bulk_col_delete_width"
+            android:layout_height="@dimen/bulk_row_input_height"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@drawable/ic_delete"
+            android:padding="4dp"
+            app:tint="@color/status_danger"
+            android:contentDescription="@string/btn_all_delete" />
+
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/divider"
+        android:alpha="0.4" />
+
+</LinearLayout>

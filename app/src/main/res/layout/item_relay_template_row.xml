@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingVertical="@dimen/spacing_s">
+
+        <EditText
+            android:id="@+id/etRowName"
+            android:layout_width="@dimen/tmpl_col_name_width"
+            android:layout_height="@dimen/tmpl_row_input_height"
+            android:layout_marginEnd="@dimen/spacing_xs"
+            android:background="@drawable/bg_edit_text"
+            android:paddingHorizontal="@dimen/spacing_s"
+            android:textColor="@color/text_primary"
+            android:textSize="@dimen/text_size_body_small"
+            android:singleLine="true"
+            android:hint="@string/hint_tmpl_row_name" />
+
+        <EditText
+            android:id="@+id/etRowPath"
+            android:layout_width="@dimen/tmpl_col_path_width"
+            android:layout_height="@dimen/tmpl_row_input_height"
+            android:layout_marginEnd="@dimen/spacing_xs"
+            android:background="@drawable/bg_edit_text"
+            android:paddingHorizontal="@dimen/spacing_s"
+            android:textColor="@color/text_primary"
+            android:textSize="@dimen/text_size_body_small"
+            android:singleLine="true"
+            android:gravity="end|center_vertical"
+            android:hint="@string/hint_tmpl_row_path" />
+
+        <Spinner
+            android:id="@+id/spRowType"
+            android:layout_width="@dimen/tmpl_col_type_width"
+            android:layout_height="@dimen/tmpl_row_input_height"
+            android:layout_marginEnd="@dimen/spacing_xs"
+            android:background="@drawable/bg_spinner_strong"
+            android:spinnerMode="dropdown" />
+
+        <EditText
+            android:id="@+id/etRowUnit"
+            android:layout_width="@dimen/tmpl_col_unit_width"
+            android:layout_height="@dimen/tmpl_row_input_height"
+            android:layout_marginEnd="@dimen/spacing_xs"
+            android:background="@drawable/bg_edit_text"
+            android:paddingHorizontal="@dimen/spacing_s"
+            android:textColor="@color/text_primary"
+            android:textSize="@dimen/text_size_body_small"
+            android:singleLine="true"
+            android:hint="@string/hint_tmpl_row_unit" />
+
+        <EditText
+            android:id="@+id/etRowMultiplier"
+            android:layout_width="@dimen/tmpl_col_mult_width"
+            android:layout_height="@dimen/tmpl_row_input_height"
+            android:layout_marginEnd="@dimen/spacing_xs"
+            android:background="@drawable/bg_edit_text"
+            android:paddingHorizontal="@dimen/spacing_s"
+            android:textColor="@color/text_primary"
+            android:textSize="@dimen/text_size_body_small"
+            android:singleLine="true"
+            android:inputType="numberDecimal|numberSigned"
+            android:hint="@string/hint_tmpl_row_multiplier" />
+
+        <ImageButton
+            android:id="@+id/btnRowDelete"
+            android:layout_width="@dimen/tmpl_col_delete_width"
+            android:layout_height="@dimen/tmpl_row_input_height"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@drawable/ic_delete"
+            app:tint="@color/status_danger"
+            android:contentDescription="@string/btn_all_delete" />
+
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/divider"
+        android:alpha="0.4" />
+
+</LinearLayout>

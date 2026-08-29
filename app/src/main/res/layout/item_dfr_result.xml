@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/layoutAssessmentRoot"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="@dimen/spacing_l"
+    android:background="@color/dfr_surface"
+    android:layout_marginTop="@dimen/spacing_s">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/lbl_all_result"
+        android:textColor="@color/dfr_chart_cursor_c1"
+        android:textSize="@dimen/text_size_subhead"
+        android:textStyle="bold"
+        android:gravity="center"
+        android:layout_marginBottom="@dimen/spacing_m" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:background="#777777"
+        android:layout_marginBottom="@dimen/spacing_s" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingVertical="@dimen/spacing_s"
+        android:gravity="center_vertical">
+        <TextView android:layout_width="@dimen/icon_size_ml" android:layout_height="wrap_content" android:text="@string/lbl_all_no" android:textColor="@color/dfr_text_primary" android:textSize="@dimen/text_size_caption" android:textStyle="bold" android:gravity="center" />
+        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="@string/lbl_all_parameter" android:textColor="@color/dfr_text_primary" android:textSize="@dimen/text_size_caption" android:textStyle="bold" android:gravity="center" />
+        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1.5" android:text="@string/lbl_all_value" android:textColor="@color/dfr_text_primary" android:textSize="@dimen/text_size_caption" android:textStyle="bold" android:gravity="center" />
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:background="#777777"
+        android:layout_marginBottom="@dimen/spacing_s" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/lbl_view_analog_channel_header"
+        android:textColor="@color/status_warning"
+        android:textSize="@dimen/text_size_body_small"
+        android:textStyle="bold"
+        android:letterSpacing="0.1"
+        android:layout_marginTop="@dimen/spacing_s"
+        android:layout_marginBottom="@dimen/spacing_xs" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1.5dp"
+        android:background="#777777"
+        android:layout_marginBottom="@dimen/spacing_s" />
+
+    <LinearLayout
+        android:id="@+id/containerAnalogAssessment"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/lbl_view_digital_channel_header"
+        android:textColor="@color/status_warning"
+        android:textSize="@dimen/text_size_body_small"
+        android:textStyle="bold"
+        android:letterSpacing="0.1"
+        android:layout_marginTop="@dimen/spacing_m"
+        android:layout_marginBottom="@dimen/spacing_xs" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1.5dp"
+        android:background="#777777"
+        android:layout_marginBottom="@dimen/spacing_s" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingVertical="@dimen/spacing_s"
+        android:gravity="center_vertical">
+        <TextView android:layout_width="@dimen/icon_size_m" android:layout_height="wrap_content" android:text="@string/lbl_all_v" android:textColor="@color/dfr_text_primary" android:textSize="@dimen/text_size_caption" android:textStyle="bold" android:gravity="center" />
+        <TextView android:layout_width="@dimen/icon_size_m" android:layout_height="wrap_content" android:text="@string/lbl_all_no" android:textColor="@color/dfr_text_primary" android:textSize="@dimen/text_size_caption" android:textStyle="bold" android:gravity="center" />
+        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1.2" android:text="@string/lbl_all_parameter" android:textColor="@color/dfr_text_primary" android:textSize="@dimen/text_size_caption" android:textStyle="bold" />
+        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="@string/lbl_all_ch_map" android:textColor="@color/dfr_text_primary" android:textSize="@dimen/text_size_caption" android:textStyle="bold" android:gravity="center" />
+        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1.5" android:text="@string/lbl_all_value" android:textColor="@color/dfr_text_primary" android:textSize="@dimen/text_size_caption" android:textStyle="bold" android:gravity="center" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/containerDigitalAssessment"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/msg_view_manual_entry_hint"
+        android:textColor="@color/status_warning"
+        android:textSize="@dimen/text_size_caption"
+        android:layout_marginTop="@dimen/spacing_l"
+        android:gravity="center_horizontal" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/lbl_view_additional_info"
+        android:textColor="@color/dfr_text_primary"
+        android:textSize="@dimen/text_size_small"
+        android:layout_marginTop="@dimen/spacing_m" />
+
+    <EditText
+        android:id="@+id/etNote"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:minHeight="80dp"
+        android:gravity="top"
+        android:background="@drawable/bg_edit_text"
+        android:padding="@dimen/spacing_m"
+        android:layout_marginTop="@dimen/spacing_xs"
+        android:textColor="@color/dfr_text_primary"
+        android:textSize="@dimen/text_size_small" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="@dimen/spacing_xl">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnExportPdf"
+            android:layout_width="0dp"
+            android:layout_height="54dp"
+            android:layout_weight="1"
+            android:text="@string/btn_view_export_pdf"
+            android:textSize="@dimen/text_size_body_small"
+            app:backgroundTint="@color/dfr_chart_cursor_c1"
+            android:textColor="@color/white"
+            app:cornerRadius="@dimen/spacing_s"
+            android:layout_marginEnd="@dimen/spacing_s" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnDownloadImg"
+            android:layout_width="0dp"
+            android:layout_height="54dp"
+            android:layout_weight="1"
+            android:text="@string/btn_view_download_img"
+            android:textSize="@dimen/text_size_body_small"
+            app:backgroundTint="@color/status_warning"
+            android:textColor="@color/white"
+            app:cornerRadius="@dimen/spacing_s" />
+    </LinearLayout>
+
+</LinearLayout>

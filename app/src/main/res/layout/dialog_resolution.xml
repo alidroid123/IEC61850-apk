@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    app:cardCornerRadius="@dimen/card_corner_radius_huge"
+    app:cardElevation="@dimen/card_elevation_huge"
+    app:strokeWidth="1dp"
+    app:strokeColor="@color/divider"
+    app:cardBackgroundColor="@color/dfr_background">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="@dimen/spacing_xxl">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/ttl_view_res_detail"
+            android:textColor="@color/dfr_text_primary"
+            android:textSize="@dimen/text_size_title_small"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_s"
+            android:text="@string/msg_view_res_detail_desc"
+            android:textColor="@color/dfr_text_secondary"
+            android:textSize="@dimen/text_size_body_small"
+            android:lineSpacingExtra="2dp" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/divider"
+            android:layout_marginVertical="@dimen/spacing_xl"
+            android:alpha="0.5" />
+
+        <TextView
+            android:id="@+id/txtResolutionValue"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:text="@string/lbl_view_res_info_default"
+            android:textColor="?attr/colorPrimary"
+            android:textSize="@dimen/text_size_title"
+            android:textStyle="bold"
+            android:letterSpacing="0.05" />
+
+        <SeekBar
+            android:id="@+id/seekBarResolution"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_xl"
+            android:max="99"
+            android:progress="10"
+            android:splitTrack="false"
+            android:thumbTint="?attr/colorPrimary"
+            android:progressTint="?attr/colorPrimary"
+            android:progressBackgroundTint="@color/divider" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="@dimen/spacing_s"
+            android:paddingHorizontal="@dimen/spacing_m">
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/lbl_view_res_low"
+                android:textSize="10sp"
+                android:textColor="@color/text_hint" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/lbl_view_res_high"
+                android:textSize="10sp"
+                android:textColor="@color/text_hint" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_giant"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/btnCancelRes"
+                style="@style/Widget.MaterialComponents.Button.TextButton"
+                android:layout_width="0dp"
+                android:layout_height="@dimen/large_button_height"
+                android:layout_weight="1"
+                android:text="@string/btn_all_cancel"
+                android:textColor="@color/text_secondary"
+                android:textSize="@dimen/text_size_body_small"
+                android:textStyle="bold" />
+
+            <Button
+                android:id="@+id/btnApplyRes"
+                style="@style/Widget.DFRtools.Button"
+                android:layout_width="0dp"
+                android:layout_height="@dimen/large_button_height"
+                android:layout_weight="1.2"
+                android:text="Apply"
+                android:textSize="@dimen/text_size_body_small"
+                app:cornerRadius="@dimen/card_corner_radius_medium" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+</com.google.android.material.card.MaterialCardView>

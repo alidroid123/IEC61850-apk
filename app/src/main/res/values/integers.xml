@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- // Network & Protocol Settings -->
+    <integer name="config_mms_connect_timeout_ms">5000</integer>
+    <integer name="config_mms_default_port">102</integer>
+    <integer name="config_mms_refresh_rate_ms">2000</integer>
+    <integer name="config_mon_default_interval_seconds">5</integer>
+
+    <integer name="config_ping_packet_count_single">1</integer>
+    <integer name="config_ping_packet_count_bulk">3</integer>
+    <integer name="config_ping_timeout_seconds">2</integer>
+    <integer name="config_ping_socket_timeout_ms">1500</integer>
+    <integer name="config_ping_thread_pool_size">5</integer>
+
+    <!-- // DFR Viewer Settings -->
+    <integer name="config_dfr_default_resolution_percent">10</integer>
+    <integer name="config_dfr_target_point_count">2000</integer>
+    <integer name="config_dfr_min_visible_points">100</integer>
+    <integer name="config_dfr_rv_cache_size">60</integer>
+    <integer name="config_dfr_export_batch_size">2</integer>
+    <integer name="config_dfr_export_width_px">1400</integer>
+    <integer name="config_dfr_export_frame_delay_ms">10</integer>
+
+    <!-- // General App Settings -->
+    <integer name="config_ui_toast_duration_short_ms">2000</integer>
+    <integer name="config_ui_overlay_dismiss_delay_ms">4000</integer>
+</resources>

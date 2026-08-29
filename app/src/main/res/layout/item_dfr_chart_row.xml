@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="@color/dfr_background"
+    android:paddingTop="@dimen/spacing_6dp"
+    android:id="@+id/containerChartRow">
+
+    <LinearLayout
+        android:id="@+id/layoutChannelHeader"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingHorizontal="@dimen/spacing_ml"
+        android:paddingVertical="@dimen/spacing_tiny"
+        android:clickable="true"
+        android:focusable="true"
+        android:background="?attr/selectableItemBackground">
+
+        <TextView
+            android:id="@+id/txtChannelInfo"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textSize="@dimen/text_size_tiny"
+            android:textStyle="bold"
+            android:fontFamily="monospace"
+            android:textColor="@color/dfr_text_primary"
+            android:text="@string/lbl_view_chart_row_default" />
+
+        <ImageView
+            android:id="@+id/ivEditIcon"
+            android:layout_width="14dp"
+            android:layout_height="14dp"
+            android:layout_marginStart="@dimen/spacing_xs"
+            android:src="@drawable/ic_edit_small"
+            android:alpha="0.6"
+            android:visibility="gone" />
+    </LinearLayout>
+
+    <com.alidev.dfrtools.dfr.DfrLineChart
+        android:id="@+id/rowChart"
+        android:layout_width="match_parent"
+        android:layout_height="130dp"
+        android:layout_marginTop="0dp" />
+
+    <com.alidev.dfrtools.dfr.DfrDigitalView
+        android:id="@+id/rowDigitalView"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/spacing_ms"
+        android:paddingBottom="@dimen/spacing_xs"
+        android:visibility="gone" />
+
+    <TextView
+        android:id="@+id/txtDigitalSummary"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingHorizontal="@dimen/spacing_ml"
+        android:paddingBottom="@dimen/spacing_tiny"
+        android:textColor="@color/text_secondary"
+        android:textSize="@dimen/text_size_micro"
+        android:visibility="gone" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="2.5dp"
+        android:layout_marginTop="@dimen/spacing_6dp"
+        android:background="#777777" />
+
+</LinearLayout>

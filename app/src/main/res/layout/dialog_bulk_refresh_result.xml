@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="@dimen/spacing_l"
+    android:gravity="center"
+    android:background="@drawable/bg_spinner"
+    android:backgroundTint="@color/bg_card">
+
+    <ImageView
+        android:id="@+id/imgBulkResultIcon"
+        android:layout_width="@dimen/icon_size_huge"
+        android:layout_height="@dimen/icon_size_huge"
+        android:src="@drawable/ic_check"
+        app:tint="@color/status_safe"
+        android:background="@drawable/bg_spinner"
+        android:padding="@dimen/spacing_ml"
+        app:backgroundTint="#2016A34A" />
+
+    <TextView
+        android:id="@+id/tvBulkResultTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/spacing_xl"
+        android:text="@string/ttl_mon_bulk_result"
+        android:textColor="@color/text_primary"
+        android:textSize="@dimen/text_size_title_small"
+        android:fontFamily="sans-serif-medium"
+        android:textStyle="bold"
+        android:letterSpacing="0.1" />
+
+    <TextView
+        android:id="@+id/tvBulkResultMessage"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/spacing_s"
+        android:textColor="@color/text_secondary"
+        android:textSize="@dimen/text_size_body_large"
+        android:gravity="center"
+        android:lineSpacingExtra="@dimen/spacing_tiny" />
+
+    <Button
+        android:id="@+id/btnBulkResultClose"
+        style="@style/Widget.DFRtools.Button"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/large_button_height"
+        android:layout_marginTop="@dimen/spacing_xl"
+        android:text="@string/btn_all_close"
+        android:textSize="@dimen/text_size_body_small"
+        app:cornerRadius="@dimen/card_corner_radius_medium" />
+
+</LinearLayout>

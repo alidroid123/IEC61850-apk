@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Standard Dark Theme Palette (Base) -->
+    <color name="bg_app">#0F172A</color>
+    <color name="bg_card">#1E293B</color>
+    <color name="bg_navy_dim">#010409</color>
+
+    <color name="text_primary">#F8FAFC</color>
+    <color name="text_secondary">#CBD5E1</color>
+    <color name="text_hint">#484F58</color>
+
+    <!-- Placeholder for Dynamic Theming -->
+    <color name="brand_primary">#60A5FA</color>
+    <color name="brand_secondary">#94A3B8</color>
+    <color name="brand_navy">#010409</color>
+
+    <color name="theme_primary">#60A5FA</color>
+    <color name="theme_secondary">#94A3B8</color>
+
+    <color name="divider">#30363D</color>
+    <color name="divider_bold">#60A5FA</color>
+    <color name="divider_strong">#6B7280</color>
+
+    <!-- Status Colors (Universal) -->
+    <color name="status_safe">#16A34A</color>
+    <color name="status_danger">#DC2626</color>
+    <color name="status_warning">#F59E0B</color>
+    <color name="status_info">#0284C7</color>
+    <color name="status_neutral">#9CA3AF</color>
+
+    <!-- Unit accent colors for IED Monitoring value pills - fixed cross-theme, see values/colors.xml. -->
+    <color name="unit_accent_1">#2a78d6</color>
+    <color name="unit_accent_2">#d95926</color>
+    <color name="unit_accent_3">#199e70</color>
+    <color name="unit_accent_4">#c98500</color>
+    <color name="unit_accent_5">#d55181</color>
+    <color name="unit_accent_6">#008300</color>
+    <color name="unit_accent_7">#4a3aa7</color>
+    <color name="unit_accent_8">#e34948</color>
+
+    <color name="white">#FFFFFF</color>
+    <color name="black">#000000</color>
+
+    <color name="brand_accent_glow">#2060A5FA</color>
+    <color name="status_safe_soft">#3316A34A</color>
+    <color name="status_danger_soft">#33DC2626</color>
+    <color name="switch_track_on">#6616A34A</color>
+    <color name="switch_track_off">#66F59E0B</color>
+    <color name="ambient_purple_start">#3D1B5D</color>
+    <color name="ambient_purple_end">#0F172A</color>
+
+    <!-- Header Gradients -->
+    <color name="header_start">#1E293B</color>
+    <color name="header_end">#0F172A</color>
+
+    <!-- DFR Viewer Palette (Dark) - STATIC -->
+    <color name="dfr_background">#0A0E14</color>
+    <color name="dfr_surface">#121820</color>
+    <color name="dfr_text_primary">#F0F6FC</color>
+    <color name="dfr_text_secondary">#8B949E</color>
+    <color name="dfr_chart_grid">#1AFFFFFF</color>
+    <color name="dfr_chart_cursor_c1">#00E5FF</color>
+    <color name="dfr_chart_cursor_c2">#FF4081</color>
+    <color name="dfr_chart_cursor_time">#FF9100</color>
+    <color name="dfr_chart_trigger">#607D8B</color>
+    <color name="dfr_digital_block">#BB86FC</color>
+    <color name="dfr_header_accent">#BC8CFF</color>
+    <color name="dfr_analog_r">#FF5252</color>
+    <color name="dfr_analog_s">#FFD600</color>
+    <color name="dfr_analog_t">#00E676</color>
+    <color name="dfr_analog_n">#E0E0E0</color>
+</resources>

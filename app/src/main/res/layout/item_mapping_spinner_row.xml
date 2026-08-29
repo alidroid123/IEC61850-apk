@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:layout_marginBottom="@dimen/spacing_s">
+
+    <TextView
+        android:id="@+id/txtMappingLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="@dimen/text_size_caption"
+        android:textStyle="bold"
+        android:layout_marginBottom="2dp" />
+
+    <Spinner
+        android:id="@+id/spinnerMapping"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/standard_button_height"
+        android:background="@drawable/bg_spinner" />
+
+</LinearLayout>

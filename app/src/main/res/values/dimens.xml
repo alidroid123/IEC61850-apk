@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- // Generic Spacing (Margins & Paddings) -->
+    <dimen name="spacing_tiny">2dp</dimen>
+    <dimen name="spacing_xs">4dp</dimen>
+    <dimen name="spacing_6dp">6dp</dimen>
+    <dimen name="spacing_s">8dp</dimen>
+    <dimen name="spacing_ms">10dp</dimen>
+    <dimen name="spacing_m">12dp</dimen>
+    <dimen name="spacing_ml">14dp</dimen>
+    <dimen name="spacing_l">16dp</dimen>
+    <dimen name="spacing_xl">20dp</dimen>
+    <dimen name="spacing_xxl">24dp</dimen>
+    <dimen name="spacing_giant">32dp</dimen>
+    <dimen name="spacing_huge">40dp</dimen>
+
+    <!-- // Text Sizes -->
+    <dimen name="text_size_micro">7sp</dimen>
+    <dimen name="text_size_nano">8sp</dimen>
+    <dimen name="text_size_tiny">9sp</dimen>
+    <dimen name="text_size_caption">10sp</dimen>
+    <dimen name="text_size_small">11sp</dimen>
+    <dimen name="text_size_body_small">12sp</dimen>
+    <dimen name="text_size_body">13sp</dimen>
+    <dimen name="text_size_body_large">14sp</dimen>
+    <dimen name="text_size_medium">15sp</dimen>
+    <dimen name="text_size_subhead">16sp</dimen>
+    <dimen name="text_size_title_small">18sp</dimen>
+    <dimen name="text_size_title">20sp</dimen>
+    <dimen name="text_size_header">24sp</dimen>
+
+    <!-- // Icon & Image Sizes -->
+    <dimen name="icon_size_xs">14dp</dimen>
+    <dimen name="icon_size_s">18dp</dimen>
+    <dimen name="icon_size_ms">20dp</dimen>
+    <dimen name="icon_size_m">24dp</dimen>
+    <dimen name="icon_size_ml">30dp</dimen>
+    <dimen name="icon_size_l">32dp</dimen>
+    <dimen name="icon_size_xl">40dp</dimen>
+    <dimen name="icon_size_xxl">48dp</dimen>
+    <dimen name="icon_size_huge">64dp</dimen>
+    <dimen name="logo_size_large">100dp</dimen>
+    <dimen name="logo_size_xlarge">120dp</dimen>
+
+    <!-- // Component Specific -->
+    <dimen name="header_padding_top">54dp</dimen>
+    <dimen name="header_padding_bottom">32dp</dimen>
+    <dimen name="card_elevation_small">1dp</dimen>
+    <dimen name="card_elevation_medium">4dp</dimen>
+    <dimen name="card_elevation_large">12dp</dimen>
+    <dimen name="card_elevation_huge">16dp</dimen>
+    <dimen name="card_corner_radius_small">8dp</dimen>
+    <dimen name="card_corner_radius_medium">12dp</dimen>
+    <dimen name="card_corner_radius_large">16dp</dimen>
+    <dimen name="card_corner_radius_huge">20dp</dimen>
+    <dimen name="card_corner_radius_giant">24dp</dimen>
+    <dimen name="standard_button_height">48dp</dimen>
+    <dimen name="large_button_height">54dp</dimen>
+    <dimen name="input_field_height">44dp</dimen>
+    <dimen name="drawer_width">280dp</dimen>
+    <dimen name="drawer_item_padding_start">12dp</dimen>
+    <dimen name="drawer_text_margin_start">16dp</dimen>
+    <dimen name="drawer_icon_size">24dp</dimen>
+
+    <!-- // Relay Template Edit Table Columns -->
+    <dimen name="tmpl_col_name_width">130dp</dimen>
+    <dimen name="tmpl_col_path_width">220dp</dimen>
+    <dimen name="tmpl_col_type_width">110dp</dimen>
+    <dimen name="tmpl_col_unit_width">70dp</dimen>
+    <dimen name="tmpl_col_mult_width">90dp</dimen>
+    <dimen name="tmpl_col_delete_width">48dp</dimen>
+    <dimen name="tmpl_row_input_height">40dp</dimen>
+
+    <!-- // Monitoring Bulk Edit Dialog Table Columns (compact) -->
+    <dimen name="bulk_col_name_width">100dp</dimen>
+    <dimen name="bulk_col_path_width">150dp</dimen>
+    <dimen name="bulk_col_type_width">56dp</dimen>
+    <dimen name="bulk_col_unit_width">56dp</dimen>
+    <dimen name="bulk_col_mult_width">68dp</dimen>
+    <dimen name="bulk_col_delete_width">36dp</dimen>
+    <dimen name="bulk_row_input_height">34dp</dimen>
+    <dimen name="bulk_rows_max_height">260dp</dimen>
+</resources>
