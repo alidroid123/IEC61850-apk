@@ -92,13 +92,7 @@ public class UpdateFlow {
 
         Intent serviceIntent = new Intent(activity, UpdateDownloadService.class);
         serviceIntent.putExtra(UpdateDownloadService.EXTRA_DOWNLOAD_URL, info.downloadUrl);
-        try {
-            android.util.Log.e("UpdateFlowDBG", "starting UpdateDownloadService url=" + info.downloadUrl);
-            ContextCompat.startForegroundService(activity, serviceIntent);
-            android.util.Log.e("UpdateFlowDBG", "startForegroundService call returned OK");
-        } catch (Exception e) {
-            android.util.Log.e("UpdateFlowDBG", "startForegroundService FAILED", e);
-        }
+        ContextCompat.startForegroundService(activity, serviceIntent);
         Toast.makeText(activity, R.string.msg_all_update_downloading, Toast.LENGTH_SHORT).show();
     }
 

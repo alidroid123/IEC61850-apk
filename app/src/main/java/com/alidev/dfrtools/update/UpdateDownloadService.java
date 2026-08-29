@@ -31,7 +31,8 @@ import java.io.File;
  * DownloadManager.ACTION_DOWNLOAD_COMPLETE is not one of the exempted system broadcasts - only a
  * receiver registered at *runtime* still receives it, which is why this is a running service
  * (mirroring MonitoringRefreshService's existing foreground-service pattern) rather than a
- * receiver in AndroidManifest.xml.
+ * receiver in AndroidManifest.xml. The runtime receiver also must be registered EXPORTED (see
+ * below) since the broadcast comes from the system's DownloadManager process, not our own app.
  */
 public class UpdateDownloadService extends Service {
 
@@ -44,22 +45,13 @@ public class UpdateDownloadService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        android.util.Log.e("UpdateFlowDBG", "UpdateDownloadService.onStartCommand called");
         String url = intent != null ? intent.getStringExtra(EXTRA_DOWNLOAD_URL) : null;
         if (url == null) {
-            android.util.Log.e("UpdateFlowDBG", "url was null, stopping");
             stopSelf();
             return START_NOT_STICKY;
         }
 
-        try {
-            startForeground(NOTIF_ID, buildNotification());
-            android.util.Log.e("UpdateFlowDBG", "startForeground() succeeded");
-        } catch (Exception e) {
-            android.util.Log.e("UpdateFlowDBG", "startForeground() FAILED", e);
-            stopSelf();
-            return START_NOT_STICKY;
-        }
+        startForeground(NOTIF_ID, buildNotification());
 
         DownloadManager downloadManager = (DownloadManager) getSystemService(DOWNLOAD_SERVICE);
         DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url));
@@ -69,26 +61,25 @@ public class UpdateDownloadService extends Service {
         request.setDestinationInExternalFilesDir(this, null, "update.apk");
         request.setMimeType("application/vnd.android.package-archive");
         downloadId = downloadManager.enqueue(request);
-        android.util.Log.e("UpdateFlowDBG", "enqueued downloadId=" + downloadId);
 
         downloadCompleteReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
                 long id = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1);
-                android.util.Log.e("UpdateFlowDBG", "onReceive DOWNLOAD_COMPLETE id=" + id + " ours=" + downloadId);
                 if (id == downloadId) installAndStop();
             }
         };
+        // EXPORTED (not NOT_EXPORTED) because this broadcast is sent by the system's
+        // DownloadManager provider - a different UID/process than our own app - and
+        // NOT_EXPORTED blocks delivery from anything but our own package, silently dropping it.
         ContextCompat.registerReceiver(this, downloadCompleteReceiver,
                 new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE),
-                ContextCompat.RECEIVER_NOT_EXPORTED);
-        android.util.Log.e("UpdateFlowDBG", "receiver registered");
+                ContextCompat.RECEIVER_EXPORTED);
 
         return START_NOT_STICKY;
     }
 
     private void installAndStop() {
-        android.util.Log.e("UpdateFlowDBG", "installAndStop() called");
         File apkFile = new File(getExternalFilesDir(null), "update.apk");
         if (apkFile.exists()) {
             Uri apkUri = FileProvider.getUriForFile(this, getPackageName() + ".fileprovider", apkFile);
