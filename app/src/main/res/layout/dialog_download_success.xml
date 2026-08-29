@@ -80,8 +80,6 @@
                     android:layout_height="@dimen/large_button_height"
                     android:layout_weight="1"
                     android:layout_marginStart="@dimen/spacing_xs"
-                    android:backgroundTint="@null"
-                    android:background="@drawable/bg_button_gradient"
                     android:text="@string/btn_all_share"
                     android:textSize="@dimen/text_size_small"
                     app:cornerRadius="@dimen/card_corner_radius_medium" />

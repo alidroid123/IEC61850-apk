@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Opaque on purpose - alpha is applied via android:alpha on the View that uses this
+     drawable, since a theme attribute color reference (?attr/customAccentColor) can't have
+     alpha baked into its hex the way a fixed color like white can. -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="oval">
+    <solid android:color="?attr/customAccentColor" />
+</shape>

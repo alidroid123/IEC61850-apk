@@ -7,10 +7,35 @@
     android:background="@color/dfr_background">
 
     <!-- Header -->
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/bg_header_layered">
+
+        <!-- Smaller/repositioned vs. the standard header blobs: this header is compact
+             (single row) and has 4 tool icons clustered top-end, so a full-size blob there
+             would visually crowd them - kept small and tucked behind the lone back button
+             instead. -->
+        <View
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:layout_gravity="top|start"
+            android:layout_marginTop="-40dp"
+            android:layout_marginStart="-30dp"
+            android:background="@drawable/shape_decor_blob_light" />
+
+        <View
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:layout_gravity="bottom|end"
+            android:layout_marginBottom="-20dp"
+            android:layout_marginEnd="-10dp"
+            android:alpha="0.15"
+            android:background="@drawable/shape_decor_blob_accent" />
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@drawable/bg_header_industrial"
         android:paddingHorizontal="@dimen/spacing_s"
         android:paddingVertical="@dimen/spacing_m"
         android:gravity="center_vertical">
@@ -97,6 +122,7 @@
             app:tint="@color/white" />
 
     </LinearLayout>
+    </FrameLayout>
 
     <LinearLayout
         android:id="@+id/controlsLayout"
