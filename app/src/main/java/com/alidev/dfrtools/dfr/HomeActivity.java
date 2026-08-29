@@ -1,22 +1,35 @@
 package com.alidev.dfrtools.dfr;
 
+import android.app.DownloadManager;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.core.content.ContextCompat;
+import androidx.core.content.FileProvider;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import com.alidev.dfrtools.R;
+import com.alidev.dfrtools.update.UpdateChecker;
+import com.alidev.dfrtools.update.UpdatePrefs;
 import com.google.android.material.navigation.NavigationView;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -26,6 +39,8 @@ public class HomeActivity extends BaseActivity {
     private DrawerLayout drawerLayout;
     private TextView tvStatGiCount, tvStatDeviceCount, tvStatAlarmCount;
     private ImageView imgStatAlarm;
+    private BroadcastReceiver updateDownloadReceiver;
+    private long updateDownloadId = -1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -113,6 +128,92 @@ public class HomeActivity extends BaseActivity {
         tvStatDeviceCount = findViewById(R.id.tvStatDeviceCount);
         tvStatAlarmCount = findViewById(R.id.tvStatAlarmCount);
         imgStatAlarm = findViewById(R.id.imgStatAlarm);
+
+        checkForAppUpdate();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (updateDownloadReceiver != null) {
+            unregisterReceiver(updateDownloadReceiver);
+            updateDownloadReceiver = null;
+        }
+    }
+
+    /**
+     * Silent background check against GitHub Releases; never surfaces errors to the user
+     * since this is a non-critical background check (see UpdateChecker).
+     */
+    private void checkForAppUpdate() {
+        UpdatePrefs.recordOpen(this);
+        UpdateChecker.checkForUpdate(this, info -> {
+            if (info == null || isFinishing() || !UpdatePrefs.shouldShowPrompt(this)) return;
+            showUpdateDialog(info);
+        });
+    }
+
+    private void showUpdateDialog(UpdateChecker.UpdateInfo info) {
+        View dialogView = getLayoutInflater().inflate(R.layout.dialog_update_available, null);
+        TextView tvMessage = dialogView.findViewById(R.id.tvUpdateMessage);
+        tvMessage.setText(getString(R.string.msg_all_update_available, info.versionName));
+
+        AlertDialog dialog = new AlertDialog.Builder(this, R.style.Theme_Comtrade_Dialog)
+                .setView(dialogView)
+                .setCancelable(false)
+                .create();
+
+        dialogView.findViewById(R.id.btnUpdateLater).setOnClickListener(v -> {
+            UpdatePrefs.onDismissed(this);
+            dialog.dismiss();
+        });
+
+        dialogView.findViewById(R.id.btnUpdateNow).setOnClickListener(v -> {
+            dialog.dismiss();
+            startUpdateDownload(info);
+        });
+
+        dialog.show();
+    }
+
+    private void startUpdateDownload(UpdateChecker.UpdateInfo info) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && !getPackageManager().canRequestPackageInstalls()) {
+            Toast.makeText(this, R.string.msg_all_update_grant_install, Toast.LENGTH_LONG).show();
+            startActivity(new Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES,
+                    Uri.parse("package:" + getPackageName())));
+            return;
+        }
+
+        DownloadManager downloadManager = (DownloadManager) getSystemService(DOWNLOAD_SERVICE);
+        DownloadManager.Request request = new DownloadManager.Request(Uri.parse(info.downloadUrl));
+        request.setTitle(getString(R.string.app_name));
+        request.setDescription(getString(R.string.ttl_all_update_available));
+        request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
+        request.setDestinationInExternalFilesDir(this, null, "update.apk");
+        request.setMimeType("application/vnd.android.package-archive");
+
+        updateDownloadId = downloadManager.enqueue(request);
+
+        updateDownloadReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                long id = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1);
+                if (id == updateDownloadId) installDownloadedApk();
+            }
+        };
+        ContextCompat.registerReceiver(this, updateDownloadReceiver,
+                new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE),
+                ContextCompat.RECEIVER_NOT_EXPORTED);
+    }
+
+    private void installDownloadedApk() {
+        File apkFile = new File(getExternalFilesDir(null), "update.apk");
+        if (!apkFile.exists()) return;
+        Uri apkUri = FileProvider.getUriForFile(this, getPackageName() + ".fileprovider", apkFile);
+        Intent installIntent = new Intent(Intent.ACTION_VIEW);
+        installIntent.setDataAndType(apkUri, "application/vnd.android.package-archive");
+        installIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        startActivity(installIntent);
     }
 
     @Override

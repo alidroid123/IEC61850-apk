@@ -2,6 +2,20 @@ plugins {
     id 'com.android.application'
 }
 
+def versionPropsFile = rootProject.file('version.properties')
+def versionProps = new Properties()
+versionProps.load(new FileInputStream(versionPropsFile))
+def vMajor = versionProps['versionMajor'].toInteger()
+def vMinor = versionProps['versionMinor'].toInteger()
+def vPatch = versionProps['versionPatch'].toInteger()
+
+def keystorePropsFile = rootProject.file('keystore.properties')
+def hasSigningConfig = keystorePropsFile.exists()
+def keystoreProps = new Properties()
+if (hasSigningConfig) {
+    keystoreProps.load(new FileInputStream(keystorePropsFile))
+}
+
 android {
     namespace 'com.alidev.dfrtools'
     compileSdk 34
@@ -10,8 +24,8 @@ android {
         applicationId "com.alidev.dfrtools"
         minSdk 24
         targetSdk 34
-        versionCode 1
-        versionName "1.0"
+        versionCode vMajor * 10000 + vMinor * 100 + vPatch
+        versionName "${vMajor}.${vMinor}.${vPatch}"
 
         // Fase 3: IEC 61850 DFR Downloader native build (libiec61850, GPLv3 - see
         // app/src/main/cpp/libiec61850/COPYING). Only 64/32-bit ARM targeted since
@@ -29,10 +43,24 @@ android {
         }
     }
 
+    signingConfigs {
+        if (hasSigningConfig) {
+            release {
+                storeFile rootProject.file(keystoreProps['storeFile'])
+                storePassword keystoreProps['storePassword']
+                keyAlias keystoreProps['keyAlias']
+                keyPassword keystoreProps['keyPassword']
+            }
+        }
+    }
+
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            if (hasSigningConfig) {
+                signingConfig signingConfigs.release
+            }
         }
     }
 
