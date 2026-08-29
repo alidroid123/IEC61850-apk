@@ -362,48 +362,29 @@
                             android:textStyle="bold"
                             android:letterSpacing="0.1" />
 
-                        <RadioGroup
-                            android:id="@+id/rgDownloadMode"
+                        <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="@dimen/spacing_s"
                             android:orientation="horizontal">
 
-                            <RadioButton
-                                android:id="@+id/rbBulk"
+                            <Spinner
+                                android:id="@+id/spDownloadMode"
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
                                 android:layout_weight="1"
-                                android:checked="true"
-                                android:text="@string/lbl_dl_mode_bulk"
-                                android:textColor="@color/text_primary"
-                                android:buttonTint="?attr/colorPrimary" />
+                                android:layout_marginEnd="@dimen/spacing_s"
+                                android:background="@drawable/bg_spinner"
+                                android:padding="@dimen/spacing_s" />
 
-                            <RadioButton
-                                android:id="@+id/rbSingle"
+                            <Spinner
+                                android:id="@+id/spDownloadN"
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
                                 android:layout_weight="1"
-                                android:text="@string/lbl_dl_mode_single"
-                                android:textColor="@color/text_primary"
-                                android:buttonTint="?attr/colorPrimary" />
-                        </RadioGroup>
-
-                        <com.google.android.material.textfield.TextInputLayout
-                            android:id="@+id/tilN"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="@dimen/spacing_s"
-                            android:hint="@string/hint_dl_n_amount">
-
-                            <com.google.android.material.textfield.TextInputEditText
-                                android:id="@+id/etN"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:inputType="number"
-                                android:text="@string/val_dl_default_n"
-                                android:textColor="@color/text_primary" />
-                        </com.google.android.material.textfield.TextInputLayout>
+                                android:background="@drawable/bg_spinner"
+                                android:padding="@dimen/spacing_s" />
+                        </LinearLayout>
 
                         <Button
                             android:id="@+id/btnDownloadByMode"

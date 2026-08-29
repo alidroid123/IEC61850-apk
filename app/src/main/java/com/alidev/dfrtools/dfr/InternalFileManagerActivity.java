@@ -48,10 +48,16 @@ public class InternalFileManagerActivity extends BaseActivity {
                     File downloadDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
                     File baseDir = new File(downloadDir, "DFR");
                     if (!baseDir.exists()) baseDir.mkdirs();
-                    
-                    Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-                    Uri uri = Uri.fromFile(baseDir);
-                    intent.setDataAndType(uri, "*/*");
+
+                    // Hand off a FileProvider content:// Uri (with an explicit read-grant flag) to
+                    // whichever external file manager the user picks, instead of a raw file:// Uri
+                    // - a raw file:// Uri risks FileUriExposedException/SecurityException once it
+                    // leaves this app's process on API 24+, and isn't readable by the other app
+                    // without an explicit permission grant anyway.
+                    Uri uri = FileProvider.getUriForFile(this, getPackageName() + ".fileprovider", baseDir);
+                    Intent intent = new Intent(Intent.ACTION_VIEW);
+                    intent.setDataAndType(uri, "resource/folder");
+                    intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
                     startActivity(Intent.createChooser(intent, getString(R.string.ttl_file_open_chooser)));
                 } catch (Exception e) {
                     Toast.makeText(this, getString(R.string.msg_view_general_error, e.getMessage()), Toast.LENGTH_SHORT).show();
@@ -63,6 +69,8 @@ public class InternalFileManagerActivity extends BaseActivity {
         checkPermissions();
         adapter = new FolderAdapter(folders);
         rvFolders.setAdapter(adapter);
+
+        ((TextView) findViewById(R.id.tvFolderSummary)).setText(getString(R.string.lbl_file_folder_count, folders.size()));
     }
 
     private void checkPermissions() {

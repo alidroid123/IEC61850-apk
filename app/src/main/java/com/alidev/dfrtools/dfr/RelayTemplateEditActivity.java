@@ -187,18 +187,26 @@ public class RelayTemplateEditActivity extends BaseActivity {
     }
 
     private void showAddTemplateChoiceDialog() {
-        String[] options = {
-                getString(R.string.opt_tmpl_add_blank),
-                getString(R.string.opt_tmpl_add_from_monitoring)
-        };
-        new AlertDialog.Builder(this, R.style.Theme_Comtrade_Dialog)
-                .setTitle(R.string.ttl_tmpl_add_choice)
-                .setItems(options, (d, which) -> {
-                    if (which == 0) showAddTemplateDialog();
-                    else showPickMonitoringGroupDialog();
-                })
-                .setNegativeButton(R.string.btn_all_cancel, null)
-                .show();
+        View v = getLayoutInflater().inflate(R.layout.dialog_add_template_choice, null);
+        AlertDialog dialog = new AlertDialog.Builder(this, R.style.Theme_Comtrade_Dialog)
+                .setView(v)
+                .create();
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+            dialog.getWindow().setGravity(android.view.Gravity.CENTER);
+        }
+
+        v.findViewById(R.id.btnChoiceBlank).setOnClickListener(view -> {
+            dialog.dismiss();
+            showAddTemplateDialog();
+        });
+        v.findViewById(R.id.btnChoiceFromMonitoring).setOnClickListener(view -> {
+            dialog.dismiss();
+            showPickMonitoringGroupDialog();
+        });
+        v.findViewById(R.id.btnCancelChoice).setOnClickListener(view -> dialog.dismiss());
+
+        dialog.show();
     }
 
     private void showPickMonitoringGroupDialog() {
@@ -214,21 +222,36 @@ public class RelayTemplateEditActivity extends BaseActivity {
             return;
         }
 
-        List<String> ips = new ArrayList<>(grouped.keySet());
-        String[] labels = new String[ips.size()];
-        for (int i = 0; i < ips.size(); i++) {
-            String ip = ips.get(i);
-            MonitoringManager.DeviceHeaderData header = MonitoringManager.getDeviceHeaderData(this, ip);
-            int count = grouped.get(ip).size();
-            String title = header != null ? (header.title + " (" + header.device + ")") : ip;
-            labels[i] = title + " - " + ip + " [" + count + "]";
+        View v = getLayoutInflater().inflate(R.layout.dialog_pick_list, null);
+        AlertDialog dialog = new AlertDialog.Builder(this, R.style.Theme_Comtrade_Dialog)
+                .setView(v)
+                .create();
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+            dialog.getWindow().setGravity(android.view.Gravity.CENTER);
         }
 
-        new AlertDialog.Builder(this, R.style.Theme_Comtrade_Dialog)
-                .setTitle(R.string.ttl_tmpl_pick_group)
-                .setItems(labels, (d, which) -> showAddTemplateFromGroupDialog(grouped.get(ips.get(which))))
-                .setNegativeButton(R.string.btn_all_cancel, null)
-                .show();
+        ((TextView) v.findViewById(R.id.tvPickListTitle)).setText(R.string.ttl_tmpl_pick_group);
+        LinearLayout container = v.findViewById(R.id.llPickListItems);
+
+        for (java.util.Map.Entry<String, List<MonitoredNode>> entry : grouped.entrySet()) {
+            String ip = entry.getKey();
+            List<MonitoredNode> groupNodes = entry.getValue();
+            MonitoringManager.DeviceHeaderData header = MonitoringManager.getDeviceHeaderData(this, ip);
+            String title = header != null ? (header.title + " (" + header.device + ")") : ip;
+
+            View row = getLayoutInflater().inflate(R.layout.item_dialog_pick_row, container, false);
+            ((TextView) row.findViewById(R.id.tvPickRowTitle)).setText(title);
+            ((TextView) row.findViewById(R.id.tvPickRowSubtitle)).setText(ip + " • " + groupNodes.size() + " point");
+            row.setOnClickListener(view -> {
+                dialog.dismiss();
+                showAddTemplateFromGroupDialog(groupNodes);
+            });
+            container.addView(row);
+        }
+
+        v.findViewById(R.id.btnPickListCancel).setOnClickListener(view -> dialog.dismiss());
+        dialog.show();
     }
 
     private void showAddTemplateFromGroupDialog(List<MonitoredNode> groupNodes) {

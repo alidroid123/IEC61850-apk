@@ -39,6 +39,7 @@
     <string name="btn_dl_start_download">START DOWNLOAD</string>
     <string name="btn_file_open_folder_small">open folder</string>
     <string name="lbl_file_count">%1$d files</string>
+    <string name="lbl_file_folder_count">%1$d folder tersimpan</string>
     <string name="btn_mms_explore">EXPLORE</string>
     <string name="btn_mms_open_monitoring">MONITOR</string>
     <string name="btn_mms_refresh">REFRESH</string>

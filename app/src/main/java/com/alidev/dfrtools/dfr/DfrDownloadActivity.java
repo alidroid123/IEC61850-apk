@@ -14,7 +14,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
-import android.widget.RadioGroup;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -53,7 +52,7 @@ public class DfrDownloadActivity extends BaseActivity {
     private java.util.concurrent.Future<?> pingFuture = null;
 
     private EditText etIp1, etIp2, etIp3, etIp4;
-    private TextInputEditText etPort, etN;
+    private TextInputEditText etPort;
     private Button btnConnect, btnPing, btnDownloadByMode;
     private ImageButton btnSaveDevice, btnOpenList, btnMenu;
     private TextView tvConnectionStatus, tvVendorInfo, tvEmptyState, tvFileListLabel, tvPingResults, tvPingStatus, tvDeviceInfo, tvPingResultsPort;
@@ -65,7 +64,8 @@ public class DfrDownloadActivity extends BaseActivity {
     private TextView tvProgressLabel;
     private View layoutProgressOnly;
     private Button btnOpenDownloaded, btnCloseOverlay, btnOpenFolder, btnShareDownloaded;
-    private RadioGroup rgDownloadMode;
+    private Spinner spDownloadMode, spDownloadN;
+    private static final int MAX_DOWNLOAD_N = 50;
     private DrawerLayout drawerLayout;
     private NavigationView navigationView;
     private String currentGi = "", currentBay = "";
@@ -134,7 +134,6 @@ public class DfrDownloadActivity extends BaseActivity {
         IpAddressHelper.setupIpInputs(etIp1, etIp2, etIp3, etIp4);
 
         etPort = findViewById(R.id.etPort);
-        etN = findViewById(R.id.etN);
         btnConnect = findViewById(R.id.btnConnect);
         btnPing = findViewById(R.id.btnPing);
         btnDownloadByMode = findViewById(R.id.btnDownloadByMode);
@@ -155,7 +154,9 @@ public class DfrDownloadActivity extends BaseActivity {
         overlayProgress = findViewById(R.id.overlayProgress);
         tvProgressLabel = findViewById(R.id.tvProgressLabel);
         layoutProgressOnly = findViewById(R.id.layoutProgressOnly);
-        rgDownloadMode = findViewById(R.id.rgDownloadMode);
+        spDownloadMode = findViewById(R.id.spDownloadMode);
+        spDownloadN = findViewById(R.id.spDownloadN);
+        setupDownloadModeSpinners();
         layoutPostDownload = findViewById(R.id.layoutPostDownload);
         btnOpenDownloaded = findViewById(R.id.btnOpenDownloaded);
         btnOpenFolder = findViewById(R.id.btnOpenFolder);
@@ -459,20 +460,8 @@ public class DfrDownloadActivity extends BaseActivity {
             Toast.makeText(this, R.string.msg_dl_no_scan_results, Toast.LENGTH_SHORT).show();
             return;
         }
-        String nStr = etN.getText() == null ? "" : etN.getText().toString().trim();
-        int n;
-        try {
-            n = Integer.parseInt(nStr);
-        } catch (NumberFormatException e) {
-            etN.setError(getString(R.string.err_dl_required_n));
-            return;
-        }
-        if (n < 1) {
-            etN.setError(getString(R.string.err_dl_min_n));
-            return;
-        }
-
-        boolean bulkMode = rgDownloadMode.getCheckedRadioButtonId() == R.id.rbBulk;
+        int n = (int) spDownloadN.getSelectedItem();
+        boolean bulkMode = spDownloadMode.getSelectedItemPosition() == 0;
         List<DfrFileEntry> queue;
         if (bulkMode) {
             queue = ComtradeSmartSearch.selectBulk(lastScan.targetFiles, n);
@@ -624,6 +613,36 @@ public class DfrDownloadActivity extends BaseActivity {
             }
         };
         spProfile.setAdapter(adapter);
+    }
+
+    private <T> ArrayAdapter<T> createStyledSpinnerAdapter(T[] items) {
+        return new ArrayAdapter<T>(this, android.R.layout.simple_spinner_dropdown_item, items) {
+            @NonNull
+            @Override
+            public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
+                View v = super.getView(position, convertView, parent);
+                ((TextView) v).setTextColor(ContextCompat.getColor(getContext(), R.color.text_primary));
+                ((TextView) v).setTextSize(13);
+                return v;
+            }
+            @Override
+            public View getDropDownView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
+                View v = super.getDropDownView(position, convertView, parent);
+                ((TextView) v).setTextColor(ContextCompat.getColor(getContext(), R.color.text_primary));
+                return v;
+            }
+        };
+    }
+
+    private void setupDownloadModeSpinners() {
+        String[] modes = { getString(R.string.lbl_dl_mode_bulk), getString(R.string.lbl_dl_mode_single) };
+        spDownloadMode.setAdapter(createStyledSpinnerAdapter(modes));
+        spDownloadMode.setSelection(0);
+
+        Integer[] nOptions = new Integer[MAX_DOWNLOAD_N];
+        for (int i = 0; i < MAX_DOWNLOAD_N; i++) nOptions[i] = i + 1;
+        spDownloadN.setAdapter(createStyledSpinnerAdapter(nOptions));
+        spDownloadN.setSelection(0);
     }
 
     private void setupIpWatcher() {
