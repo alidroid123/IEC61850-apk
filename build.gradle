@@ -2,4 +2,10 @@
 plugins {
     id 'com.android.application' version '8.3.2' apply false
     id 'com.google.gms.google-services' version '4.5.0' apply false
+    // No Kotlin source in this app - applied purely so Gradle's Kotlin Multiplatform variant
+    // resolution (org.jetbrains.kotlin.platform.type attribute) works correctly for KMP-published
+    // libraries like recent androidx.datastore versions (a transitive Firebase Installations
+    // dependency); without it those resolve to the "-jvm" variant (no Context-based classes) and
+    // the app crashes on launch. See app/build.gradle's datastore-preferences-android comment.
+    id 'org.jetbrains.kotlin.android' version '1.9.24' apply false
 }
