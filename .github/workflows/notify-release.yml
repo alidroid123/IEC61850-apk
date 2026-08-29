@@ -1,0 +1,20 @@
+name: Notify release via FCM
+
+# Fires on ANY new GitHub Release being published - from `gradle assembleRelease` on this
+# machine, another machine, `gh release create`, or the GitHub web UI - unlike a build-time hook,
+# this is tied to the actual GitHub release event, so it works no matter how the release was made.
+on:
+  release:
+    types: [published]
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Send FCM push to app_updates topic
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+        run: node .github/scripts/send-fcm-notification.js
