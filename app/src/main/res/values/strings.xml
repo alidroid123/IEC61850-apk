@@ -262,6 +262,7 @@
     <string name="msg_all_update_available">Versi %1$s sudah tersedia. Update sekarang untuk mendapatkan perbaikan dan fitur terbaru.</string>
     <string name="msg_all_update_grant_install">Izinkan aplikasi ini menginstal update, lalu coba lagi.</string>
     <string name="msg_all_update_downloading">Mengunduh update di background… instalasi akan muncul otomatis setelah selesai.</string>
+    <string name="lbl_update_download_channel">Unduhan Update Aplikasi</string>
     <string name="msg_all_update_checking">Memeriksa update…</string>
     <string name="msg_all_update_none">Tidak ada update baru, atau gagal memeriksa koneksi</string>
     <string name="msg_push_update_available">Versi baru ComtradeDownloader sudah tersedia. Buka aplikasi untuk update.</string>

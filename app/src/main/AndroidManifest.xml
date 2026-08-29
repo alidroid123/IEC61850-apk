@@ -115,13 +115,10 @@
             </intent-filter>
         </service>
 
-        <receiver
-            android:name=".update.UpdateDownloadReceiver"
-            android:exported="false">
-            <intent-filter>
-                <action android:name="android.intent.action.DOWNLOAD_COMPLETE" />
-            </intent-filter>
-        </receiver>
+        <service
+            android:name=".update.UpdateDownloadService"
+            android:exported="false"
+            android:foregroundServiceType="dataSync" />
 
         <activity
             android:name=".dfr.SettingsActivity"

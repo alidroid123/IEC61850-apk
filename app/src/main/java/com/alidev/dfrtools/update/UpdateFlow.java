@@ -1,8 +1,6 @@
 package com.alidev.dfrtools.update;
 
 import android.app.Activity;
-import android.app.DownloadManager;
-import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
@@ -12,6 +10,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
+import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
 
 import com.alidev.dfrtools.R;
@@ -19,11 +18,12 @@ import com.alidev.dfrtools.R;
 import java.io.File;
 
 /**
- * Shared "update available" dialog + download + sideload-install flow, reused by every Activity
- * that can trigger an update check (HomeActivity's silent background check on app open,
- * AboutActivity's manual "Cek Update" button). The actual "install once downloaded" step is
- * handled by the manifest-registered UpdateDownloadReceiver (not here) so it still fires even if
- * the user leaves the app while the download is in progress - see that class.
+ * Shared "update available" dialog + download-kickoff flow, reused by every Activity that can
+ * trigger an update check (HomeActivity's silent background check on app open, AboutActivity's
+ * manual "Cek Update" button). The actual download and "install once downloaded" step are owned
+ * by UpdateDownloadService (a foreground service, not this class) so they keep running - and the
+ * system installer still opens automatically - even if the user leaves the app or this Activity
+ * is destroyed while the download is in progress.
  */
 public class UpdateFlow {
 
@@ -90,16 +90,9 @@ public class UpdateFlow {
             return;
         }
 
-        DownloadManager downloadManager = (DownloadManager) activity.getSystemService(Context.DOWNLOAD_SERVICE);
-        DownloadManager.Request request = new DownloadManager.Request(Uri.parse(info.downloadUrl));
-        request.setTitle(activity.getString(R.string.app_name));
-        request.setDescription(activity.getString(R.string.ttl_all_update_available));
-        request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
-        request.setDestinationInExternalFilesDir(activity, null, "update.apk");
-        request.setMimeType("application/vnd.android.package-archive");
-
-        long downloadId = downloadManager.enqueue(request);
-        UpdatePrefs.setPendingDownloadId(activity, downloadId);
+        Intent serviceIntent = new Intent(activity, UpdateDownloadService.class);
+        serviceIntent.putExtra(UpdateDownloadService.EXTRA_DOWNLOAD_URL, info.downloadUrl);
+        ContextCompat.startForegroundService(activity, serviceIntent);
         Toast.makeText(activity, R.string.msg_all_update_downloading, Toast.LENGTH_SHORT).show();
     }
 
