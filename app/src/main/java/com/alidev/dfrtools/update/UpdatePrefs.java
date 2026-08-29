@@ -35,4 +35,22 @@ public class UpdatePrefs {
                 .putInt("opens_since_dismiss", 0)
                 .apply();
     }
+
+    /**
+     * Tracks the in-flight update download's id so the manifest-registered
+     * UpdateDownloadReceiver - which isn't tied to any Activity's lifecycle - can recognize
+     * "this is our download" when ACTION_DOWNLOAD_COMPLETE arrives, even if the user has since
+     * left the app.
+     */
+    public static void setPendingDownloadId(Context context, long id) {
+        getPrefs(context).edit().putLong("pending_download_id", id).apply();
+    }
+
+    public static long getPendingDownloadId(Context context) {
+        return getPrefs(context).getLong("pending_download_id", -1);
+    }
+
+    public static void clearPendingDownloadId(Context context) {
+        getPrefs(context).edit().remove("pending_download_id").apply();
+    }
 }

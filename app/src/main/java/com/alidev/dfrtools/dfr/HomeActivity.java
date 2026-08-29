@@ -150,12 +150,6 @@ public class HomeActivity extends BaseActivity {
         }
     }
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        updateFlow.onDestroy();
-    }
-
     /**
      * Silent background check against GitHub Releases; never surfaces errors to the user
      * since this is a non-critical background check (see UpdateChecker).
