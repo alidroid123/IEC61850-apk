@@ -9,73 +9,53 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center_vertical"
+        android:orientation="vertical"
         android:padding="@dimen/spacing_l">
 
-        <LinearLayout
-            android:layout_width="0dp"
+        <TextView
+            android:id="@+id/txtDefAddress"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:orientation="vertical">
+            android:textColor="@color/text_secondary"
+            android:textSize="@dimen/text_size_small"
+            android:fontFamily="monospace"
+            android:background="?attr/selectableItemBackground"
+            android:paddingVertical="2dp" />
 
-            <LinearLayout
-                android:id="@+id/layoutDefStatus"
+        <TextView
+            android:id="@+id/txtDefValue"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:textColor="?attr/customTextPrimaryColor"
+            android:textSize="@dimen/text_size_body"
+            android:textStyle="bold"
+            android:background="?attr/selectableItemBackground"
+            android:paddingVertical="2dp" />
+
+        <LinearLayout
+            android:id="@+id/layoutDefStatus"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginTop="@dimen/spacing_xs">
+
+            <View
+                android:id="@+id/dotDefStatus"
+                android:layout_width="9dp"
+                android:layout_height="9dp"
+                android:layout_marginEnd="@dimen/spacing_xs"
+                android:background="@drawable/bg_theme_color_circle" />
+
+            <TextView
+                android:id="@+id/txtDefStatus"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:layout_marginBottom="@dimen/spacing_xs">
-
-                <View
-                    android:id="@+id/dotDefStatus"
-                    android:layout_width="9dp"
-                    android:layout_height="9dp"
-                    android:layout_marginEnd="@dimen/spacing_xs"
-                    android:background="@drawable/bg_theme_color_circle" />
-
-                <TextView
-                    android:id="@+id/txtDefStatus"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textSize="@dimen/text_size_micro"
-                    android:textStyle="bold"
-                    android:letterSpacing="0.05" />
-            </LinearLayout>
-
-            <TextView
-                android:id="@+id/txtDefAddress"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textColor="@color/text_secondary"
-                android:textSize="@dimen/text_size_small"
-                android:fontFamily="monospace"
-                android:background="?attr/selectableItemBackground"
-                android:paddingVertical="2dp" />
-
-            <TextView
-                android:id="@+id/txtDefValue"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="2dp"
-                android:textColor="?attr/customTextPrimaryColor"
-                android:textSize="@dimen/text_size_body"
+                android:textSize="@dimen/text_size_micro"
                 android:textStyle="bold"
-                android:background="?attr/selectableItemBackground"
-                android:paddingVertical="2dp" />
-
+                android:letterSpacing="0.05" />
         </LinearLayout>
-
-        <ImageButton
-            android:id="@+id/btnDefAddMonitor"
-            android:layout_width="@dimen/icon_size_l"
-            android:layout_height="@dimen/icon_size_l"
-            android:layout_marginStart="@dimen/spacing_m"
-            android:padding="@dimen/spacing_xs"
-            android:background="@drawable/bg_icon_badge"
-            android:src="@drawable/ic_add"
-            app:tint="@color/white"
-            android:contentDescription="@string/lbl_mon_added" />
 
     </LinearLayout>
 </com.google.android.material.card.MaterialCardView>

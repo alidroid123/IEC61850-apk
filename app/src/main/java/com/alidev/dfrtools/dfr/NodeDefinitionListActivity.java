@@ -113,31 +113,6 @@ public class NodeDefinitionListActivity extends BaseActivity {
         dialog.show();
     }
 
-    /**
-     * Adds this row to IED Monitoring: the "general" boolean (the actual alarm state) when the
-     * device model has one alongside "d", using the description text itself as the custom name -
-     * that pairing is the whole point of Get Definition, turning a raw IEC 61850 tag into a
-     * readable monitored point in one tap. Falls back to monitoring the "d" node itself (as a
-     * string) when there's no sibling "general" to point at instead.
-     */
-    private void addDefinitionToMonitoring(NodeDefinition d) {
-        String targetPath;
-        String type;
-        if (d.hasGeneralStatus && d.nodeAddress.endsWith(".d")) {
-            targetPath = d.nodeAddress.substring(0, d.nodeAddress.length() - 2) + ".general";
-            type = "boolean";
-        } else {
-            targetPath = d.nodeAddress;
-            type = "string";
-        }
-        String nodeName = targetPath.contains(".") ? targetPath.substring(targetPath.lastIndexOf('.') + 1) : targetPath;
-
-        MonitoredNode mn = new MonitoredNode(d.deviceName, d.ip, nodeName, targetPath, type);
-        mn.customName = !d.value.trim().isEmpty() ? d.value.trim() : nodeName;
-        new MonitoringManager(this).addNode(mn);
-        Toast.makeText(this, R.string.lbl_mon_added, Toast.LENGTH_SHORT).show();
-    }
-
     private void copyToClipboard(String text) {
         if (text == null || text.isEmpty()) return;
         ClipboardManager cm = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
@@ -210,7 +185,6 @@ public class NodeDefinitionListActivity extends BaseActivity {
     class DefVH extends RecyclerView.ViewHolder {
         final View layoutStatus, dotStatus;
         final TextView txtStatus, txtAddress, txtValue;
-        final View btnAdd;
 
         DefVH(@NonNull View v) {
             super(v);
@@ -219,7 +193,6 @@ public class NodeDefinitionListActivity extends BaseActivity {
             txtStatus = v.findViewById(R.id.txtDefStatus);
             txtAddress = v.findViewById(R.id.txtDefAddress);
             txtValue = v.findViewById(R.id.txtDefValue);
-            btnAdd = v.findViewById(R.id.btnDefAddMonitor);
         }
 
         void bind(NodeDefinition d) {
@@ -239,7 +212,6 @@ public class NodeDefinitionListActivity extends BaseActivity {
             txtValue.setText(d.value);
             txtAddress.setOnClickListener(v -> copyToClipboard(d.nodeAddress));
             txtValue.setOnClickListener(v -> copyToClipboard(d.value));
-            btnAdd.setOnClickListener(v -> addDefinitionToMonitoring(d));
         }
     }
 }

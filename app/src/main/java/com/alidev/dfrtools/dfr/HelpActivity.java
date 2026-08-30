@@ -167,6 +167,7 @@ public class HelpActivity extends BaseActivity {
                             new HelpComponent(R.drawable.ic_search, R.string.help_cmp_exp_3_name, R.string.help_cmp_exp_3_desc),
                             new HelpComponent(R.drawable.ic_add, R.string.help_cmp_exp_4_name, R.string.help_cmp_exp_4_desc),
                             new HelpComponent(R.drawable.ic_more_vert, R.string.help_cmp_exp_5_name, R.string.help_cmp_exp_5_desc),
+                            new HelpComponent(R.drawable.ic_list, R.string.help_cmp_exp_6_name, R.string.help_cmp_exp_6_desc),
                     },
                     new HelpFeature[]{
                             new HelpFeature(R.string.help_feat_exp_1_title, R.string.help_feat_exp_1_steps),
@@ -174,6 +175,7 @@ public class HelpActivity extends BaseActivity {
                             new HelpFeature(R.string.help_feat_exp_3_title, R.string.help_feat_exp_3_steps),
                             new HelpFeature(R.string.help_feat_exp_4_title, R.string.help_feat_exp_4_steps),
                             new HelpFeature(R.string.help_feat_exp_5_title, R.string.help_feat_exp_5_steps),
+                            new HelpFeature(R.string.help_feat_exp_6_title, R.string.help_feat_exp_6_steps),
                     }),
             new HelpSection(R.drawable.ic_dfr_chart, R.string.help_ttl_viewer, R.string.help_sum_viewer, R.string.help_func_viewer,
                     new HelpComponent[]{

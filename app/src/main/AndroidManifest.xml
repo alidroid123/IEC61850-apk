@@ -113,6 +113,11 @@
             android:foregroundServiceType="dataSync" />
 
         <service
+            android:name=".dfr.FullListFetchService"
+            android:exported="false"
+            android:foregroundServiceType="dataSync" />
+
+        <service
             android:name=".update.AppFcmService"
             android:exported="false">
             <intent-filter>

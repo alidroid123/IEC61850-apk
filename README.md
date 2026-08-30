@@ -32,7 +32,7 @@ Requirement: `compileSdk 34`, `minSdk 24` (Android 7.0+), `targetSdk 34`, Java 8
 | **Viewer DFR** | Plot channel analog & digital, kursor T1/T2, ekspor grafik/laporan PDF. |
 | **Riwayat Unduhan** | Kelola file COMTRADE yang sudah diunduh, per folder. |
 | **Database Relay** | Data gardu induk/bay/IP/merk/tipe per relay, ping satuan & massal, impor/ekspor CSV. |
-| **IED Explorer** | Jelajahi model data IEC 61850 (LD/LN/DO/DA) sebuah IED secara langsung; "Get Definition" memindai seluruh device untuk atribut `d` (deskripsi) dan menyimpannya ke tabel Node Definitions (bisa di-export CSV). |
+| **IED Explorer** | Jelajahi model data IEC 61850 (LD/LN/DO/DA) sebuah IED secara langsung; "Get Definition" memindai seluruh device untuk atribut `d` (deskripsi) + status `general`/`stVal` pasangannya dan menyimpannya ke tabel Node Definitions (bisa di-export CSV); "Full List" membaca nilai SEMUA node di device sebagai daftar datar, berjalan di background (`FullListFetchService`) dengan notifikasi live. |
 | **Monitoring IED** | Polling titik pantau dari banyak IED, ambang alarm, invert warna boolean per-titik, bulk edit (tabel dengan tipe dropdown, tambah baris, pilih alamat live, drag reorder), refresh per grup. |
 | **Template Relay** | Set titik pantau yang bisa dipakai ulang per tipe/merk relay. |
 | **Backup & Pemulihan** | Ekspor/impor seluruh device + titik pantau + template + definisi node jadi satu file JSON. |
@@ -50,6 +50,7 @@ app/src/main/java/com/alidev/dfrtools/
  │   ├─ MmsExplorerActivity, IEDMonitoringActivity, RelayTemplateEditActivity
  │   ├─ DeviceListActivity, InternalFileManagerActivity, SettingsActivity
  │   ├─ NodeDefinition, NodeDefinitionManager, NodeDefinitionListActivity <- tabel atribut 'd' (Get Definition di MMS Explorer)
+ │   ├─ FullListEntry, FullListFetchService <- "Full List" MMS Explorer: baca semua node, foreground service + notifikasi
  │   ├─ ThemeManager                 <- 5 tema, rotasi warna per-Activity untuk tema Abstract
  │   ├─ BackupManager                <- ekspor/impor config (device/monitoring/template/definisi node) jadi satu JSON
  │   ├─ Iec61850DfrClient            <- wrapper Java atas native (BLOCKING, panggil dari background thread)

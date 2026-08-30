@@ -62,6 +62,22 @@
     <string name="msg_mms_definitions_delete_confirm">Menghapus semua node \'d\' tersimpan untuk %1$s. Tidak bisa dibatalkan - Anda selalu bisa menjalankan Get Definition lagi nanti.</string>
     <string name="msg_mms_definitions_deleted">Tabel dihapus</string>
     <string name="lbl_mms_def_copied">Disalin</string>
+    <string name="msg_mms_get_definition_progress">Get data….%1$s</string>
+    <string name="lbl_mms_def_col_status">Status</string>
+
+    <string name="btn_mms_full_list">FULL LIST</string>
+    <string name="ttl_mms_full_list_confirm">Ambil Semua Nilai?</string>
+    <string name="btn_mms_full_list_confirm">MULAI</string>
+    <string name="msg_mms_full_list_confirm">Proses ini membaca SETIAP node di seluruh device dan bisa memakan waktu sangat lama tergantung ukuran device-nya. Tetap berjalan di background (dengan notifikasi) meski keluar dari aplikasi. Lanjutkan?</string>
+    <string name="lbl_mms_full_list_title">Full List</string>
+    <string name="lbl_mms_full_list_count">%1$d node terbaca</string>
+    <string name="btn_mms_full_list_close">TUTUP</string>
+    <string name="msg_mms_fulllist_starting">Memulai Full List…</string>
+    <string name="msg_mms_fulllist_progress">Fetching…%1$s</string>
+    <string name="msg_mms_fulllist_done">Full List selesai: %1$d node</string>
+    <string name="ttl_mms_fulllist_notif">MMS Full List</string>
+    <string name="lbl_mms_fulllist_notif_channel">Full List Fetch</string>
+    <string name="msg_mms_fulllist_already_running">Proses Full List sudah berjalan di background</string>
     <string name="btn_mon_add">TAMBAH</string>
     <string name="btn_mon_save">SIMPAN</string>
     <string name="btn_mon_remove">HAPUS</string>
@@ -631,7 +647,11 @@
     <string name="help_feat_exp_4_title">Refresh &amp; Tutup Koneksi</string>
     <string name="help_feat_exp_4_steps">1. Ketuk ikon {ic:more} titik tiga, lalu Refresh, untuk membangun ulang struktur bila terasa sudah tidak sesuai.\n2. Ketuk CLOSE IED untuk memutus koneksi setelah selesai.</string>
     <string name="help_feat_exp_5_title">Mengambil Node Definitions</string>
-    <string name="help_feat_exp_5_steps">1. Saat sedang terhubung, ketuk ikon {ic:more} titik tiga, lalu Get Definition.\n2. Aplikasi memindai setiap logical node untuk atribut \'d\' (deskripsi) dan menyimpannya ke tabel - bisa memakan waktu cukup lama pada device besar.\n3. Ketuk {ic:more} lalu Table kapan saja (terhubung atau tidak), pilih device dari daftar, lalu lihat definisi tersimpannya - ketuk alamat atau value untuk menyalin, pakai {ic:add} untuk memantau titik itu, atau ikon tempat sampah untuk menghapus seluruh tabel.</string>
+    <string name="help_feat_exp_5_steps">1. Saat sedang terhubung, ketuk ikon {ic:more} titik tiga, lalu Get Definition - ada baris status di bawah alamat IP yang menampilkan node yang sedang dibaca.\n2. Aplikasi memindai setiap logical node untuk atribut \'d\' (deskripsi), plus status boolean "general" atau "stVal" pasangannya kalau ada, dan menyimpannya ke tabel - bisa memakan waktu cukup lama pada device besar.\n3. Ketuk {ic:more} lalu Table kapan saja (terhubung atau tidak), pilih device dari daftar, lalu lihat definisi tersimpannya - ketuk alamat atau value untuk menyalin, atau ikon tempat sampah untuk menghapus seluruh tabel.</string>
+    <string name="help_cmp_exp_6_name">Tombol FULL LIST</string>
+    <string name="help_cmp_exp_6_desc">Membaca dan menampilkan nilai live dari setiap node di device, menggantikan tampilan folder dengan daftar datar - berjalan sebagai proses background dengan notifikasi sendiri karena bisa memakan waktu sangat lama.</string>
+    <string name="help_feat_exp_6_title">Membaca Semua Nilai (Full List)</string>
+    <string name="help_feat_exp_6_steps">1. Ketuk FULL LIST di sebelah EXPLORE, lalu konfirmasi - ini membaca setiap node di seluruh device dan bisa memakan waktu sangat lama.\n2. Tetap berjalan di background (dengan notifikasi "Fetching…") meski keluar dari aplikasi atau menutup MMS Explorer.\n3. Setiap baris menampilkan alamat node (tebal) dan nilainya; ketuk {ic:add} pada baris untuk menambahkan titik itu ke IED Monitoring, sama seperti di tampilan tree.\n4. Ketuk CLOSE untuk kembali ke tampilan folder biasa.</string>
 
     <string name="help_ttl_viewer">Viewer DFR</string>
     <string name="help_sum_viewer">Tampilkan dan analisis gelombang rekaman COMTRADE</string>

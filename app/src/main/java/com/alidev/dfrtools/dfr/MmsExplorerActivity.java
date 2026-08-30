@@ -45,6 +45,7 @@ public class MmsExplorerActivity extends BaseActivity {
     private ImageButton btnClearSearch;
     private androidx.appcompat.widget.SwitchCompat swIntranetCheck;
     private TextView tvDeviceInfo;
+    private TextView txtGetDefinitionProgress;
     private ProgressBar topProgressBar;
     private RecyclerView rvExplorer;
     private ExplorerAdapter adapter;
@@ -85,10 +86,34 @@ public class MmsExplorerActivity extends BaseActivity {
         }
     }
 
-    private Button btnConnect, btnDisconnect;
+    private Button btnConnect, btnDisconnect, btnFullList;
     private ImageButton btnMmsMoreOptions;
     private boolean isFetchingDefinitions = false;
     private java.util.Set<String> pathsToRestore = null;
+
+    private View layoutFullList;
+    private RecyclerView rvFullList;
+    private TextView txtFullListStatus;
+    private FullListAdapter fullListAdapter;
+    private final List<FullListEntry> fullListItems = new ArrayList<>();
+    private final FullListFetchService.ProgressListener fullListProgressListener = new FullListFetchService.ProgressListener() {
+        @Override public void onProgress(String currentPath, int count) {
+            mainHandler.post(() -> {
+                fullListItems.clear();
+                fullListItems.addAll(FullListFetchService.getResults());
+                fullListAdapter.notifyDataSetChanged();
+                txtFullListStatus.setText(getString(R.string.msg_mms_fulllist_progress, currentPath));
+            });
+        }
+        @Override public void onComplete(List<FullListEntry> results) {
+            mainHandler.post(() -> {
+                fullListItems.clear();
+                fullListItems.addAll(results);
+                fullListAdapter.notifyDataSetChanged();
+                txtFullListStatus.setText(getString(R.string.msg_mms_fulllist_done, results.size()));
+            });
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -104,18 +129,29 @@ public class MmsExplorerActivity extends BaseActivity {
         com.alidev.dfrtools.utils.IpAddressHelper.setupIpInputs(etIp1, etIp2, etIp3, etIp4);
 
         tvDeviceInfo = findViewById(R.id.tvDeviceInfo);
+        txtGetDefinitionProgress = findViewById(R.id.txtGetDefinitionProgress);
         topProgressBar = findViewById(R.id.topProgressBar);
         rvExplorer = findViewById(R.id.rvExplorer);
         btnConnect = findViewById(R.id.btnConnect);
         btnDisconnect = findViewById(R.id.btnDisconnect);
+        btnFullList = findViewById(R.id.btnFullList);
         btnMmsMoreOptions = findViewById(R.id.btnMmsMoreOptions);
         layoutSearch = findViewById(R.id.layoutSearch);
         etSearch = findViewById(R.id.etSearch);
         btnClearSearch = findViewById(R.id.btnClearSearch);
 
+        layoutFullList = findViewById(R.id.layoutFullList);
+        rvFullList = findViewById(R.id.rvFullList);
+        txtFullListStatus = findViewById(R.id.txtFullListStatus);
+        rvFullList.setLayoutManager(new LinearLayoutManager(this));
+        fullListAdapter = new FullListAdapter();
+        rvFullList.setAdapter(fullListAdapter);
+        findViewById(R.id.btnCloseFullList).setOnClickListener(v -> exitFullListMode());
+
         findViewById(R.id.btnBack).setOnClickListener(v -> finish());
         btnConnect.setOnClickListener(v -> checkIntranetAndExecute(this::startExploration));
         btnDisconnect.setOnClickListener(v -> stopExploration());
+        btnFullList.setOnClickListener(v -> confirmStartFullList());
         btnMmsMoreOptions.setOnClickListener(this::showMoreOptionsMenu);
 
         setupSearch();
@@ -1046,6 +1082,8 @@ public class MmsExplorerActivity extends BaseActivity {
 
         topProgressBar.setVisibility(View.VISIBLE);
         isFetchingDefinitions = true;
+        txtGetDefinitionProgress.setVisibility(View.VISIBLE);
+        txtGetDefinitionProgress.setText(getString(R.string.msg_mms_get_definition_progress, host));
         executor.execute(() -> {
             List<NodeDefinition> found = new ArrayList<>();
             try {
@@ -1066,6 +1104,7 @@ public class MmsExplorerActivity extends BaseActivity {
             int count = found.size();
             mainHandler.post(() -> {
                 topProgressBar.setVisibility(View.GONE);
+                txtGetDefinitionProgress.setVisibility(View.GONE);
                 isFetchingDefinitions = false;
                 Toast.makeText(this, count > 0
                         ? getString(R.string.msg_mms_definitions_saved, count)
@@ -1090,20 +1129,135 @@ public class MmsExplorerActivity extends BaseActivity {
             if (sub.equals("d")) {
                 Iec61850DfrClient.FcReadResult result = client.readWithFcFallback(subPath, nodeToFcMap.get(subPath));
                 NodeDefinition def = new NodeDefinition(host, deviceName, subPath, result != null ? result.value : "");
-                if (subItems.contains("general")) {
-                    // Common data classes like ACD/ACT pair a "general" boolean alarm state with
-                    // "d" as its description at the same DO - surface it alongside the description
-                    // since that's usually the actual point worth monitoring.
-                    String generalPath = path + ".general";
-                    Iec61850DfrClient.FcReadResult genResult = client.readWithFcFallback(generalPath, nodeToFcMap.get(generalPath));
+                // Common data classes pair a boolean status with "d" as its description at the
+                // same DO - "general" (ACD/ACT alarms) or "stVal" (SPS/DPS status) - surface
+                // whichever is present alongside the description since that's usually the actual
+                // point worth monitoring. Checked in that order since a DO very rarely has both.
+                String statusAttr = subItems.contains("general") ? "general" : subItems.contains("stVal") ? "stVal" : null;
+                if (statusAttr != null) {
+                    String statusPath = path + "." + statusAttr;
+                    Iec61850DfrClient.FcReadResult statusResult = client.readWithFcFallback(statusPath, nodeToFcMap.get(statusPath));
                     def.hasGeneralStatus = true;
-                    def.generalStatusValue = genResult != null ? genResult.value : "";
+                    def.generalStatusValue = statusResult != null ? statusResult.value : "";
                 }
                 out.add(def);
+                mainHandler.post(() -> txtGetDefinitionProgress.setText(getString(R.string.msg_mms_get_definition_progress, subPath)));
             } else {
                 collectDefinitionsUnderDO(subPath, host, deviceName, out);
             }
         }
+    }
+
+    /** "FULL LIST" reads every leaf on the device (no filtering, unlike Get Definition) - warn
+     *  before starting since it can take a very long time on a large device. */
+    private void confirmStartFullList() {
+        String host = com.alidev.dfrtools.utils.IpAddressHelper.getIpFromInputs(etIp1, etIp2, etIp3, etIp4);
+        if (host.isEmpty() || host.equals("0.0.0.0")) return;
+
+        if (FullListFetchService.isRunning()) {
+            Toast.makeText(this, R.string.msg_mms_fulllist_already_running, Toast.LENGTH_SHORT).show();
+            enterFullListMode();
+            return;
+        }
+
+        View v = getLayoutInflater().inflate(R.layout.dialog_confirm_refresh_many, null);
+        AlertDialog dialog = new AlertDialog.Builder(this, R.style.Theme_Comtrade_Dialog)
+                .setView(v)
+                .create();
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+        }
+
+        ((TextView) v.findViewById(R.id.tvConfirmTitle)).setText(R.string.ttl_mms_full_list_confirm);
+        ((TextView) v.findViewById(R.id.tvConfirmMessage)).setText(R.string.msg_mms_full_list_confirm);
+        ((TextView) v.findViewById(R.id.btnConfirm)).setText(R.string.btn_mms_full_list_confirm);
+
+        v.findViewById(R.id.btnCancel).setOnClickListener(view -> dialog.dismiss());
+        v.findViewById(R.id.btnConfirm).setOnClickListener(view -> {
+            dialog.dismiss();
+            checkIntranetAndExecute(() -> {
+                fullListItems.clear();
+                fullListAdapter.notifyDataSetChanged();
+                FullListFetchService.start(this, host);
+                enterFullListMode();
+            });
+        });
+
+        dialog.show();
+    }
+
+    private void enterFullListMode() {
+        rvExplorer.setVisibility(View.GONE);
+        layoutFullList.setVisibility(View.VISIBLE);
+        txtFullListStatus.setText(FullListFetchService.isRunning()
+                ? getString(R.string.msg_mms_fulllist_progress, FullListFetchService.getLastPath())
+                : getString(R.string.lbl_mms_full_list_count, fullListItems.size()));
+    }
+
+    private void exitFullListMode() {
+        layoutFullList.setVisibility(View.GONE);
+        rvExplorer.setVisibility(View.VISIBLE);
+    }
+
+    /** Adds a Full List row to IED Monitoring, reusing the same dialog as Explorer's tree view -
+     *  the row isn't backed by a real MmsNode (Full List never walked the tree structure, only
+     *  leaf values), so a minimal synthetic one is built just to carry what that dialog needs. */
+    private void addFullListEntryToMonitoring(FullListEntry entry) {
+        String name = entry.fullPath.contains(".")
+                ? entry.fullPath.substring(entry.fullPath.lastIndexOf('.') + 1) : entry.fullPath;
+        MmsNode node = new MmsNode(name, entry.fullPath, NodeType.DA, 0);
+        node.value = entry.value;
+        node.isLeaf = true;
+        showAddMonitorDialog(node);
+    }
+
+    class FullListAdapter extends RecyclerView.Adapter<FullListAdapter.VH> {
+        @NonNull @Override
+        public VH onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+            return new VH(getLayoutInflater().inflate(R.layout.item_full_list_row, parent, false));
+        }
+
+        @Override public void onBindViewHolder(@NonNull VH holder, int position) {
+            holder.bind(fullListItems.get(position));
+        }
+
+        @Override public int getItemCount() { return fullListItems.size(); }
+
+        class VH extends RecyclerView.ViewHolder {
+            final TextView txtAddress, txtValue;
+            final ImageView btnAdd;
+
+            VH(View v) {
+                super(v);
+                txtAddress = v.findViewById(R.id.txtFullListAddress);
+                txtValue = v.findViewById(R.id.txtFullListValue);
+                btnAdd = v.findViewById(R.id.btnFullListAdd);
+            }
+
+            void bind(FullListEntry entry) {
+                txtAddress.setText(entry.fullPath);
+                txtValue.setText(entry.value);
+                btnAdd.setOnClickListener(v -> addFullListEntryToMonitoring(entry));
+            }
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        FullListFetchService.setListener(fullListProgressListener);
+        if (FullListFetchService.isRunning() || !FullListFetchService.getResults().isEmpty()) {
+            fullListItems.clear();
+            fullListItems.addAll(FullListFetchService.getResults());
+            fullListAdapter.notifyDataSetChanged();
+            enterFullListMode();
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        FullListFetchService.setListener(null);
+        super.onPause();
     }
 
     @Override

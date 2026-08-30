@@ -65,6 +65,22 @@
     <string name="msg_mms_definitions_delete_confirm">Deletes every saved \'d\' node for %1$s. This can\'t be undone - you can always run Get Definition again later.</string>
     <string name="msg_mms_definitions_deleted">Table deleted</string>
     <string name="lbl_mms_def_copied">Copied</string>
+    <string name="msg_mms_get_definition_progress">Get data….%1$s</string>
+    <string name="lbl_mms_def_col_status">Status</string>
+
+    <string name="btn_mms_full_list">FULL LIST</string>
+    <string name="ttl_mms_full_list_confirm">Fetch Every Value?</string>
+    <string name="btn_mms_full_list_confirm">START</string>
+    <string name="msg_mms_full_list_confirm">This reads EVERY node on the whole device and can take a very long time depending on its size. It keeps running in the background (with a notification) even if you leave the app. Continue?</string>
+    <string name="lbl_mms_full_list_title">Full List</string>
+    <string name="lbl_mms_full_list_count">%1$d node(s) read</string>
+    <string name="btn_mms_full_list_close">CLOSE</string>
+    <string name="msg_mms_fulllist_starting">Starting Full List…</string>
+    <string name="msg_mms_fulllist_progress">Fetching…%1$s</string>
+    <string name="msg_mms_fulllist_done">Full List complete: %1$d node(s)</string>
+    <string name="ttl_mms_fulllist_notif">MMS Full List</string>
+    <string name="lbl_mms_fulllist_notif_channel">Full List Fetch</string>
+    <string name="msg_mms_fulllist_already_running">A Full List fetch is already running in the background</string>
     <string name="btn_mon_add">ADD</string>
     <string name="btn_mon_save">SAVE</string>
     <string name="btn_mon_remove">REMOVE</string>
@@ -665,7 +681,11 @@
     <string name="help_feat_exp_4_title">Refreshing &amp; Disconnecting</string>
     <string name="help_feat_exp_4_steps">1. Tap the {ic:more} more-options icon, then Refresh, to rebuild the structure if it looks outdated.\n2. Tap CLOSE IED to disconnect when finished.</string>
     <string name="help_feat_exp_5_title">Getting Node Definitions</string>
-    <string name="help_feat_exp_5_steps">1. While connected, tap the {ic:more} more-options icon, then Get Definition.\n2. The app scans every logical node for \'d\' (description) attributes and saves them to a table - this can take a while on a large device.\n3. Tap {ic:more} then Table anytime (connected or not), pick a device from the list, then browse its saved definitions - tap any address or value to copy it, use {ic:add} to monitor that point, or the trash icon to delete the whole table.</string>
+    <string name="help_feat_exp_5_steps">1. While connected, tap the {ic:more} more-options icon, then Get Definition - a status line under the IP address shows the current node being read.\n2. The app scans every logical node for \'d\' (description) attributes, plus a paired "general" or "stVal" boolean status if the point has one, and saves them to a table - this can take a while on a large device.\n3. Tap {ic:more} then Table anytime (connected or not), pick a device from the list, then browse its saved definitions - tap any address or value to copy it, or the trash icon to delete the whole table.</string>
+    <string name="help_cmp_exp_6_name">FULL LIST button</string>
+    <string name="help_cmp_exp_6_desc">Reads and lists the live value of every single node on the device, replacing the folder tree with a flat list - runs as a background task with its own notification since it can take a very long time.</string>
+    <string name="help_feat_exp_6_title">Reading Every Value (Full List)</string>
+    <string name="help_feat_exp_6_steps">1. Tap FULL LIST next to EXPLORE, then confirm - this reads every node on the whole device and can take a very long time.\n2. It keeps running in the background (with a "Fetching…" notification) even if you leave the app or close MMS Explorer.\n3. Each row shows the node address (bold) and its value; tap {ic:add} on a row to add that point to IED Monitoring, same as in the tree view.\n4. Tap CLOSE to go back to the normal folder view.</string>
 
     <string name="help_ttl_viewer">DFR Viewer</string>
     <string name="help_sum_viewer">View and analyze COMTRADE waveform recordings</string>
