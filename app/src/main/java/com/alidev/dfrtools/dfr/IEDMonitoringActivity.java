@@ -510,6 +510,7 @@ public class IEDMonitoringActivity extends BaseActivity {
         EditText etMultiplier = v.findViewById(R.id.etMultiplier);
         EditText etUnit = v.findViewById(R.id.etUnit);
         CheckBox cbInvert = v.findViewById(R.id.cbInvert);
+        CheckBox cbInvertColor = v.findViewById(R.id.cbInvertColor);
         View layoutMultiplier = v.findViewById(R.id.layoutMultiplier);
         View layoutUnit = v.findViewById(R.id.layoutUnit);
         CheckBox cbAlarmEnabled = v.findViewById(R.id.cbAlarmEnabled);
@@ -537,6 +538,7 @@ public class IEDMonitoringActivity extends BaseActivity {
         etMultiplier.setText(String.valueOf(node.multiplier));
         etUnit.setText(node.unit);
         cbInvert.setChecked(node.invert);
+        cbInvertColor.setChecked(node.invertColor);
         cbAlarmEnabled.setChecked(node.alarmEnabled);
         etThresholdLow.setText(node.thresholdLow != null ? String.valueOf(node.thresholdLow) : "");
         etThresholdHigh.setText(node.thresholdHigh != null ? String.valueOf(node.thresholdHigh) : "");
@@ -547,6 +549,7 @@ public class IEDMonitoringActivity extends BaseActivity {
         layoutMultiplier.setVisibility(isFloat ? View.VISIBLE : View.GONE);
         layoutUnit.setVisibility(isFloat ? View.VISIBLE : View.GONE);
         cbInvert.setVisibility(isBoolean ? View.VISIBLE : View.GONE);
+        cbInvertColor.setVisibility(isBoolean ? View.VISIBLE : View.GONE);
 
         Runnable updateAlarmFieldsVisibility = () -> {
             boolean alarmOn = cbAlarmEnabled.isChecked();
@@ -586,6 +589,7 @@ public class IEDMonitoringActivity extends BaseActivity {
                 node.lastValue = node.lastValue.equalsIgnoreCase("true") ? "false" : "true";
             }
             node.invert = newInvert;
+            node.invertColor = cbInvertColor.isChecked();
             node.alarmEnabled = cbAlarmEnabled.isChecked();
             node.alarmOnValue = cbAlarmOnTrue.isChecked();
             node.alarmMatchText = etAlarmMatchText.getText().toString();
@@ -2082,12 +2086,18 @@ public class IEDMonitoringActivity extends BaseActivity {
                 layoutBooleanValue.setVisibility(View.VISIBLE);
                 pillValue.setVisibility(View.GONE);
                 boolean b = node.lastValue.equalsIgnoreCase("true");
-                // The toggle icon/text always reflects the raw value (green=FALSE, red=TRUE);
-                // whether that value counts as an alarm is a separate concern, shown via viewAlarmAccent.
-                imgToggle.setImageResource(b ? R.drawable.ic_toggle_on : R.drawable.ic_toggle_off);
+                // The toggle icon/text always reflects the raw value (green=FALSE, red=TRUE by
+                // default, swappable per-node via node.invertColor); whether that value counts as
+                // an alarm is a separate concern, shown via viewAlarmAccent.
+                boolean showRed = node.invertColor != b; // invertColor flips which state reads red
+                if (b) {
+                    imgToggle.setImageResource(node.invertColor ? R.drawable.ic_toggle_on_inverted : R.drawable.ic_toggle_on);
+                } else {
+                    imgToggle.setImageResource(node.invertColor ? R.drawable.ic_toggle_off_inverted : R.drawable.ic_toggle_off);
+                }
                 txtBooleanValue.setText(b ? "TRUE" : "FALSE");
                 txtBooleanValue.setTextColor(ContextCompat.getColor(IEDMonitoringActivity.this,
-                        b ? R.color.status_danger : R.color.status_safe));
+                        showRed ? R.color.status_danger : R.color.status_safe));
                 isBad = node.alarmEnabled ? (b == node.alarmOnValue) : !b;
             } else {
                 layoutBooleanValue.setVisibility(View.GONE);

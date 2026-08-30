@@ -120,6 +120,7 @@
     <string name="lbl_mon_multiplier">Faktor Kali (Float/Int)</string>
     <string name="lbl_mon_unit">Satuan</string>
     <string name="lbl_mon_invert">Invert Nilai (Boolean)</string>
+    <string name="lbl_mon_invert_color">Invert Warna (Boolean)</string>
     <string name="lbl_mon_select_type">Pilih Jenis Nilai</string>
     <string name="lbl_mon_type_float">Float / Integer</string>
     <string name="lbl_mon_type_bool">Boolean</string>

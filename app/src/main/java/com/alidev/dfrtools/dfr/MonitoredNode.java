@@ -15,6 +15,7 @@ public class MonitoredNode {
     public String unit = "";
     public float multiplier = 1.0f;
     public boolean invert = false;
+    public boolean invertColor = false; // boolean type only: swaps which state (TRUE/FALSE) reads as red vs green, independent of the alarm condition
     public String type; // "boolean", "float", or "string"
     public String lastValue = "";
     public long lastUpdateMillis = 0; // wall-clock time of the last successful read; persisted so the last-known value/time survives app restarts
@@ -106,6 +107,7 @@ public class MonitoredNode {
         json.put("unit", unit);
         json.put("multiplier", multiplier);
         json.put("invert", invert);
+        json.put("invertColor", invertColor);
         json.put("type", type);
         json.put("lastValue", lastValue);
         json.put("lastUpdateMillis", lastUpdateMillis);
@@ -127,6 +129,7 @@ public class MonitoredNode {
         node.unit = json.optString("unit", "");
         node.multiplier = (float) json.optDouble("multiplier", 1.0);
         node.invert = json.optBoolean("invert", false);
+        node.invertColor = json.optBoolean("invertColor", false);
         node.type = json.getString("type");
         node.lastValue = json.optString("lastValue", "");
         node.lastUpdateMillis = json.optLong("lastUpdateMillis", 0);

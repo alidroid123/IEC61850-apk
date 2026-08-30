@@ -123,6 +123,7 @@
     <string name="lbl_mon_multiplier">Multiplier (Float/Int)</string>
     <string name="lbl_mon_unit">Unit</string>
     <string name="lbl_mon_invert">Invert Value (Boolean)</string>
+    <string name="lbl_mon_invert_color">Invert Color (Boolean)</string>
     <string name="lbl_mon_select_type">Select Value Type</string>
     <string name="lbl_mon_type_float">Float / Integer</string>
     <string name="lbl_mon_type_bool">Boolean</string>

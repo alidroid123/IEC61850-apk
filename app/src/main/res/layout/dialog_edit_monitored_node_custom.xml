@@ -108,6 +108,14 @@
             android:text="@string/lbl_mon_invert"
             android:textColor="?attr/customTextPrimaryColor" />
 
+        <CheckBox
+            android:id="@+id/cbInvertColor"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_s"
+            android:text="@string/lbl_mon_invert_color"
+            android:textColor="?attr/customTextPrimaryColor" />
+
         <View
             android:layout_width="match_parent"
             android:layout_height="1dp"
