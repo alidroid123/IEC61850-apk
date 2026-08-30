@@ -61,7 +61,7 @@ public class UpdateChecker {
         });
     }
 
-    private static String getCurrentVersionName(Context context) {
+    public static String getCurrentVersionName(Context context) {
         try {
             PackageInfo pi = context.getPackageManager().getPackageInfo(context.getPackageName(), 0);
             return pi.versionName;

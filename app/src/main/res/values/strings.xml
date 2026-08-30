@@ -295,7 +295,7 @@
     <string name="msg_all_delete_confirm">This action is permanent and cannot be undone.</string>
     <string name="msg_all_fields_required">All fields must be filled</string>
     <string name="msg_all_update_available">Versi %1$s sudah tersedia. Update sekarang untuk mendapatkan perbaikan dan fitur terbaru.</string>
-    <string name="msg_all_update_available_title">Update v%1$s tersedia</string>
+    <string name="msg_all_update_available_title">Update Tersedia: v%1$s &gt; v%2$s</string>
     <string name="lbl_update_whats_new">Yang baru:</string>
     <string name="msg_all_update_grant_install">Izinkan aplikasi ini menginstal update, lalu coba lagi.</string>
     <string name="msg_all_update_downloading">Mengunduh update di background… instalasi akan muncul otomatis setelah selesai.</string>

@@ -84,7 +84,7 @@ public class AboutActivity extends BaseActivity {
             if (isFinishing()) return;
             if (info != null) {
                 AppNotifications.add(this, "update_" + info.versionName,
-                        getString(R.string.msg_all_update_available_title, info.versionName),
+                        getString(R.string.msg_all_update_available_title, UpdateChecker.getCurrentVersionName(this), info.versionName),
                         info.releaseNotes);
                 updateFlow.showUpdateDialog(info);
             } else {

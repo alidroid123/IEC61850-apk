@@ -165,7 +165,7 @@ public class HomeActivity extends BaseActivity {
             // below, so a user who dismissed the popup can still find the update (and what
             // changed) later from the bell icon instead of it only ever appearing once.
             AppNotifications.add(this, "update_" + info.versionName,
-                    getString(R.string.msg_all_update_available_title, info.versionName),
+                    getString(R.string.msg_all_update_available_title, UpdateChecker.getCurrentVersionName(this), info.versionName),
                     info.releaseNotes);
             refreshNotifBadge();
             if (!UpdatePrefs.shouldShowPrompt(this)) return;
