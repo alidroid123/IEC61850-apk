@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <com.google.android.material.card.MaterialCardView
+        android:layout_width="320dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_margin="@dimen/spacing_l"
+        app:cardCornerRadius="@dimen/card_corner_radius_huge"
+        app:cardBackgroundColor="@color/bg_card"
+        app:strokeColor="?attr/colorPrimary"
+        app:strokeWidth="1dp"
+        app:cardElevation="@dimen/card_elevation_huge">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="@dimen/spacing_xxl"
+            android:background="?attr/customSurfaceColor">
+
+            <ImageView
+                android:layout_width="@dimen/icon_size_huge"
+                android:layout_height="@dimen/icon_size_huge"
+                android:layout_gravity="center"
+                android:src="@drawable/ic_import"
+                app:tint="?attr/colorPrimary"
+                android:layout_marginBottom="@dimen/spacing_l"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/ttl_tmpl_import_csv"
+                android:textColor="?attr/customTextPrimaryColor"
+                android:textSize="@dimen/text_size_title"
+                android:textStyle="bold"
+                android:gravity="center" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_s"
+                android:text="@string/msg_dev_import_instructions"
+                android:textColor="@color/text_secondary"
+                android:textSize="@dimen/text_size_body_large"
+                android:gravity="center" />
+
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_xl"
+                app:cardCornerRadius="@dimen/card_corner_radius_medium"
+                app:cardElevation="0dp"
+                app:strokeWidth="1dp"
+                app:strokeColor="@color/divider">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="@dimen/spacing_l"
+                    android:background="#0A808080">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/lbl_dev_csv_columns_header"
+                        android:textColor="?attr/colorPrimary"
+                        android:textSize="@dimen/text_size_body_small"
+                        android:textStyle="bold"
+                        android:letterSpacing="0.1"
+                        android:layout_marginBottom="@dimen/spacing_s"/>
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/val_tmpl_csv_columns"
+                        android:textColor="?attr/customTextPrimaryColor"
+                        android:textSize="@dimen/text_size_medium"
+                        android:lineSpacingExtra="@dimen/spacing_xs"
+                        android:fontFamily="monospace" />
+
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_l"
+                android:text="@string/val_tmpl_csv_example"
+                android:textColor="@color/text_secondary"
+                android:textSize="@dimen/text_size_body_small"
+                android:fontStyle="italic"
+                android:gravity="center" />
+
+            <Button
+                android:id="@+id/btnDownloadTemplate"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/large_button_height"
+                android:layout_marginTop="@dimen/spacing_xl"
+                android:text="@string/btn_dev_download_template"
+                app:strokeColor="?attr/colorPrimary"
+                app:cornerRadius="@dimen/card_corner_radius_medium" />
+
+            <Button
+                android:id="@+id/btnContinueImport"
+                style="@style/Widget.DFRtools.Button"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/large_button_height"
+                android:layout_marginTop="@dimen/spacing_l"
+                android:text="@string/btn_dev_choose_csv" />
+
+            <Button
+                android:id="@+id/btnCancelImport"
+                style="@style/Widget.MaterialComponents.Button.TextButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/btn_all_cancel"
+                android:textColor="@color/status_danger" />
+
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+</FrameLayout>

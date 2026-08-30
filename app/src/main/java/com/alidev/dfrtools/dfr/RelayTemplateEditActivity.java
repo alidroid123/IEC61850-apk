@@ -1,5 +1,8 @@
 package com.alidev.dfrtools.dfr;
 
+import android.app.Activity;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,11 +16,19 @@ import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
+import androidx.core.content.FileProvider;
 
 import com.alidev.dfrtools.R;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Lets the user author/edit relay monitoring templates (see RelayTemplates) instead of them
@@ -64,6 +75,8 @@ public class RelayTemplateEditActivity extends BaseActivity {
         findViewById(R.id.btnDeleteTemplate).setOnClickListener(v -> confirmDeleteTemplate());
         findViewById(R.id.btnAddRow).setOnClickListener(v -> addRow());
         findViewById(R.id.btnSaveTemplate).setOnClickListener(v -> saveTemplate());
+        findViewById(R.id.btnImportCsvHeader).setOnClickListener(v -> showImportCsvDialog());
+        findViewById(R.id.btnExportCsvHeader).setOnClickListener(v -> exportCurrentTemplateToCsv());
 
         spTemplateSelector.setOnItemSelectedListener(new android.widget.AdapterView.OnItemSelectedListener() {
             @Override
@@ -467,6 +480,159 @@ public class RelayTemplateEditActivity extends BaseActivity {
         });
 
         dialog.show();
+    }
+
+    // --- CSV import/export ------------------------------------------------------------------
+    // Column order: Name, Address (LD/LN.DO.DA), Type (string/float/boolean), Unit, Multiplier -
+    // i.e. the same five fields as a RelayTemplates.Point / the on-screen table's columns, so a
+    // file exported here re-imports byte-for-byte into any template (this one or another).
+
+    private static final int REQUEST_TEMPLATE_CSV = 3001;
+
+    private void showImportCsvDialog() {
+        if (currentTemplateName == null) {
+            Toast.makeText(this, R.string.msg_tmpl_no_template_for_import, Toast.LENGTH_SHORT).show();
+            return;
+        }
+        View dialogView = getLayoutInflater().inflate(R.layout.dialog_import_template_csv, null);
+        AlertDialog dialog = new AlertDialog.Builder(this, R.style.Theme_Comtrade_Dialog)
+                .setView(dialogView)
+                .create();
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+        }
+
+        dialogView.findViewById(R.id.btnDownloadTemplate).setOnClickListener(v -> downloadTemplateCsvExample());
+        dialogView.findViewById(R.id.btnContinueImport).setOnClickListener(v -> {
+            dialog.dismiss();
+            pickTemplateCsv();
+        });
+        dialogView.findViewById(R.id.btnCancelImport).setOnClickListener(v -> dialog.dismiss());
+
+        dialog.show();
+    }
+
+    private void pickTemplateCsv() {
+        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+        intent.setType("text/comma-separated-values");
+        String[] mimetypes = {"text/comma-separated-values", "text/csv", "text/plain"};
+        intent.putExtra(Intent.EXTRA_MIME_TYPES, mimetypes);
+        startActivityForResult(intent, REQUEST_TEMPLATE_CSV);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REQUEST_TEMPLATE_CSV && resultCode == Activity.RESULT_OK && data != null && data.getData() != null) {
+            importTemplateCsv(data.getData());
+        }
+    }
+
+    private void importTemplateCsv(Uri uri) {
+        try (InputStream is = getContentResolver().openInputStream(uri)) {
+            BufferedReader reader = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8));
+            int added = 0;
+            String line;
+            boolean firstLine = true;
+            while ((line = reader.readLine()) != null) {
+                if (line.trim().isEmpty()) continue;
+                if (firstLine) {
+                    firstLine = false;
+                    String lower = line.toLowerCase(Locale.ROOT);
+                    if (lower.contains("nama") || lower.contains("name") || lower.contains("alamat") || lower.contains("address")) continue;
+                }
+                String[] p = line.split(",", -1);
+                if (p.length < 2) continue;
+
+                String customName = p[0].replace("\"", "").trim();
+                String path = p[1].replace("\"", "").trim();
+                if (customName.isEmpty() || path.isEmpty()) continue;
+
+                String type = p.length > 2 ? p[2].replace("\"", "").trim().toLowerCase(Locale.ROOT) : "float";
+                if (!TYPE_OPTIONS.contains(type)) type = "float";
+                String unit = p.length > 3 ? p[3].replace("\"", "").trim() : "";
+                float multiplier = 1f;
+                if (p.length > 4) {
+                    try {
+                        multiplier = Float.parseFloat(p[4].replace("\"", "").trim());
+                    } catch (NumberFormatException ignored) {}
+                }
+
+                boolean duplicate = false;
+                for (RelayTemplates.Point existing : currentPoints) {
+                    if (existing.path.equals(path)) {
+                        duplicate = true;
+                        break;
+                    }
+                }
+                if (duplicate) continue;
+
+                currentPoints.add(new RelayTemplates.Point(path, customName, type, unit, multiplier));
+                added++;
+            }
+            if (added > 0) renderRows();
+            Toast.makeText(this, getString(R.string.msg_tmpl_import_ok, added), Toast.LENGTH_LONG).show();
+        } catch (Exception e) {
+            Toast.makeText(this, getString(R.string.msg_dev_import_fail, e.getMessage()), Toast.LENGTH_LONG).show();
+        }
+    }
+
+    private void downloadTemplateCsvExample() {
+        try {
+            File file = new File(getExternalFilesDir(null), "template_relay_contoh.csv");
+            FileOutputStream fos = new FileOutputStream(file);
+            fos.write("Nama,Alamat,Tipe,Satuan,Pengali\n".getBytes(StandardCharsets.UTF_8));
+            fos.write("Arus IR,Measurements/MMXU1.A.phsA.cVal.mag.f,float,A,1.0\n".getBytes(StandardCharsets.UTF_8));
+            fos.write("CB Open,Control/XCBR1.Pos.stVal,boolean,,1.0\n".getBytes(StandardCharsets.UTF_8));
+            fos.close();
+
+            Uri uri = FileProvider.getUriForFile(this, getPackageName() + ".fileprovider", file);
+            Intent intent = new Intent(Intent.ACTION_SEND);
+            intent.setType("text/csv");
+            intent.putExtra(Intent.EXTRA_STREAM, uri);
+            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            startActivity(Intent.createChooser(intent, getString(R.string.ttl_dev_share_template)));
+        } catch (Exception e) {
+            Toast.makeText(this, getString(R.string.msg_dev_import_fail, e.getMessage()), Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    /** Exports the in-memory (possibly unsaved) rows currently shown in the table, not whatever
+     *  is on disk - what you see on screen is what gets shared, tap Save first if that matters. */
+    private void exportCurrentTemplateToCsv() {
+        if (currentTemplateName == null || currentPoints.isEmpty()) {
+            Toast.makeText(this, R.string.msg_tmpl_nothing_to_export, Toast.LENGTH_SHORT).show();
+            return;
+        }
+        try {
+            String safeName = currentTemplateName.replaceAll("[^A-Za-z0-9_-]", "_");
+            File file = new File(getExternalFilesDir(null), "template_" + safeName + ".csv");
+            FileOutputStream fos = new FileOutputStream(file);
+            fos.write("Nama,Alamat,Tipe,Satuan,Pengali\n".getBytes(StandardCharsets.UTF_8));
+            for (RelayTemplates.Point point : currentPoints) {
+                String row = String.format(Locale.US, "%s,%s,%s,%s,%s\n",
+                        csvEscape(point.customName), csvEscape(point.path), csvEscape(point.type),
+                        csvEscape(point.unit), String.valueOf(point.multiplier));
+                fos.write(row.getBytes(StandardCharsets.UTF_8));
+            }
+            fos.close();
+
+            Uri uri = FileProvider.getUriForFile(this, getPackageName() + ".fileprovider", file);
+            Intent intent = new Intent(Intent.ACTION_SEND);
+            intent.setType("text/csv");
+            intent.putExtra(Intent.EXTRA_STREAM, uri);
+            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            startActivity(Intent.createChooser(intent, getString(R.string.ttl_tmpl_share_csv)));
+        } catch (Exception e) {
+            Toast.makeText(this, getString(R.string.msg_dev_import_fail, e.getMessage()), Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    /** Commas in a field would otherwise shift every later column when this file is read back in
+     *  (both this app's own importTemplateCsv above and a spreadsheet) - wrapped in quotes instead. */
+    private static String csvEscape(String value) {
+        if (value == null) return "";
+        return value.contains(",") ? "\"" + value.replace("\"", "\"\"") + "\"" : value;
     }
 
     /** TextWatcher that only cares about the final text, to keep row bindings above terse. */

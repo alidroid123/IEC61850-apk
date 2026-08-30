@@ -108,6 +108,59 @@
                 android:textSize="@dimen/text_size_tiny" />
         </LinearLayout>
 
+        <LinearLayout
+            android:id="@+id/btnImportCsvHeader"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center_horizontal"
+            android:layout_marginStart="@dimen/spacing_xs"
+            android:clickable="true"
+            android:focusable="true"
+            android:background="?attr/selectableItemBackgroundBorderless">
+
+            <ImageView
+                android:layout_width="@dimen/icon_size_xl"
+                android:layout_height="@dimen/icon_size_xl"
+                android:padding="@dimen/spacing_s"
+                android:src="@drawable/ic_import"
+                app:tint="@color/white" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/btn_tmpl_import_csv"
+                android:textColor="@color/white"
+                android:textSize="@dimen/text_size_tiny" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/btnExportCsvHeader"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center_horizontal"
+            android:layout_marginStart="@dimen/spacing_xs"
+            android:clickable="true"
+            android:focusable="true"
+            android:background="?attr/selectableItemBackgroundBorderless">
+
+            <ImageView
+                android:layout_width="@dimen/icon_size_xl"
+                android:layout_height="@dimen/icon_size_xl"
+                android:padding="@dimen/spacing_s"
+                android:src="@drawable/ic_export"
+                android:contentDescription="@string/cd_tmpl_export_csv"
+                app:tint="@color/white" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/btn_tmpl_export_csv"
+                android:textColor="@color/white"
+                android:textSize="@dimen/text_size_tiny" />
+        </LinearLayout>
+
     </LinearLayout>
     </FrameLayout>
 

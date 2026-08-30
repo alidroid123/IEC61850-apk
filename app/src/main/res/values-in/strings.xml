@@ -145,6 +145,16 @@
     <string name="msg_mon_import_ok">Berhasil impor %d titik</string>
     <string name="val_mon_csv_columns">1. Nama Custom\n2. Alamat Node (full path)\n3. Satuan</string>
     <string name="val_mon_csv_example">Contoh: Arus R,PriFouMMXU1.A.phsA.cVal.mag.f,A</string>
+    <string name="ttl_tmpl_import_csv">Impor CSV Template</string>
+    <string name="val_tmpl_csv_columns">1. Nama\n2. Alamat (LD/LN.DO.DA, tanpa nama device)\n3. Tipe (string/float/boolean)\n4. Satuan\n5. Pengali</string>
+    <string name="val_tmpl_csv_example">Contoh: Arus IR,Measurements/MMXU1.A.phsA.cVal.mag.f,float,A,1.0</string>
+    <string name="btn_tmpl_import_csv">Impor CSV</string>
+    <string name="btn_tmpl_export_csv">Ekspor CSV</string>
+    <string name="cd_tmpl_export_csv">Ekspor template ke CSV</string>
+    <string name="msg_tmpl_no_template_for_import">Pilih atau buat template terlebih dahulu</string>
+    <string name="msg_tmpl_import_ok">%1$d baris ditambahkan - ketuk Simpan untuk menyimpannya</string>
+    <string name="msg_tmpl_nothing_to_export">Template ini belum punya baris untuk diekspor</string>
+    <string name="ttl_tmpl_share_csv">Bagikan CSV Template</string>
     <string name="btn_mon_add_template">Template</string>
     <string name="lbl_mon_auto_refresh">Auto Refresh</string>
     <string name="lbl_mon_gi_filter_all">Semua GI</string>

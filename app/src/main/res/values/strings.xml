@@ -136,6 +136,16 @@
     <string name="msg_mon_import_ok">Successfully imported %d points</string>
     <string name="val_mon_csv_columns">1. Custom Name\n2. Node Address (full path)\n3. Unit</string>
     <string name="val_mon_csv_example">Example: Arus R,PriFouMMXU1.A.phsA.cVal.mag.f,A</string>
+    <string name="ttl_tmpl_import_csv">Import Template CSV</string>
+    <string name="val_tmpl_csv_columns">1. Name\n2. Address (LD/LN.DO.DA, no device name)\n3. Type (string/float/boolean)\n4. Unit\n5. Multiplier</string>
+    <string name="val_tmpl_csv_example">Example: Arus IR,Measurements/MMXU1.A.phsA.cVal.mag.f,float,A,1.0</string>
+    <string name="btn_tmpl_import_csv">Import CSV</string>
+    <string name="btn_tmpl_export_csv">Export CSV</string>
+    <string name="cd_tmpl_export_csv">Export template to CSV</string>
+    <string name="msg_tmpl_no_template_for_import">Pick or create a template first</string>
+    <string name="msg_tmpl_import_ok">%1$d rows added - tap Save to keep them</string>
+    <string name="msg_tmpl_nothing_to_export">This template has no rows to export yet</string>
+    <string name="ttl_tmpl_share_csv">Share Template CSV</string>
     <string name="lbl_mon_alarm_enable">Enable Alarm</string>
     <string name="lbl_mon_threshold_low">Low Threshold</string>
     <string name="lbl_mon_threshold_high">High Threshold</string>
