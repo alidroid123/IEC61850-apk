@@ -1593,7 +1593,7 @@ public class IEDMonitoringActivity extends BaseActivity {
 
         @NonNull @Override public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
             if (viewType == TYPE_HEADER) {
-                return new HeaderVH(LayoutInflater.from(parent.getContext()).inflate(R.layout.item_monitoring_header, parent, false));
+                return new HeaderVH(LayoutInflater.from(parent.getContext()).inflate(R.layout.item_monitoring_header, parent, false), false);
             }
             return new ItemVH(LayoutInflater.from(parent.getContext()).inflate(R.layout.item_monitored_node, parent, false));
         }
@@ -1654,7 +1654,7 @@ public class IEDMonitoringActivity extends BaseActivity {
             v.setBackgroundResource(R.drawable.bg_monitoring_group_header_pinned);
             int extraPad = dpToPx(6);
             v.setPadding(v.getPaddingLeft(), v.getPaddingTop() + extraPad, v.getPaddingRight(), v.getPaddingBottom() + extraPad);
-            stickyHolder = new HeaderVH(v);
+            stickyHolder = new HeaderVH(v, true);
             stickyHeaderContainer.addView(v);
         }
         adapter.onBindViewHolder(stickyHolder, headerPos); // always rebind so a live refresh never shows stale text while pinned
@@ -1743,13 +1743,21 @@ public class IEDMonitoringActivity extends BaseActivity {
         }
     }
 
+    private static final int[] GROUP_HEADER_VARIANTS = {
+            R.drawable.bg_monitoring_group_header_1,
+            R.drawable.bg_monitoring_group_header_2,
+            R.drawable.bg_monitoring_group_header_3,
+    };
+
     class HeaderVH extends RecyclerView.ViewHolder {
         TextView txtHeader, txtHeaderIp, txtHeaderUpdate, txtHeaderCompact;
         View layoutHeaderDetails;
         ImageView btnEditDevice, btnBulkEdit, btnDeleteGroup, btnRefreshGroup, imgExpand;
         View statusDot;
-        HeaderVH(View v) {
+        final boolean isSticky;
+        HeaderVH(View v, boolean isSticky) {
             super(v);
+            this.isSticky = isSticky;
             txtHeader = v.findViewById(R.id.txtHeader);
             txtHeaderIp = v.findViewById(R.id.txtHeaderIp);
             txtHeaderUpdate = v.findViewById(R.id.txtHeaderUpdate);
@@ -1763,6 +1771,16 @@ public class IEDMonitoringActivity extends BaseActivity {
             statusDot = v.findViewById(R.id.statusDot);
         }
         void bind(HeaderInfo info) {
+            // Cycle through a small set of theme-native gradient variants per device (stable via
+            // the IP's hash, not position, so a given device always keeps the same look across
+            // scrolls/refreshes) - breaks up the "wall of identical bars" look a long device list
+            // otherwise has, without touching the rest of the app's palette. The pinned sticky
+            // copy keeps its own fixed look instead, so it doesn't change hue as you scroll past
+            // different groups underneath it.
+            if (!isSticky) {
+                int variant = Math.floorMod(info.ip.hashCode(), GROUP_HEADER_VARIANTS.length);
+                itemView.setBackgroundResource(GROUP_HEADER_VARIANTS[variant]);
+            }
             // While searching, collapse the header down to one thin identification line and hide
             // every action/status affordance - the point is to scan the flat match list quickly,
             // not manage the group.

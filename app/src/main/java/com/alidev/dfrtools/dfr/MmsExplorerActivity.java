@@ -546,6 +546,7 @@ public class MmsExplorerActivity extends BaseActivity {
             for (String ld : cachedLds) nodes.add(new MmsNode(ld, ld, NodeType.LD, 0));
             adapter.setNodes(nodes);
             restoreExpandedNodes(nodes);
+            prefetchPriorityFolder(nodes);
             return;
         }
 
@@ -563,8 +564,74 @@ public class MmsExplorerActivity extends BaseActivity {
                 adapter.setNodes(nodes);
                 saveExplorerCache(com.alidev.dfrtools.utils.IpAddressHelper.getIpFromInputs(etIp1, etIp2, etIp3, etIp4));
                 restoreExpandedNodes(nodes);
+                prefetchPriorityFolder(nodes);
             });
         });
+    }
+
+    /**
+     * Eagerly walks the "Measurements" logical device's full subtree (LN -> DO -> DA, including
+     * leaf value reads) right after connecting, instead of leaving it to the normal lazy
+     * fetch-on-first-expand behavior - it's the folder users check first on almost every relay, so
+     * by the time they tap into it, it's already loaded from cachedFolders with no spinner. Every
+     * other logical device is intentionally left to the existing lazy load + cache, since eagerly
+     * walking the entire data model on every connect (potentially hundreds of points across many
+     * logical devices) would make connecting itself slow for no benefit most of the time.
+     */
+    private void prefetchPriorityFolder(List<MmsNode> rootNodes) {
+        MmsNode measurements = null;
+        for (MmsNode n : rootNodes) {
+            if (n.name.equalsIgnoreCase("Measurements")) {
+                measurements = n;
+                break;
+            }
+        }
+        if (measurements == null || measurements.isLoaded) return;
+
+        MmsNode target = measurements;
+        executor.execute(() -> {
+            eagerLoadSubtree(target);
+            mainHandler.post(() -> saveExplorerCache(com.alidev.dfrtools.utils.IpAddressHelper.getIpFromInputs(etIp1, etIp2, etIp3, etIp4)));
+        });
+    }
+
+    /** Runs on the background executor - synchronously walks and caches node's full subtree. */
+    private void eagerLoadSubtree(MmsNode node) {
+        if (node.isLoaded) {
+            for (MmsNode child : node.children) eagerLoadSubtree(child);
+            return;
+        }
+
+        List<MmsNode> children = new ArrayList<>();
+        try {
+            if (node.type == NodeType.LD) {
+                List<String> lns = client.getLogicalDeviceDirectory(node.name);
+                for (String ln : lns) children.add(new MmsNode(ln, node.fullPath + "/" + ln, NodeType.LN, node.level + 1));
+            } else if (node.type == NodeType.LN) {
+                List<String> dos = client.getLogicalNodeDirectory(node.fullPath);
+                for (String doName : dos) children.add(new MmsNode(doName, node.fullPath + "." + doName, NodeType.DO, node.level + 1));
+            } else if (node.type == NodeType.DO || node.type == NodeType.DA) {
+                List<String> subItems = client.getDataDirectory(node.fullPath);
+                if (subItems != null && !subItems.isEmpty()) {
+                    for (String subName : subItems) {
+                        children.add(new MmsNode(subName, node.fullPath + "." + subName, NodeType.DA, node.level + 1));
+                    }
+                } else {
+                    node.isLeaf = true;
+                    Iec61850DfrClient.FcReadResult result = client.readWithFcFallback(node.fullPath, nodeToFcMap.get(node.fullPath));
+                    if (result != null) {
+                        node.value = result.value;
+                        nodeToFcMap.put(node.fullPath, result.fc);
+                    }
+                }
+            }
+        } catch (Exception ignored) {}
+
+        node.children = children;
+        node.isLoaded = true;
+        if (!node.isLeaf) cachedFolders.put(node.fullPath, children);
+
+        for (MmsNode child : children) eagerLoadSubtree(child);
     }
 
     private void toggleNode(MmsNode node) {
