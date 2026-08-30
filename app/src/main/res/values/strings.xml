@@ -21,6 +21,7 @@
     <string name="btn_all_update">Update</string>
     <string name="btn_base_toggle_mode">Toggle to %s</string>
     <string name="btn_dev_choose_csv">CHOOSE CSV FILE</string>
+    <string name="btn_dev_add">ADD</string>
     <string name="btn_dev_export">Export</string>
     <string name="btn_dev_import">Import</string>
     <string name="btn_dev_download_template">DOWNLOAD TEMPLATE</string>

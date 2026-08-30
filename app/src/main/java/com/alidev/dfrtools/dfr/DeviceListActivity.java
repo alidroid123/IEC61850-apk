@@ -113,6 +113,51 @@ public class DeviceListActivity extends BaseActivity {
                 .show();
     }
 
+    /** Manual "add one device" entry point from the header + icon - unlike showAddDeviceDialog(),
+     *  the IP isn't known ahead of time (that one only opens pre-filled from an "ip_prefill"
+     *  intent extra), so this form also collects it via the same 4-octet input used elsewhere. */
+    private void showAddSingleDeviceDialog() {
+        View dialogView = getLayoutInflater().inflate(R.layout.dialog_add_device, null);
+        AlertDialog dialog = new AlertDialog.Builder(this, R.style.Theme_Comtrade_Dialog)
+                .setView(dialogView)
+                .create();
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+            dialog.getWindow().setGravity(android.view.Gravity.CENTER);
+        }
+
+        android.widget.EditText etGi = dialogView.findViewById(R.id.etAddGi);
+        android.widget.EditText etBay = dialogView.findViewById(R.id.etAddBay);
+        android.widget.EditText etDevice = dialogView.findViewById(R.id.etAddDevice);
+        android.widget.EditText etMerk = dialogView.findViewById(R.id.etAddMerk);
+        android.widget.EditText etType = dialogView.findViewById(R.id.etAddType);
+        View ipLayout = dialogView.findViewById(R.id.layoutAddDeviceIp);
+        android.widget.EditText etIp1 = ipLayout.findViewById(R.id.etIp1);
+        android.widget.EditText etIp2 = ipLayout.findViewById(R.id.etIp2);
+        android.widget.EditText etIp3 = ipLayout.findViewById(R.id.etIp3);
+        android.widget.EditText etIp4 = ipLayout.findViewById(R.id.etIp4);
+        com.alidev.dfrtools.utils.IpAddressHelper.setupIpInputs(etIp1, etIp2, etIp3, etIp4);
+
+        dialogView.findViewById(R.id.btnAddDeviceCancel).setOnClickListener(v -> dialog.dismiss());
+        dialogView.findViewById(R.id.btnAddDeviceSave).setOnClickListener(v -> {
+            String gi = etGi.getText().toString().trim();
+            String bay = etBay.getText().toString().trim();
+            String device = etDevice.getText().toString().trim();
+            String ip = com.alidev.dfrtools.utils.IpAddressHelper.getIpFromInputs(etIp1, etIp2, etIp3, etIp4);
+            String merk = etMerk.getText().toString().trim();
+            String type = etType.getText().toString().trim();
+
+            if (gi.isEmpty() || bay.isEmpty() || device.isEmpty() || ip.isEmpty() || ip.equals("0.0.0.0")) {
+                Toast.makeText(this, R.string.msg_all_fields_required, Toast.LENGTH_SHORT).show();
+                return;
+            }
+            saveDeviceToList(gi, bay, device, ip, merk, type);
+            dialog.dismiss();
+        });
+
+        dialog.show();
+    }
+
     private void saveDeviceToList(String gi, String bay, String device, String ip, String merk, String type) {
         JSONArray arr = new JSONArray();
         try {
@@ -151,6 +196,7 @@ public class DeviceListActivity extends BaseActivity {
         tvStatClosed = findViewById(R.id.tvStatClosed);
         tvStatOffline = findViewById(R.id.tvStatOffline);
 
+        findViewById(R.id.btnAddDevice).setOnClickListener(v -> showAddSingleDeviceDialog());
         findViewById(R.id.btnImportCsv).setOnClickListener(v -> showImportInfoDialog());
         btnExportCsv = findViewById(R.id.btnExportCsv);
         layoutExport = findViewById(R.id.layoutExport);

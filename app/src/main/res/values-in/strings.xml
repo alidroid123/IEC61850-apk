@@ -19,6 +19,7 @@
     <string name="btn_all_update">Update</string>
     <string name="btn_base_toggle_mode">Ganti ke %s</string>
     <string name="btn_dev_choose_csv">PILIH FILE CSV</string>
+    <string name="btn_dev_add">TAMBAH</string>
     <string name="btn_dev_export">Ekspor</string>
     <string name="btn_dev_import">Impor</string>
     <string name="btn_dev_download_template">UNDUH TEMPLATE</string>

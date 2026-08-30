@@ -1037,7 +1037,12 @@ public class MmsExplorerActivity extends BaseActivity {
         if (host.isEmpty() || !client.isConnected() || isFetchingDefinitions) return;
 
         MonitoringManager.DeviceHeaderData headerData = MonitoringManager.getDeviceHeaderData(this, host);
-        String deviceName = headerData != null ? headerData.title : host;
+        // Unlike IED Monitoring's plain "[GI] bay [Bay]" header, the Definitions table also spells
+        // out device/merk/type - Get Definition is exactly the tool for telling apart several
+        // similar relays that happen to share a GI/Bay naming pattern.
+        String deviceName = headerData != null
+                ? String.format("%s - %s (%s %s)", headerData.title, headerData.device, headerData.merk, headerData.type)
+                : host;
 
         topProgressBar.setVisibility(View.VISIBLE);
         isFetchingDefinitions = true;
