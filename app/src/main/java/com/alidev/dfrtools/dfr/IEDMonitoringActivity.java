@@ -715,9 +715,9 @@ public class IEDMonitoringActivity extends BaseActivity {
         return ContextCompat.getColor(this, UNIT_ACCENT_COLORS[idx]);
     }
 
-    /** Deterministic color per device IP, so a given device's group header always carries the same accent line. */
-    private int getDeviceAccentColor(String ip) {
-        int idx = Math.abs((ip == null ? "" : ip).hashCode()) % UNIT_ACCENT_COLORS.length;
+    /** Deterministic color per Device name, so every group header for that device always carries the same accent line. */
+    private int getDeviceAccentColor(String device) {
+        int idx = Math.abs((device == null ? "" : device).hashCode()) % UNIT_ACCENT_COLORS.length;
         return ContextCompat.getColor(this, UNIT_ACCENT_COLORS[idx]);
     }
 
@@ -1496,11 +1496,13 @@ public class IEDMonitoringActivity extends BaseActivity {
     }
 
     static class HeaderInfo {
-        String title, ip, ipLine;
+        String title, ip, ipLine, device;
         boolean isUnknown;
         boolean isCollapsed;
         boolean isSearchMode; // true while a search query is active: forces expansion + compact header row
-        HeaderInfo(String t, String i, String ipLine, boolean u) { title = t; ip = i; this.ipLine = ipLine; isUnknown = u; }
+        HeaderInfo(String t, String i, String ipLine, String device, boolean u) {
+            title = t; ip = i; this.ipLine = ipLine; this.device = device; isUnknown = u;
+        }
     }
 
     class MonitoringAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
@@ -1572,9 +1574,9 @@ public class IEDMonitoringActivity extends BaseActivity {
                 HeaderInfo header;
                 MonitoringManager.DeviceHeaderData data = getDeviceHeaderData(ip);
                 if (data != null) {
-                    header = new HeaderInfo(data.title, ip, data.ipLine, false);
+                    header = new HeaderInfo(data.title, ip, data.ipLine, data.device, false);
                 } else {
-                    header = new HeaderInfo(ip, ip, ip, true);
+                    header = new HeaderInfo(ip, ip, ip, ip, true);
                 }
                 header.isCollapsed = searching ? false : !expandedIps.contains(ip);
                 header.isSearchMode = searching;
@@ -1817,7 +1819,7 @@ public class IEDMonitoringActivity extends BaseActivity {
             if (statusDot != null) statusDot.setVisibility(View.VISIBLE);
             if (viewDeviceAccent != null) {
                 viewDeviceAccent.setVisibility(View.VISIBLE);
-                viewDeviceAccent.setBackgroundTintList(android.content.res.ColorStateList.valueOf(getDeviceAccentColor(info.ip)));
+                viewDeviceAccent.setBackgroundTintList(android.content.res.ColorStateList.valueOf(getDeviceAccentColor(info.device)));
             }
             if (imgExpand != null) imgExpand.setVisibility(View.VISIBLE);
             if (btnBulkEdit != null) btnBulkEdit.setVisibility(View.VISIBLE);
