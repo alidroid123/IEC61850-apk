@@ -20,6 +20,7 @@ import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.PopupWindow;
 import android.widget.ProgressBar;
 import android.widget.RadioGroup;
 import android.widget.Spinner;
@@ -1099,6 +1100,55 @@ public class IEDMonitoringActivity extends BaseActivity {
         }
     }
 
+    /** Themed replacement for the stock PopupMenu - matches the app's card/dropdown look
+     *  (bg_popup_menu_card, theme-aware surface/text colors) instead of the platform default. */
+    private void showHeaderOptionsMenu(View anchor, HeaderInfo info) {
+        LinearLayout container = new LinearLayout(this);
+        container.setOrientation(LinearLayout.VERTICAL);
+        container.setBackgroundResource(R.drawable.bg_popup_menu_card);
+
+        PopupWindow popup = new PopupWindow(container, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, true);
+        popup.setElevation(dpToPx(8));
+        popup.setOutsideTouchable(true);
+        popup.setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
+
+        addHeaderMenuOption(container, popup, R.drawable.ic_edit_small, R.string.ttl_mon_bulk_edit, -1,
+                () -> showBulkEditDialog(info.ip, info.title));
+        if (info.isUnknown) {
+            addHeaderMenuOption(container, popup, R.drawable.ic_add, R.string.lbl_mon_add_device, -1, () -> {
+                Intent intent = new Intent(IEDMonitoringActivity.this, DeviceListActivity.class);
+                intent.putExtra("ip_prefill", info.ip);
+                startActivity(intent);
+            });
+        }
+        addHeaderMenuOption(container, popup, R.drawable.ic_delete, R.string.lbl_mon_delete_group,
+                R.color.status_danger, () -> confirmDeleteGroup(info));
+
+        container.measure(View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED),
+                View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED));
+        int xOff = anchor.getWidth() - container.getMeasuredWidth();
+        popup.showAsDropDown(anchor, xOff, 0);
+    }
+
+    private void addHeaderMenuOption(LinearLayout container, PopupWindow popup, int iconRes, int labelRes,
+                                      int tintColorRes, Runnable action) {
+        View row = getLayoutInflater().inflate(R.layout.item_header_menu_option, container, false);
+        ImageView icon = row.findViewById(R.id.imgMenuOptionIcon);
+        TextView label = row.findViewById(R.id.txtMenuOptionLabel);
+        icon.setImageResource(iconRes);
+        label.setText(labelRes);
+        if (tintColorRes != -1) {
+            int color = ContextCompat.getColor(this, tintColorRes);
+            icon.setImageTintList(android.content.res.ColorStateList.valueOf(color));
+            label.setTextColor(color);
+        }
+        row.setOnClickListener(v -> {
+            popup.dismiss();
+            action.run();
+        });
+        container.addView(row);
+    }
+
     private void confirmDeleteGroup(HeaderInfo info) {
         View dialogView = getLayoutInflater().inflate(R.layout.dialog_confirm_delete, null);
         AlertDialog dialog = new AlertDialog.Builder(this, R.style.Theme_Comtrade_Dialog)
@@ -1836,30 +1886,7 @@ public class IEDMonitoringActivity extends BaseActivity {
             if (imgExpand != null) imgExpand.setRotation(info.isCollapsed ? 0 : 90);
             layoutHeaderBanner.setOnClickListener(v -> adapter.toggleGroup(info.ip));
             if (btnMoreOptions != null) {
-                btnMoreOptions.setOnClickListener(v -> {
-                    androidx.appcompat.widget.PopupMenu menu = new androidx.appcompat.widget.PopupMenu(IEDMonitoringActivity.this, v);
-                    if (info.isUnknown) {
-                        menu.getMenu().add(0, 1, 0, R.string.lbl_mon_add_device);
-                    }
-                    menu.getMenu().add(0, 2, 1, R.string.ttl_mon_bulk_edit);
-                    menu.getMenu().add(0, 3, 2, R.string.lbl_mon_delete_group);
-                    menu.setOnMenuItemClickListener(item -> {
-                        if (item.getItemId() == 1) {
-                            Intent intent = new Intent(IEDMonitoringActivity.this, DeviceListActivity.class);
-                            intent.putExtra("ip_prefill", info.ip);
-                            startActivity(intent);
-                            return true;
-                        } else if (item.getItemId() == 2) {
-                            showBulkEditDialog(info.ip, info.title);
-                            return true;
-                        } else if (item.getItemId() == 3) {
-                            confirmDeleteGroup(info);
-                            return true;
-                        }
-                        return false;
-                    });
-                    menu.show();
-                });
+                btnMoreOptions.setOnClickListener(v -> showHeaderOptionsMenu(v, info));
             }
             if (btnRefreshGroup != null) {
                 btnRefreshGroup.setOnClickListener(v -> checkIntranetAndExecute(() -> manualRefreshGroup(info.ip)));
