@@ -189,7 +189,7 @@ public class HelpActivity extends BaseActivity {
             new HelpSection(R.drawable.ic_ied_monitor, R.string.help_ttl_monitoring, R.string.help_sum_monitoring, R.string.help_func_monitoring,
                     new HelpComponent[]{
                             new HelpComponent(R.drawable.ic_sync, R.string.help_cmp_mon_1_name, R.string.help_cmp_mon_1_desc),
-                            new HelpComponent(R.drawable.ic_add, R.string.help_cmp_mon_2_name, R.string.help_cmp_mon_2_desc),
+                            new HelpComponent(R.drawable.ic_template, R.string.help_cmp_mon_2_name, R.string.help_cmp_mon_2_desc),
                             new HelpComponent(R.drawable.ic_search, R.string.help_cmp_mon_3_name, R.string.help_cmp_mon_3_desc),
                             new HelpComponent(R.drawable.ic_arrow_right, R.string.help_cmp_mon_4_name, R.string.help_cmp_mon_4_desc),
                             new HelpComponent(R.drawable.ic_sync, R.string.help_cmp_mon_5_name, R.string.help_cmp_mon_5_desc),

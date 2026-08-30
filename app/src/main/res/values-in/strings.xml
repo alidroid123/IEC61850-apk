@@ -644,7 +644,7 @@
     <string name="help_cmp_mon_8_name">Ikon Pensil per Titik</string>
     <string name="help_cmp_mon_8_desc">Mengedit satu titik: ganti nama, atur unit/multiplier, balik nilai boolean, atau atur ambang batas Alarm.</string>
     <string name="help_feat_mon_1_title">Menambah Titik</string>
-    <string name="help_feat_mon_1_steps">1. Tambahkan titik satu per satu dari IED Explorer lewat ikon {ic:add}.\n2. Atau tambah sekaligus semua titik untuk satu tipe relay lewat ikon {ic:add} Template di header - lihat bagian Edit Template di bawah.</string>
+    <string name="help_feat_mon_1_steps">1. Tambahkan titik satu per satu dari IED Explorer lewat ikon {ic:add}.\n2. Atau tambah sekaligus semua titik untuk satu tipe relay lewat ikon {ic:template} Template di header - lihat bagian Edit Template di bawah.</string>
     <string name="help_feat_mon_2_title">Membaca Status Device</string>
     <string name="help_feat_mon_2_steps">1. Setiap header kelompok menampilkan titik status koneksi dan tanggal/waktu update terakhir secara lengkap.\n2. Untuk titik boolean, nilai TRUE ditampilkan warna merah dan FALSE warna hijau - sesuai kondisi gangguan/alarm yang biasanya bernilai TRUE.</string>
     <string name="help_feat_mon_3_title">Bulk Edit Satu Grup</string>

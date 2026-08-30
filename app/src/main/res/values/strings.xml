@@ -678,7 +678,7 @@
     <string name="help_cmp_mon_8_name">Point pencil icon</string>
     <string name="help_cmp_mon_8_desc">Edits a single point: rename it, set unit/multiplier, invert a boolean, or set an Alarm threshold.</string>
     <string name="help_feat_mon_1_title">Adding Points</string>
-    <string name="help_feat_mon_1_steps">1. Add individual points from IED Explorer using its {ic:add} icon.\n2. Or bulk-add a whole relay type\'s points at once with the {ic:add} Template icon in the header - see Edit Template below.</string>
+    <string name="help_feat_mon_1_steps">1. Add individual points from IED Explorer using its {ic:add} icon.\n2. Or bulk-add a whole relay type\'s points at once with the {ic:template} Template icon in the header - see Edit Template below.</string>
     <string name="help_feat_mon_2_title">Reading Device Status</string>
     <string name="help_feat_mon_2_steps">1. Each group header shows a connection dot and the full last-update date/time.\n2. For boolean points, TRUE shows in red and FALSE in green, matching a fault/alarm condition usually being TRUE.</string>
     <string name="help_feat_mon_3_title">Bulk-Editing a Group</string>
