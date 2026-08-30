@@ -54,11 +54,20 @@ public class InternalFileManagerActivity extends BaseActivity {
                     // - a raw file:// Uri risks FileUriExposedException/SecurityException once it
                     // leaves this app's process on API 24+, and isn't readable by the other app
                     // without an explicit permission grant anyway.
+                    // "vnd.android.document/directory" is Android's actual documented MIME type
+                    // for a folder (DocumentsContract.Document.MIME_TYPE_DIR) - not every file
+                    // manager supports it, so resolveActivity() is checked first: previously this
+                    // used a made-up "resource/folder" type that matched zero apps on any device,
+                    // which is what produced the "no app can open this" system message.
                     Uri uri = FileProvider.getUriForFile(this, getPackageName() + ".fileprovider", baseDir);
                     Intent intent = new Intent(Intent.ACTION_VIEW);
-                    intent.setDataAndType(uri, "resource/folder");
+                    intent.setDataAndType(uri, "vnd.android.document/directory");
                     intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                    startActivity(Intent.createChooser(intent, getString(R.string.ttl_file_open_chooser)));
+                    if (intent.resolveActivity(getPackageManager()) != null) {
+                        startActivity(Intent.createChooser(intent, getString(R.string.ttl_file_open_chooser)));
+                    } else {
+                        Toast.makeText(this, getString(R.string.msg_file_open_folder_unsupported, baseDir.getAbsolutePath()), Toast.LENGTH_LONG).show();
+                    }
                 } catch (Exception e) {
                     Toast.makeText(this, getString(R.string.msg_view_general_error, e.getMessage()), Toast.LENGTH_SHORT).show();
                 }

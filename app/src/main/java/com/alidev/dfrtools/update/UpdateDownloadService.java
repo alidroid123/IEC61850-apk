@@ -9,9 +9,11 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Build;
 import android.os.IBinder;
+import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
@@ -53,6 +55,12 @@ public class UpdateDownloadService extends Service {
 
         startForeground(NOTIF_ID, buildNotification());
 
+        // Clear out any leftover APK from a previous update attempt first: it keeps the extra
+        // storage this feature uses capped at one APK at a time (never accumulating across
+        // updates), and avoids handing the installer a stale/partial file left behind by an
+        // earlier failed or abandoned download at the same destination path.
+        apkFile().delete();
+
         DownloadManager downloadManager = (DownloadManager) getSystemService(DOWNLOAD_SERVICE);
         DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url));
         request.setTitle(getString(R.string.app_name));
@@ -79,14 +87,38 @@ public class UpdateDownloadService extends Service {
         return START_NOT_STICKY;
     }
 
+    private File apkFile() {
+        return new File(getExternalFilesDir(null), "update.apk");
+    }
+
+    /**
+     * ACTION_DOWNLOAD_COMPLETE fires for both a successful AND a failed download - it only means
+     * the download reached a terminal state, not that the file is valid. Installing without this
+     * status check was the cause of the "package appears to be invalid" installer error some
+     * users hit: on a failed/incomplete download the broadcast still arrived and the code below
+     * used to try installing the partial file anyway, while tapping the system's own "download
+     * complete" notification later worked because by then the file was actually finished.
+     */
     private void installAndStop() {
-        File apkFile = new File(getExternalFilesDir(null), "update.apk");
-        if (apkFile.exists()) {
+        DownloadManager downloadManager = (DownloadManager) getSystemService(DOWNLOAD_SERVICE);
+        boolean successful = false;
+        try (Cursor cursor = downloadManager.query(new DownloadManager.Query().setFilterById(downloadId))) {
+            if (cursor != null && cursor.moveToFirst()) {
+                int status = cursor.getInt(cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_STATUS));
+                successful = status == DownloadManager.STATUS_SUCCESSFUL;
+            }
+        } catch (Exception ignored) {}
+
+        File apkFile = apkFile();
+        if (successful && apkFile.exists() && apkFile.length() > 0) {
             Uri apkUri = FileProvider.getUriForFile(this, getPackageName() + ".fileprovider", apkFile);
             Intent installIntent = new Intent(Intent.ACTION_VIEW);
             installIntent.setDataAndType(apkUri, "application/vnd.android.package-archive");
             installIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_GRANT_READ_URI_PERMISSION);
             startActivity(installIntent);
+        } else {
+            apkFile.delete();
+            Toast.makeText(this, R.string.msg_update_download_failed, Toast.LENGTH_LONG).show();
         }
         stopSelf();
     }

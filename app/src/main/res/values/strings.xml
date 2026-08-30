@@ -267,6 +267,7 @@
     <string name="msg_all_update_grant_install">Izinkan aplikasi ini menginstal update, lalu coba lagi.</string>
     <string name="msg_all_update_downloading">Mengunduh update di background… instalasi akan muncul otomatis setelah selesai.</string>
     <string name="lbl_update_download_channel">Unduhan Update Aplikasi</string>
+    <string name="msg_update_download_failed">Gagal mengunduh update. Silakan coba lagi.</string>
     <string name="msg_all_update_checking">Memeriksa update…</string>
     <string name="msg_all_update_none">Tidak ada update baru, atau gagal memeriksa koneksi</string>
     <string name="msg_push_update_available">Versi baru ComtradeDownloader sudah tersedia. Buka aplikasi untuk update.</string>
@@ -390,6 +391,7 @@
     <string name="ttl_file_delete_folder">DELETE FOLDER?</string>
     <string name="ttl_file_delete_file">DELETE FILE?</string>
     <string name="ttl_file_open_chooser">Open DFR Folder</string>
+    <string name="msg_file_open_folder_unsupported">No file manager app on this phone can open a folder directly. The files are located at: %1$s</string>
     <string name="ttl_help_main">Help</string>
 
     <!-- // Menu -->

@@ -354,6 +354,7 @@
     <string name="ttl_file_delete_folder">HAPUS FOLDER?</string>
     <string name="ttl_file_delete_file">HAPUS FILE?</string>
     <string name="ttl_file_open_chooser">Buka Folder DFR</string>
+    <string name="msg_file_open_folder_unsupported">Tidak ada aplikasi pengelola file di HP ini yang bisa membuka folder secara langsung. File tersimpan di: %1$s</string>
     <string name="ttl_help_main">Bantuan</string>
 
     <!-- // Menu -->
