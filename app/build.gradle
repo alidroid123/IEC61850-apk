@@ -143,11 +143,25 @@ tasks.register('publishReleaseToGit') {
         exec { workingDir rootProject.projectDir; commandLine 'git', 'push', 'origin', tag; ignoreExitValue = true }
 
         def ghExe = new File('C:/Program Files/GitHub CLI/gh.exe').exists() ? 'C:/Program Files/GitHub CLI/gh.exe' : 'gh'
+
+        // RELEASE_NOTES.md is written by hand (or by whoever/whatever is driving this release)
+        // right before triggering assembleRelease, with what actually changed - it becomes both
+        // the GitHub release body and, from there, the update dialog's "What's new" text and the
+        // FCM push subtext (see UpdateChecker/AppFcmService). Deleted after use so a forgotten
+        // update falls back to a generic note instead of silently repeating stale changelog text
+        // on the next release.
+        def notesFile = file("${rootProject.projectDir}/RELEASE_NOTES.md")
+        def hasNotes = notesFile.exists() && !notesFile.text.trim().isEmpty()
         exec {
             workingDir rootProject.projectDir
-            commandLine ghExe, 'release', 'create', tag, stagedApk.absolutePath, '--title', tag, '--notes', 'Automated release'
+            if (hasNotes) {
+                commandLine ghExe, 'release', 'create', tag, stagedApk.absolutePath, '--title', tag, '--notes-file', notesFile.absolutePath
+            } else {
+                commandLine ghExe, 'release', 'create', tag, stagedApk.absolutePath, '--title', tag, '--notes', 'Automated release'
+            }
             ignoreExitValue = true
         }
+        if (hasNotes) notesFile.delete()
 
         stagedApk.delete()
         logger.lifecycle("==> Release ${tag} published: https://github.com/alidroid123/IEC61850-apk/releases/tag/${tag}")

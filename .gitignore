@@ -18,3 +18,6 @@ keystore.properties
 *.jks
 app/google-services.json
 firebase-service-account.json
+# Per-release changelog scratch file, consumed and deleted by publishReleaseToGit - never
+# committed, so a leftover/forgotten one never pollutes `git status` between releases.
+RELEASE_NOTES.md

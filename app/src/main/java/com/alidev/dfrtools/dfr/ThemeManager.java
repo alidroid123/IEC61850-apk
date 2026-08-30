@@ -78,6 +78,7 @@ public class ThemeManager {
     static {
         java.util.Map<Class<?>, Integer> m = new java.util.HashMap<>();
         m.put(HomeActivity.class,                0); // Azure
+        m.put(com.alidev.dfrtools.update.NotificationActivity.class, 0);
         m.put(DeviceListActivity.class,          1); // Violet
         m.put(RelayTemplateEditActivity.class,   2); // Magenta
         m.put(DfrDownloadActivity.class,         3); // Coral

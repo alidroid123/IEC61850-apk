@@ -114,6 +114,7 @@ public class HelpActivity extends BaseActivity {
                             new HelpComponent(R.drawable.ic_download, R.string.help_cmp_home_2_name, R.string.help_cmp_home_2_desc),
                             new HelpComponent(R.drawable.ic_warning, R.string.help_cmp_home_3_name, R.string.help_cmp_home_3_desc),
                             new HelpComponent(R.drawable.ic_info, R.string.help_cmp_home_4_name, R.string.help_cmp_home_4_desc),
+                            new HelpComponent(R.drawable.ic_notification_bell, R.string.help_cmp_home_5_name, R.string.help_cmp_home_5_desc),
                     },
                     new HelpFeature[]{
                             new HelpFeature(R.string.help_feat_home_1_title, R.string.help_feat_home_1_steps),

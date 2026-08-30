@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Unread-notification indicator on the Home bell icon. A plain white stroke (rather than the
+     active theme's surface color) so it reads correctly against the header gradient itself,
+     which is what it always sits on regardless of theme. -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="oval">
+    <solid android:color="@color/status_danger" />
+    <stroke android:width="1.5dp" android:color="@color/white" />
+</shape>

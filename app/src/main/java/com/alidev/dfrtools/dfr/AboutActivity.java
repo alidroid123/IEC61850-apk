@@ -11,6 +11,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.alidev.dfrtools.R;
+import com.alidev.dfrtools.update.AppNotifications;
 import com.alidev.dfrtools.update.UpdateChecker;
 import com.alidev.dfrtools.update.UpdateFlow;
 
@@ -82,6 +83,9 @@ public class AboutActivity extends BaseActivity {
         UpdateChecker.checkForUpdate(this, info -> {
             if (isFinishing()) return;
             if (info != null) {
+                AppNotifications.add(this, "update_" + info.versionName,
+                        getString(R.string.msg_all_update_available_title, info.versionName),
+                        info.releaseNotes);
                 updateFlow.showUpdateDialog(info);
             } else {
                 Toast.makeText(this, R.string.msg_all_update_none, Toast.LENGTH_SHORT).show();

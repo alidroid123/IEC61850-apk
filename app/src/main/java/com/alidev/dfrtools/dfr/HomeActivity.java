@@ -17,6 +17,8 @@ import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import com.alidev.dfrtools.R;
 import com.alidev.dfrtools.update.AppFcmService;
+import com.alidev.dfrtools.update.AppNotifications;
+import com.alidev.dfrtools.update.NotificationActivity;
 import com.alidev.dfrtools.update.UpdateChecker;
 import com.alidev.dfrtools.update.UpdateFlow;
 import com.alidev.dfrtools.update.UpdatePrefs;
@@ -46,6 +48,7 @@ public class HomeActivity extends BaseActivity {
         drawerLayout = findViewById(R.id.drawerLayout);
         NavigationView navigationView = findViewById(R.id.navigationView);
         findViewById(R.id.btnMenu).setOnClickListener(v -> drawerLayout.openDrawer(GravityCompat.START));
+        findViewById(R.id.btnNotifications).setOnClickListener(v -> startActivity(new Intent(this, NotificationActivity.class)));
 
         setupDrawerThemes(navigationView);
 
@@ -157,15 +160,29 @@ public class HomeActivity extends BaseActivity {
     private void checkForAppUpdate() {
         UpdatePrefs.recordOpen(this);
         UpdateChecker.checkForUpdate(this, info -> {
-            if (info == null || isFinishing() || !UpdatePrefs.shouldShowPrompt(this)) return;
+            if (info == null || isFinishing()) return;
+            // Logged to the in-app notification feed regardless of the dialog's own throttling
+            // below, so a user who dismissed the popup can still find the update (and what
+            // changed) later from the bell icon instead of it only ever appearing once.
+            AppNotifications.add(this, "update_" + info.versionName,
+                    getString(R.string.msg_all_update_available_title, info.versionName),
+                    info.releaseNotes);
+            refreshNotifBadge();
+            if (!UpdatePrefs.shouldShowPrompt(this)) return;
             updateFlow.showUpdateDialog(info);
         });
+    }
+
+    private void refreshNotifBadge() {
+        View dot = findViewById(R.id.dotNotifUnread);
+        if (dot != null) dot.setVisibility(AppNotifications.hasUnread(this) ? View.VISIBLE : View.GONE);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
         refreshDashboardStats();
+        refreshNotifBadge();
         updateFlow.onResume();
     }
 

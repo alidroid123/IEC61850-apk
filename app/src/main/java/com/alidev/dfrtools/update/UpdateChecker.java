@@ -31,10 +31,13 @@ public class UpdateChecker {
     public static class UpdateInfo {
         public final String versionName;
         public final String downloadUrl;
+        /** GitHub release notes body (may be empty if the release was published without one). */
+        public final String releaseNotes;
 
-        UpdateInfo(String versionName, String downloadUrl) {
+        UpdateInfo(String versionName, String downloadUrl, String releaseNotes) {
             this.versionName = versionName;
             this.downloadUrl = downloadUrl;
+            this.releaseNotes = releaseNotes;
         }
     }
 
@@ -99,7 +102,8 @@ public class UpdateChecker {
             }
             if (apkUrl == null) return null;
 
-            return new UpdateInfo(remoteVersion, apkUrl);
+            String releaseNotes = json.optString("body", "").trim();
+            return new UpdateInfo(remoteVersion, apkUrl, releaseNotes);
         } finally {
             conn.disconnect();
         }

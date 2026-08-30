@@ -62,6 +62,11 @@ public class UpdateFlow {
         TextView tvMessage = dialogView.findViewById(R.id.tvUpdateMessage);
         tvMessage.setText(activity.getString(R.string.msg_all_update_available, info.versionName));
 
+        if (info.releaseNotes != null && !info.releaseNotes.trim().isEmpty()) {
+            dialogView.findViewById(R.id.layoutUpdateNotes).setVisibility(View.VISIBLE);
+            ((TextView) dialogView.findViewById(R.id.tvUpdateNotes)).setText(info.releaseNotes.trim());
+        }
+
         AlertDialog dialog = new AlertDialog.Builder(activity, R.style.Theme_Comtrade_Dialog)
                 .setView(dialogView)
                 .setCancelable(false)

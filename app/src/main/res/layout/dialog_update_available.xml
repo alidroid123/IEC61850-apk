@@ -40,6 +40,43 @@
         android:gravity="center"
         android:lineSpacingExtra="@dimen/spacing_tiny" />
 
+    <!-- Hidden entirely when the release has no notes, rather than showing an empty box. -->
+    <LinearLayout
+        android:id="@+id/layoutUpdateNotes"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/spacing_l"
+        android:orientation="vertical"
+        android:visibility="gone">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/lbl_update_whats_new"
+            android:textColor="?attr/colorPrimary"
+            android:textSize="@dimen/text_size_body_small"
+            android:textStyle="bold"
+            android:letterSpacing="0.05" />
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:maxHeight="160dp"
+            android:layout_marginTop="@dimen/spacing_xs"
+            android:background="@drawable/bg_edit_text"
+            android:padding="@dimen/spacing_m">
+
+            <TextView
+                android:id="@+id/tvUpdateNotes"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="@color/text_primary"
+                android:textSize="@dimen/text_size_body_small"
+                android:lineSpacingExtra="@dimen/spacing_xs"
+                android:gravity="start" />
+        </ScrollView>
+    </LinearLayout>
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

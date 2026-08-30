@@ -143,6 +143,11 @@
             android:exported="false"
             android:label="Help" />
 
+        <activity
+            android:name=".update.NotificationActivity"
+            android:exported="false"
+            android:label="Notifikasi" />
+
     </application>
 
 </manifest>

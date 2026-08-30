@@ -347,6 +347,15 @@
 
     <!-- // Title -->
     <string name="ttl_abt_main">Tentang Aplikasi</string>
+    <string name="ttl_notif_main">Notifikasi</string>
+    <string name="btn_notif_mark_all_read">Tandai semua dibaca</string>
+    <string name="msg_notif_empty">Belum ada notifikasi</string>
+    <string name="lbl_notif_time_now">Baru saja</string>
+    <string name="lbl_notif_time_minutes">%d menit lalu</string>
+    <string name="lbl_notif_time_hours">%d jam lalu</string>
+    <string name="lbl_notif_time_days">%d hari lalu</string>
+    <string name="msg_all_update_available_title">Update v%1$s tersedia</string>
+    <string name="lbl_update_whats_new">Yang baru:</string>
     <string name="ttl_all_delete_data">HAPUS DATA?</string>
     <string name="ttl_base_theme_selection">Pilih Tema (%s)</string>
     <string name="ttl_dev_database">Database Device</string>
@@ -496,6 +505,8 @@
     <string name="help_cmp_home_3_desc">Jumlah gardu induk, status online device, dan jumlah alarm aktif di seluruh armada, sekilas.</string>
     <string name="help_cmp_home_4_name">FAB Tentang Aplikasi</string>
     <string name="help_cmp_home_4_desc">Tombol mengambang di pojok kanan bawah yang membuka halaman Tentang Aplikasi.</string>
+    <string name="help_cmp_home_5_name">Ikon lonceng notifikasi</string>
+    <string name="help_cmp_home_5_desc">Membuka layar Notifikasi. Titik merah berarti ada yang belum dibaca - biasanya versi aplikasi baru.</string>
     <string name="help_feat_home_1_title">Membuka Fitur</string>
     <string name="help_feat_home_1_steps">1. Ketuk kartu menu mana pun untuk langsung membuka fitur tersebut.\n2. Banner ringkasan di bawah kartu ({ic:location} gardu induk, {ic:list} device, {ic:warning} alarm aktif) menampilkan gambaran cepat seluruh armada - buka Daftar Relay atau IED Monitoring untuk detail lengkap di balik angka-angka ini.</string>
     <string name="help_feat_home_2_title">Menu Samping</string>
@@ -583,7 +594,7 @@
     <string name="help_feat_exp_4_title">Refresh &amp; Tutup Koneksi</string>
     <string name="help_feat_exp_4_steps">1. Ketuk {ic:sync} untuk membangun ulang struktur bila terasa sudah tidak sesuai.\n2. Ketuk CLOSE IED untuk memutus koneksi setelah selesai.</string>
 
-    <string name="help_ttl_viewer">DFR Viewer</string>
+    <string name="help_ttl_viewer">Viewer DFR</string>
     <string name="help_sum_viewer">Tampilkan dan analisis gelombang rekaman COMTRADE</string>
     <string name="help_func_viewer">Membuka pasangan file COMTRADE (.cfg + .dat) dan menampilkan grafik channel analog serta digitalnya untuk analisis gangguan, lengkap dengan kursor, zoom, dan ekspor laporan.</string>
     <string name="help_cmp_view_1_name">Ikon Zoom</string>
@@ -603,7 +614,7 @@
     <string name="help_feat_view_4_title">Zoom &amp; Ekspor</string>
     <string name="help_feat_view_4_steps">1. Cubit layar (pinch) untuk zoom, atau ketuk {ic:zoom} untuk mengunci level zoom di semua channel.\n2. Gunakan DOWNLOAD IMG atau EXPORT TO PDF untuk menyimpan grafik/laporan.</string>
 
-    <string name="help_ttl_monitoring">IED Monitoring</string>
+    <string name="help_ttl_monitoring">Monitoring IED</string>
     <string name="help_sum_monitoring">Pantau nilai dan alarm dari banyak IED secara real-time</string>
     <string name="help_func_monitoring">Membaca ulang secara berkala (polling) daftar titik yang dipantau dari satu atau beberapa IED, dikelompokkan per device, lengkap dengan ambang batas alarm yang bisa diatur dan indikator status koneksi per device.</string>
     <string name="help_cmp_mon_1_name">Ikon Refresh (header)</string>

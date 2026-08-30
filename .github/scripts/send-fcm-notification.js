@@ -33,9 +33,26 @@ function httpsPost(url, headers, body) {
     });
 }
 
+// FCM data-message values must be flat strings, and system notification trays clip very long
+// text anyway - so the changelog is capped rather than sent in full. The in-app notification
+// feed (AppNotifications, populated from the same push in AppFcmService) doesn't have this
+// limit - only the push's own visible text is trimmed here.
+const BODY_MAX_LENGTH = 300;
+
+function buildBody(tag, releaseBody) {
+    const trimmed = (releaseBody || '').trim();
+    if (!trimmed) {
+        return `Versi ${tag} sudah tersedia. Buka aplikasi untuk update.`;
+    }
+    if (trimmed.length <= BODY_MAX_LENGTH) return trimmed;
+    return trimmed.slice(0, BODY_MAX_LENGTH - 1).trimEnd() + '…';
+}
+
 async function main() {
     const sa = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
     const tag = process.env.RELEASE_TAG || 'terbaru';
+    const version = tag.startsWith('v') ? tag.slice(1) : tag;
+    const body = buildBody(tag, process.env.RELEASE_BODY);
 
     const now = Math.floor(Date.now() / 1000);
     const header = { alg: 'RS256', typ: 'JWT' };
@@ -64,7 +81,8 @@ async function main() {
             topic: 'app_updates',
             data: {
                 title: 'Update Tersedia',
-                body: `Versi ${tag} sudah tersedia. Buka aplikasi untuk update.`,
+                body,
+                version,
             },
         },
     });

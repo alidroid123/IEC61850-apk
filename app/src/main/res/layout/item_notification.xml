@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/rootNotifItem"
+    style="@style/Widget.DFRtools.CardView"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="@dimen/spacing_m"
+    android:clickable="true"
+    android:focusable="true"
+    android:foreground="?attr/selectableItemBackground">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:padding="@dimen/spacing_l">
+
+        <ImageView
+            android:id="@+id/imgNotifIcon"
+            android:layout_width="@dimen/icon_size_xl"
+            android:layout_height="@dimen/icon_size_xl"
+            android:background="@drawable/bg_icon_badge"
+            android:padding="@dimen/spacing_s"
+            android:src="@drawable/ic_notification_bell"
+            app:tint="@color/white" />
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginStart="@dimen/spacing_m"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/txtNotifTitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="?attr/customTextPrimaryColor"
+                android:textSize="@dimen/text_size_body"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/txtNotifMessage"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:textColor="@color/text_secondary"
+                android:textSize="@dimen/text_size_body_small"
+                android:lineSpacingExtra="@dimen/spacing_xs"
+                android:maxLines="3"
+                android:ellipsize="end" />
+
+            <TextView
+                android:id="@+id/txtNotifTime"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_xs"
+                android:textColor="@color/text_hint"
+                android:textSize="@dimen/text_size_micro" />
+        </LinearLayout>
+
+        <View
+            android:id="@+id/dotNotifItemUnread"
+            android:layout_width="9dp"
+            android:layout_height="9dp"
+            android:layout_marginStart="@dimen/spacing_s"
+            android:layout_gravity="top"
+            android:background="@drawable/bg_theme_color_circle"
+            android:backgroundTint="@color/status_danger" />
+
+    </LinearLayout>
+</com.google.android.material.card.MaterialCardView>

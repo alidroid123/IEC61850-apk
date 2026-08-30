@@ -47,6 +47,12 @@ public class AppFcmService extends FirebaseMessagingService {
             if (message.getNotification().getBody() != null) body = message.getNotification().getBody();
         }
 
+        // De-duped by version below (same id as the in-app checker uses), so a release the user
+        // already saw via push and then re-confirms by opening the app doesn't show up twice.
+        String version = message.getData().get("version");
+        String notifId = version != null ? "update_" + version : "push_" + System.currentTimeMillis();
+        AppNotifications.add(this, notifId, title, body);
+
         showNotification(title, body);
     }
 
