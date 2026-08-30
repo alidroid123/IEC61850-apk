@@ -78,6 +78,7 @@
     <string name="ttl_mms_fulllist_notif">MMS Full List</string>
     <string name="lbl_mms_fulllist_notif_channel">Full List Fetch</string>
     <string name="msg_mms_fulllist_already_running">Proses Full List sudah berjalan di background</string>
+    <string name="ttl_mms_fulllist_share_chooser">Bagikan mms_full_list.csv</string>
     <string name="btn_mon_add">TAMBAH</string>
     <string name="btn_mon_save">SIMPAN</string>
     <string name="btn_mon_remove">HAPUS</string>

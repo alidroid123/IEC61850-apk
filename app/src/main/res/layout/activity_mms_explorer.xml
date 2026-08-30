@@ -160,7 +160,9 @@
                 android:layout_width="wrap_content"
                 android:layout_height="@dimen/standard_button_height"
                 android:layout_marginStart="@dimen/spacing_s"
-                android:text="@string/btn_mms_full_list" />
+                android:text="@string/btn_mms_full_list"
+                android:textColor="?attr/colorPrimary"
+                app:strokeColor="?attr/colorPrimary" />
 
             <Button
                 android:id="@+id/btnDisconnect"
@@ -244,51 +246,69 @@
         android:padding="@dimen/spacing_s"
         android:clipToPadding="false" />
 
-    <LinearLayout
+    <FrameLayout
         android:id="@+id/layoutFullList"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical"
         android:visibility="gone">
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:background="@color/bg_navy_dim"
-            android:paddingHorizontal="@dimen/spacing_m"
-            android:paddingVertical="@dimen/spacing_s">
+            android:layout_height="match_parent"
+            android:orientation="vertical">
 
-            <TextView
-                android:id="@+id/txtFullListStatus"
-                android:layout_width="0dp"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:background="@color/bg_navy_dim"
+                android:paddingHorizontal="@dimen/spacing_m"
+                android:paddingVertical="@dimen/spacing_s">
+
+                <TextView
+                    android:id="@+id/txtFullListStatus"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:textColor="?attr/colorPrimary"
+                    android:textSize="@dimen/text_size_caption"
+                    android:fontFamily="sans-serif-medium"
+                    android:maxLines="1"
+                    android:ellipsize="middle" />
+
+                <TextView
+                    android:id="@+id/btnCloseFullList"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="?attr/selectableItemBackground"
+                    android:padding="@dimen/spacing_xs"
+                    android:text="@string/btn_mms_full_list_close"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="@dimen/text_size_caption"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvFullList"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
                 android:layout_weight="1"
-                android:textColor="?attr/colorPrimary"
-                android:textSize="@dimen/text_size_caption"
-                android:fontFamily="sans-serif-medium"
-                android:maxLines="1"
-                android:ellipsize="middle" />
-
-            <TextView
-                android:id="@+id/btnCloseFullList"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:background="?attr/selectableItemBackground"
-                android:padding="@dimen/spacing_xs"
-                android:text="@string/btn_mms_full_list_close"
-                android:textColor="@color/text_secondary"
-                android:textSize="@dimen/text_size_caption"
-                android:textStyle="bold" />
+                android:paddingHorizontal="@dimen/spacing_s" />
         </LinearLayout>
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rvFullList"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:paddingHorizontal="@dimen/spacing_s" />
-    </LinearLayout>
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/fabFullListExport"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|end"
+            android:layout_margin="@dimen/spacing_xxl"
+            android:contentDescription="@string/btn_mms_definitions_export"
+            android:src="@drawable/ic_export"
+            app:backgroundTint="?attr/colorPrimary"
+            app:tint="@color/white"
+            android:visibility="gone" />
+
+    </FrameLayout>
 
 </LinearLayout>

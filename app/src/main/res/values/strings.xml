@@ -81,6 +81,7 @@
     <string name="ttl_mms_fulllist_notif">MMS Full List</string>
     <string name="lbl_mms_fulllist_notif_channel">Full List Fetch</string>
     <string name="msg_mms_fulllist_already_running">A Full List fetch is already running in the background</string>
+    <string name="ttl_mms_fulllist_share_chooser">Share mms_full_list.csv</string>
     <string name="btn_mon_add">ADD</string>
     <string name="btn_mon_save">SAVE</string>
     <string name="btn_mon_remove">REMOVE</string>

@@ -3,6 +3,7 @@ package com.alidev.dfrtools.dfr;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -25,6 +26,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.core.content.ContextCompat;
+import androidx.core.content.FileProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -33,6 +35,9 @@ import com.alidev.dfrtools.R;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -94,6 +99,7 @@ public class MmsExplorerActivity extends BaseActivity {
     private View layoutFullList;
     private RecyclerView rvFullList;
     private TextView txtFullListStatus;
+    private View fabFullListExport;
     private FullListAdapter fullListAdapter;
     private final List<FullListEntry> fullListItems = new ArrayList<>();
     private final FullListFetchService.ProgressListener fullListProgressListener = new FullListFetchService.ProgressListener() {
@@ -103,6 +109,7 @@ public class MmsExplorerActivity extends BaseActivity {
                 fullListItems.addAll(FullListFetchService.getResults());
                 fullListAdapter.notifyDataSetChanged();
                 txtFullListStatus.setText(getString(R.string.msg_mms_fulllist_progress, currentPath));
+                fabFullListExport.setVisibility(View.GONE);
             });
         }
         @Override public void onComplete(List<FullListEntry> results) {
@@ -111,6 +118,7 @@ public class MmsExplorerActivity extends BaseActivity {
                 fullListItems.addAll(results);
                 fullListAdapter.notifyDataSetChanged();
                 txtFullListStatus.setText(getString(R.string.msg_mms_fulllist_done, results.size()));
+                fabFullListExport.setVisibility(results.isEmpty() ? View.GONE : View.VISIBLE);
             });
         }
     };
@@ -143,13 +151,18 @@ public class MmsExplorerActivity extends BaseActivity {
         layoutFullList = findViewById(R.id.layoutFullList);
         rvFullList = findViewById(R.id.rvFullList);
         txtFullListStatus = findViewById(R.id.txtFullListStatus);
+        fabFullListExport = findViewById(R.id.fabFullListExport);
         rvFullList.setLayoutManager(new LinearLayoutManager(this));
         fullListAdapter = new FullListAdapter();
         rvFullList.setAdapter(fullListAdapter);
         findViewById(R.id.btnCloseFullList).setOnClickListener(v -> exitFullListMode());
+        fabFullListExport.setOnClickListener(v -> exportFullListToCsv());
 
         findViewById(R.id.btnBack).setOnClickListener(v -> finish());
-        btnConnect.setOnClickListener(v -> checkIntranetAndExecute(this::startExploration));
+        btnConnect.setOnClickListener(v -> {
+            exitFullListMode(); // switch back to the tree view so EXPLORE's results are actually visible
+            checkIntranetAndExecute(this::startExploration);
+        });
         btnDisconnect.setOnClickListener(v -> stopExploration());
         btnFullList.setOnClickListener(v -> confirmStartFullList());
         btnMmsMoreOptions.setOnClickListener(this::showMoreOptionsMenu);
@@ -530,6 +543,14 @@ public class MmsExplorerActivity extends BaseActivity {
                 nodeToFcMap.clear();
                 pathsToRestore = null;
                 adapter.setNodes(new ArrayList<>());
+
+                // CLOSE IED resets whichever view was showing - a Full List browsed earlier for
+                // this device shouldn't linger once the connection it came from is torn down.
+                exitFullListMode();
+                fullListItems.clear();
+                fullListAdapter.notifyDataSetChanged();
+                fabFullListExport.setVisibility(View.GONE);
+
                 Toast.makeText(this, R.string.msg_mms_connection_closed, Toast.LENGTH_SHORT).show();
             });
         });
@@ -1178,6 +1199,7 @@ public class MmsExplorerActivity extends BaseActivity {
             checkIntranetAndExecute(() -> {
                 fullListItems.clear();
                 fullListAdapter.notifyDataSetChanged();
+                fabFullListExport.setVisibility(View.GONE);
                 FullListFetchService.start(this, host);
                 enterFullListMode();
             });
@@ -1189,14 +1211,77 @@ public class MmsExplorerActivity extends BaseActivity {
     private void enterFullListMode() {
         rvExplorer.setVisibility(View.GONE);
         layoutFullList.setVisibility(View.VISIBLE);
-        txtFullListStatus.setText(FullListFetchService.isRunning()
+        boolean running = FullListFetchService.isRunning();
+        txtFullListStatus.setText(running
                 ? getString(R.string.msg_mms_fulllist_progress, FullListFetchService.getLastPath())
                 : getString(R.string.lbl_mms_full_list_count, fullListItems.size()));
+        fabFullListExport.setVisibility(!running && !fullListItems.isEmpty() ? View.VISIBLE : View.GONE);
     }
 
     private void exitFullListMode() {
         layoutFullList.setVisibility(View.GONE);
         rvExplorer.setVisibility(View.VISIBLE);
+    }
+
+    private void exportFullListToCsv() {
+        if (fullListItems.isEmpty()) {
+            Toast.makeText(this, R.string.msg_mms_definitions_export_empty, Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        try {
+            File exportDir = new File(getExternalFilesDir(null), "Exports");
+            if (!exportDir.exists()) exportDir.mkdirs();
+
+            File file = new File(exportDir, "mms_full_list.csv");
+            FileOutputStream fos = new FileOutputStream(file);
+            fos.write("ALAMAT NODE,VALUE\n".getBytes(StandardCharsets.UTF_8));
+            for (FullListEntry entry : fullListItems) {
+                String line = String.format("\"%s\",\"%s\"\n", entry.fullPath, entry.value);
+                fos.write(line.getBytes(StandardCharsets.UTF_8));
+            }
+            fos.close();
+            showFullListExportSuccessDialog(file);
+        } catch (Exception e) {
+            Toast.makeText(this, getString(R.string.msg_mms_definitions_export_fail, e.getMessage()), Toast.LENGTH_LONG).show();
+        }
+    }
+
+    private void showFullListExportSuccessDialog(File file) {
+        View dialogView = getLayoutInflater().inflate(R.layout.dialog_export_success, null);
+        AlertDialog dialog = new AlertDialog.Builder(this, R.style.Theme_Comtrade_Dialog)
+                .setView(dialogView)
+                .create();
+
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+            dialog.getWindow().setGravity(android.view.Gravity.CENTER);
+        }
+
+        dialogView.findViewById(R.id.btnOpenFolder).setOnClickListener(v -> {
+            startActivity(new Intent(this, InternalFileManagerActivity.class));
+            dialog.dismiss();
+        });
+
+        dialogView.findViewById(R.id.btnShare).setOnClickListener(v -> {
+            shareFullListCsv(file);
+            dialog.dismiss();
+        });
+
+        dialog.show();
+    }
+
+    private void shareFullListCsv(File file) {
+        try {
+            Uri uri = FileProvider.getUriForFile(this, getPackageName() + ".fileprovider", file);
+            Intent intent = new Intent(Intent.ACTION_SEND);
+            intent.setType("text/csv");
+            intent.putExtra(Intent.EXTRA_STREAM, uri);
+            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            startActivity(Intent.createChooser(intent, getString(R.string.ttl_mms_fulllist_share_chooser)));
+        } catch (Exception e) {
+            Toast.makeText(this, R.string.msg_all_share_fail, Toast.LENGTH_SHORT).show();
+        }
     }
 
     /** Adds a Full List row to IED Monitoring, reusing the same dialog as Explorer's tree view -
