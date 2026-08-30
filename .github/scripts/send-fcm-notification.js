@@ -80,7 +80,10 @@ async function main() {
         message: {
             topic: 'app_updates',
             data: {
-                title: 'Update Tersedia',
+                // No "title" here on purpose: AppFcmService only builds its own "vInstalled > vNew"
+                // title (comparing against whatever version THAT device currently has) when the
+                // payload doesn't already carry one. Sending a fixed title here would defeat that
+                // and show every device the same generic "Update Tersedia" no matter its version.
                 body,
                 version,
             },

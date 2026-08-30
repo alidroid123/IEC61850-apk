@@ -1355,12 +1355,48 @@ public class IEDMonitoringActivity extends BaseActivity {
                 manager.updateNode(row.oldFullPath, row.oldIp, row.original);
                 updated++;
             }
+            reorderNodesForIp(ip, rows);
             Toast.makeText(this, getString(R.string.msg_mon_bulk_edit_saved, updated, deletedCount), Toast.LENGTH_SHORT).show();
             dialog.dismiss();
             loadNodes();
         });
 
         dialog.show();
+    }
+
+    /**
+     * After Bulk Edit's add/update/removal calls above, re-lays the persisted node list so this
+     * ip's nodes come out in the exact order the user left them in the table - so a drag-reorder
+     * in the Bulk Edit dialog carries over to the main IED Monitoring list too. Every other ip's
+     * nodes keep their current relative order (only this ip's slots in the master list are
+     * reassigned, not moved as a block), since group membership itself is unaffected by this.
+     */
+    private void reorderNodesForIp(String ip, List<BulkEditRow> rows) {
+        List<MonitoredNode> allNodes = manager.getNodes();
+        List<Integer> ipSlots = new ArrayList<>();
+        List<MonitoredNode> pool = new ArrayList<>();
+        for (int i = 0; i < allNodes.size(); i++) {
+            if (allNodes.get(i).ipAddress.equals(ip)) {
+                ipSlots.add(i);
+                pool.add(allNodes.get(i));
+            }
+        }
+        List<MonitoredNode> ordered = new ArrayList<>();
+        for (BulkEditRow row : rows) {
+            for (Iterator<MonitoredNode> it = pool.iterator(); it.hasNext(); ) {
+                MonitoredNode n = it.next();
+                if (n.fullPath.equals(row.fullPath)) {
+                    ordered.add(n);
+                    it.remove();
+                    break;
+                }
+            }
+        }
+        ordered.addAll(pool); // leftovers that couldn't be matched (shouldn't normally happen) keep their old relative order at the end
+        for (int i = 0; i < ipSlots.size() && i < ordered.size(); i++) {
+            allNodes.set(ipSlots.get(i), ordered.get(i));
+        }
+        manager.saveNodes(allNodes);
     }
 
     /** Lets the user drag rows up/down by their handle to reorder the Bulk Edit table; swiping is unused. */
