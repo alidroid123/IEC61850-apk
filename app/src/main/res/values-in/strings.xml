@@ -237,7 +237,28 @@
     <string name="lbl_view_trigger_time_label">Waktu Trigger :</string>
 
     <!-- // Message -->
-    <string name="msg_abt_description">Aplikasi ini dirancang untuk memudahkan pengambilan (retrieval) file COMTRADE dari Power System Protection Relays menggunakan protokol IEC 61850 MMS secara aman. Dilengkapi dengan fitur cerdas pendeteksian vendor, manajemen file history, dan viewer grafik DFR yang interaktif.</string>
+    <string name="msg_abt_description">Perkakas lapangan untuk engineer proteksi. Aplikasi ini menyambung ke Power System Protection Relays melalui protokol IEC 61850 MMS untuk mengambil dan menganalisis rekaman gangguan COMTRADE, menjelajahi struktur data IED secara langsung, serta memantau pengukuran dan alarm dari banyak gardu induk sekaligus.</string>
+    <string name="lbl_abt_features">Fitur Utama</string>
+    <string name="abt_feat_1_name">Unduh COMTRADE</string>
+    <string name="abt_feat_1_desc">Ambil rekaman gangguan DFR dari relay via MMS, dengan mode Bulk / Single / Deep Scan dan profil vendor.</string>
+    <string name="abt_feat_2_name">DFR Viewer</string>
+    <string name="abt_feat_2_desc">Tampilkan channel analog dan digital, ukur dengan kursor T1/T2, lalu ekspor grafik atau laporan PDF.</string>
+    <string name="abt_feat_3_name">Riwayat Unduhan</string>
+    <string name="abt_feat_3_desc">Telusuri, buka, bagikan, dan kelola semua file COMTRADE yang pernah diunduh, tersusun per folder.</string>
+    <string name="abt_feat_4_name">Database Relay</string>
+    <string name="abt_feat_4_desc">Simpan gardu induk, bay, IP, merk, dan tipe tiap relay, lengkap dengan ping satuan/massal dan import/export CSV.</string>
+    <string name="abt_feat_5_name">IED Explorer</string>
+    <string name="abt_feat_5_desc">Jelajahi struktur data IEC 61850 secara langsung (LD / LN / DO / DA) dan baca nilainya realtime.</string>
+    <string name="abt_feat_6_name">IED Monitoring</string>
+    <string name="abt_feat_6_desc">Pantau titik dari banyak IED sekaligus, dengan ambang alarm, refresh per grup, dan bulk edit.</string>
+    <string name="abt_feat_7_name">Template Relay</string>
+    <string name="abt_feat_7_desc">Buat set titik pantau per tipe relay dan terapkan ke device manapun dari tipe itu dalam satu langkah.</string>
+    <string name="abt_feat_8_name">Backup &amp; Restore</string>
+    <string name="abt_feat_8_desc">Ekspor device, titik pantau, dan template jadi satu file JSON, lalu gabungkan kembali tanpa menimpa data lama.</string>
+    <string name="abt_feat_9_name">Update Otomatis</string>
+    <string name="abt_feat_9_desc">Mengecek rilis baru di GitHub, memasangnya langsung dari aplikasi, dan bisa memberi tahu lewat notifikasi.</string>
+    <string name="abt_feat_10_name">Tema &amp; Bahasa</string>
+    <string name="abt_feat_10_desc">Lima skema warna termasuk tema Abstract multi-warna, mode Terang/Gelap, serta Bahasa Indonesia/Inggris.</string>
     <string name="msg_all_delete_confirm">Tindakan ini permanen dan tidak bisa dibatalkan.</string>
     <string name="msg_all_fields_required">Semua field harus diisi</string>
     <string name="msg_all_share_fail">Gagal membagikan file</string>
@@ -659,12 +680,12 @@
     <string name="help_func_tips">Catatan umum yang berlaku di seluruh aplikasi: cara kerja pengecekan Intranet/VPN, cara mengganti tema warna, dan aksi mana saja yang membutuhkan koneksi jaringan ke relay.</string>
     <string name="help_cmp_tips_1_name">Saklar INTRANET</string>
     <string name="help_cmp_tips_1_desc">Pengecekan jangkauan singkat sebelum menyambung ke relay; menawarkan membuka aplikasi VPN FortiClient jika gagal.</string>
-    <string name="help_cmp_tips_2_name">Ikon Tema (matahari/bulan)</string>
-    <string name="help_cmp_tips_2_desc">Di menu samping, berganti antara beberapa tema warna serta mode Terang/Gelap.</string>
+    <string name="help_cmp_tips_2_name">Titik Warna (menu samping)</string>
+    <string name="help_cmp_tips_2_desc">Lima skema warna: Modern Blue, Emerald, Purple, Red, dan Abstract. Yang terakhir (titik multi-warna) memberi tiap layar kombinasi warnanya sendiri, bukan satu warna di seluruh aplikasi.</string>
     <string name="help_feat_tips_1_title">Intranet &amp; VPN</string>
     <string name="help_feat_tips_1_steps">1. Aktifkan saklar INTRANET pada layar koneksi untuk pengecekan jangkauan singkat.\n2. Jika gagal, aplikasi menawarkan untuk membuka aplikasi {ic:vpn} VPN FortiClient - juga bisa dibuka langsung dari menu samping.</string>
     <string name="help_feat_tips_2_title">Mengganti Tema</string>
-    <string name="help_feat_tips_2_steps">1. Buka menu samping.\n2. Ketuk {ic:theme} untuk berganti antara tema warna dan mode Terang/Gelap.</string>
+    <string name="help_feat_tips_2_steps">1. Buka menu samping lewat {ic:menu}.\n2. Ketuk salah satu dari lima titik warna di bawah \"Skema Warna\" untuk mengganti skema.\n3. Pilih titik multi-warna untuk tema Abstract, yang merotasi palet warna per layar.\n4. Ketuk {ic:theme} \"Ganti Mode\" untuk berpindah antara Terang dan Gelap.</string>
     <string name="help_feat_tips_3_title">Offline vs Online</string>
     <string name="help_feat_tips_3_steps">1. Sebagian besar aplikasi dapat digunakan sepenuhnya offline.\n2. Hanya aksi yang berkomunikasi dengan relay fisik (hubungkan, explore, download, monitoring, ping) yang membutuhkan ponsel berada di jaringan yang sama dengan relay, biasanya melalui VPN.</string>
 </resources>

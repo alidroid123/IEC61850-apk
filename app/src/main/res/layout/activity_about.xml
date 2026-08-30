@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/bg_app"
+    android:background="?attr/customBackgroundColor"
     android:orientation="vertical">
 
     <FrameLayout
@@ -56,10 +56,17 @@
         </LinearLayout>
     </FrameLayout>
 
-    <LinearLayout
+    <!-- Scrollable since the feature list was added - the old fixed-height column only ever held
+         the logo and one description card, and would clip the moment the list grew. -->
+    <ScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
+        android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:orientation="vertical"
         android:gravity="center_horizontal"
         android:padding="@dimen/spacing_xxl">
@@ -75,7 +82,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/spacing_l"
             android:text="@string/ttl_home_app_title"
-            android:textColor="@color/text_primary"
+            android:textColor="?attr/customTextPrimaryColor"
             android:textSize="@dimen/text_size_header"
             android:textStyle="bold"
             android:letterSpacing="0.1" />
@@ -92,7 +99,7 @@
             style="@style/Widget.DFRtools.CardView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/spacing_giant">
+            android:layout_marginTop="@dimen/spacing_xl">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -113,9 +120,39 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="@string/msg_abt_description"
-                    android:textColor="@color/text_primary"
+                    android:textColor="?attr/customTextPrimaryColor"
                     android:textSize="@dimen/text_size_body"
                     android:lineSpacingExtra="@dimen/spacing_xs" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <com.google.android.material.card.MaterialCardView
+            style="@style/Widget.DFRtools.CardView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_m">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="@dimen/spacing_l">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/lbl_abt_features"
+                    android:textColor="?attr/colorPrimary"
+                    android:textSize="@dimen/text_size_body_large"
+                    android:textStyle="bold" />
+
+                <!-- Filled at runtime by AboutActivity so the list stays in one place in code
+                     rather than duplicated as ten near-identical XML blocks. -->
+                <LinearLayout
+                    android:id="@+id/containerAboutFeatures"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
@@ -124,14 +161,9 @@
             style="@style/Widget.DFRtools.Button"
             android:layout_width="wrap_content"
             android:layout_height="@dimen/large_button_height"
-            android:layout_marginTop="@dimen/spacing_l"
+            android:layout_marginTop="@dimen/spacing_xl"
             android:text="@string/btn_all_check_update"
             android:textSize="@dimen/text_size_body_small" />
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -139,8 +171,9 @@
             android:text="@string/developed_by_mmd"
             android:textColor="@color/text_secondary"
             android:textSize="@dimen/text_size_caption"
-            android:layout_marginBottom="@dimen/spacing_s" />
+            android:layout_marginTop="@dimen/spacing_xl" />
 
     </LinearLayout>
+    </ScrollView>
 
 </LinearLayout>

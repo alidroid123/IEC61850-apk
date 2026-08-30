@@ -260,7 +260,28 @@
     <string name="lbl_view_trigger_time_label">Trigger Time :</string>
 
     <!-- // Message -->
-    <string name="msg_abt_description">This application is designed to facilitate the retrieval of COMTRADE files from Power System Protection Relays using the IEC 61850 MMS protocol securely. Equipped with intelligent vendor detection features, file history management, and an interactive DFR graphic viewer.</string>
+    <string name="msg_abt_description">A field toolkit for protection engineers. It connects to Power System Protection Relays over the IEC 61850 MMS protocol to retrieve and analyse COMTRADE fault records, browse an IED\'s live data model, and continuously monitor measurements and alarms across a whole fleet of substations.</string>
+    <string name="lbl_abt_features">Main Features</string>
+    <string name="abt_feat_1_name">COMTRADE Download</string>
+    <string name="abt_feat_1_desc">Retrieve DFR fault records from a relay over MMS, with Bulk / Single / Deep Scan modes and vendor profiles.</string>
+    <string name="abt_feat_2_name">DFR Viewer</string>
+    <string name="abt_feat_2_desc">Plot analog and digital channels, measure with T1/T2 cursors, and export the chart or a PDF report.</string>
+    <string name="abt_feat_3_name">Download History</string>
+    <string name="abt_feat_3_desc">Browse, open, share, and manage every COMTRADE file already downloaded, organised per folder.</string>
+    <string name="abt_feat_4_name">Relay Database</string>
+    <string name="abt_feat_4_desc">Store substation, bay, IP, brand, and type per relay, with single or bulk ping and CSV import/export.</string>
+    <string name="abt_feat_5_name">IED Explorer</string>
+    <string name="abt_feat_5_desc">Browse a live IEC 61850 data model tree (LD / LN / DO / DA) and read real-time values.</string>
+    <string name="abt_feat_6_name">IED Monitoring</string>
+    <string name="abt_feat_6_desc">Poll monitored points across many IEDs, with alarm thresholds, per-group refresh, and bulk edit.</string>
+    <string name="abt_feat_7_name">Relay Templates</string>
+    <string name="abt_feat_7_desc">Define a reusable point set per relay model and apply it to any device of that type in one step.</string>
+    <string name="abt_feat_8_name">Backup &amp; Restore</string>
+    <string name="abt_feat_8_desc">Export devices, monitored points, and templates into one JSON file, and merge it back without overwriting.</string>
+    <string name="abt_feat_9_name">Automatic Updates</string>
+    <string name="abt_feat_9_desc">Checks GitHub for new releases, installs them in-app, and can announce them by push notification.</string>
+    <string name="abt_feat_10_name">Themes &amp; Language</string>
+    <string name="abt_feat_10_desc">Five colour schemes including the multi-colour Abstract theme, Light/Dark mode, and Indonesian/English.</string>
     <string name="msg_all_delete_confirm">This action is permanent and cannot be undone.</string>
     <string name="msg_all_fields_required">All fields must be filled</string>
     <string name="msg_all_update_available">Versi %1$s sudah tersedia. Update sekarang untuk mendapatkan perbaikan dan fitur terbaru.</string>
@@ -698,12 +719,12 @@
     <string name="help_func_tips">General notes that apply across the app: how the Intranet/VPN check works, how to switch color themes, and which actions require a network connection to the relay.</string>
     <string name="help_cmp_tips_1_name">INTRANET switch</string>
     <string name="help_cmp_tips_1_desc">Quick reachability check before connecting to a relay; offers to open the FortiClient VPN app if it fails.</string>
-    <string name="help_cmp_tips_2_name">Theme icon (sun/moon)</string>
-    <string name="help_cmp_tips_2_desc">In the side drawer, switches between several color themes and Light/Dark mode.</string>
+    <string name="help_cmp_tips_2_name">Colour swatches (side drawer)</string>
+    <string name="help_cmp_tips_2_desc">Five colour schemes: Modern Blue, Emerald, Purple, Red, and Abstract. The last one (the multi-colour dot) gives each screen its own colour combination instead of one hue everywhere.</string>
     <string name="help_feat_tips_1_title">Intranet &amp; VPN</string>
     <string name="help_feat_tips_1_steps">1. Toggle the INTRANET switch on a connection screen for a quick reachability check.\n2. If it fails, the app offers to open the {ic:vpn} FortiClient VPN app - also reachable directly from the side drawer.</string>
     <string name="help_feat_tips_2_title">Switching Themes</string>
-    <string name="help_feat_tips_2_steps">1. Open the side drawer.\n2. Tap {ic:theme} to switch between color themes and Light/Dark mode.</string>
+    <string name="help_feat_tips_2_steps">1. Open the side drawer with {ic:menu}.\n2. Tap one of the five colour dots under \"Colour Scheme\" to change the scheme.\n3. Pick the multi-colour dot for the Abstract theme, which rotates the palette per screen.\n4. Tap {ic:theme} \"Change Mode\" to switch between Light and Dark.</string>
     <string name="help_feat_tips_3_title">Offline vs Online</string>
     <string name="help_feat_tips_3_steps">1. Most of the app works fully offline.\n2. Only actions that talk to a physical relay (connect, explore, download, monitor, ping) need the phone on the same network as the relay, usually via VPN.</string>
 </resources>
