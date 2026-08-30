@@ -936,9 +936,14 @@ public class IEDMonitoringActivity extends BaseActivity {
             boolean replaceExisting = rgApplyMode.getCheckedRadioButtonId() == R.id.rbApplyModeReplace;
 
             dialog.dismiss();
-            checkIntranetAndExecute(() -> {
-                for (String ip : targetIps) applyRelayTemplate(templateName, points, ip, replaceExisting);
-            });
+            // No checkIntranetAndExecute gate here on purpose: that's a single ping to a fixed
+            // gateway IP, and a failed/flaky ping used to block every target device's template
+            // apply outright - including ones that were actually reachable - with nothing added
+            // and only a generic VPN prompt shown. applyRelayTemplate() below already opens its
+            // own real MMS connection per device and reports a clear per-IP failure
+            // (msg_mon_template_connect_fail) if that fails, which is the connectivity check that
+            // actually matters here.
+            for (String ip : targetIps) applyRelayTemplate(templateName, points, ip, replaceExisting);
         });
 
         dialog.show();
