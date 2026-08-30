@@ -56,6 +56,14 @@
     <string name="msg_mms_definitions_export_empty">No definitions to export</string>
     <string name="msg_mms_definitions_export_fail">Failed to export CSV: %s</string>
     <string name="ttl_mms_definitions_share_chooser">Share node_definitions.csv</string>
+    <string name="ttl_mms_definitions_pick">Select Table</string>
+    <string name="msg_mms_definitions_empty_pick">No saved definitions yet - use Get Definition on a connected device first</string>
+    <string name="lbl_mms_definitions_pick_subtitle">%1$s • %2$d node(s)</string>
+    <string name="lbl_mms_definitions_subtitle">%1$s • %2$d node(s)</string>
+    <string name="ttl_mms_definitions_delete_confirm">Delete This Table?</string>
+    <string name="msg_mms_definitions_delete_confirm">Deletes every saved \'d\' node for %1$s. This can\'t be undone - you can always run Get Definition again later.</string>
+    <string name="msg_mms_definitions_deleted">Table deleted</string>
+    <string name="lbl_mms_def_copied">Copied</string>
     <string name="btn_mon_add">ADD</string>
     <string name="btn_mon_save">SAVE</string>
     <string name="btn_mon_remove">REMOVE</string>
@@ -656,7 +664,7 @@
     <string name="help_feat_exp_4_title">Refreshing &amp; Disconnecting</string>
     <string name="help_feat_exp_4_steps">1. Tap the {ic:more} more-options icon, then Refresh, to rebuild the structure if it looks outdated.\n2. Tap CLOSE IED to disconnect when finished.</string>
     <string name="help_feat_exp_5_title">Getting Node Definitions</string>
-    <string name="help_feat_exp_5_steps">1. While connected, tap the {ic:more} more-options icon, then Get Definition.\n2. The app scans every logical node for \'d\' (description) attributes and saves them to a table - this can take a while on a large device.\n3. Tap {ic:more} then Table anytime (connected or not) to browse the saved definitions, or use its export icon to save them as CSV.</string>
+    <string name="help_feat_exp_5_steps">1. While connected, tap the {ic:more} more-options icon, then Get Definition.\n2. The app scans every logical node for \'d\' (description) attributes and saves them to a table - this can take a while on a large device.\n3. Tap {ic:more} then Table anytime (connected or not), pick a device from the list, then browse its saved definitions - tap any address or value to copy it, use {ic:add} to monitor that point, or the trash icon to delete the whole table.</string>
 
     <string name="help_ttl_viewer">DFR Viewer</string>
     <string name="help_sum_viewer">View and analyze COMTRADE waveform recordings</string>

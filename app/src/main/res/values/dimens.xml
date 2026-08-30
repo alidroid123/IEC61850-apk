@@ -81,9 +81,4 @@
     <dimen name="bulk_col_delete_width">36dp</dimen>
     <dimen name="bulk_row_input_height">34dp</dimen>
     <dimen name="bulk_rows_max_height">260dp</dimen>
-
-    <!-- // Node Definitions table columns -->
-    <dimen name="def_col_name_width">150dp</dimen>
-    <dimen name="def_col_address_width">220dp</dimen>
-    <dimen name="def_col_value_width">200dp</dimen>
 </resources>

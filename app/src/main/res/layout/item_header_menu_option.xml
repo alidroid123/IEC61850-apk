@@ -1,33 +1,56 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/rowMenuOption"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="horizontal"
-    android:gravity="center_vertical"
-    android:minWidth="180dp"
-    android:paddingHorizontal="@dimen/spacing_m"
-    android:paddingVertical="@dimen/spacing_m"
-    android:background="?attr/selectableItemBackground"
-    android:clickable="true"
-    android:focusable="true">
+    android:orientation="vertical">
 
-    <ImageView
-        android:id="@+id/imgMenuOptionIcon"
-        android:layout_width="@dimen/icon_size_ms"
-        android:layout_height="@dimen/icon_size_ms"
-        app:tint="?attr/colorPrimary" />
-
-    <TextView
-        android:id="@+id/txtMenuOptionLabel"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:id="@+id/rowMenuOption"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/spacing_m"
-        android:textColor="?attr/customTextPrimaryColor"
-        android:textSize="@dimen/text_size_body_small"
-        android:fontFamily="sans-serif-medium"
-        android:maxLines="1"
-        android:ellipsize="end" />
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:minWidth="200dp"
+        android:paddingHorizontal="@dimen/spacing_m"
+        android:paddingVertical="@dimen/spacing_s"
+        android:background="?attr/selectableItemBackground"
+        android:clickable="true"
+        android:focusable="true">
+
+        <FrameLayout
+            android:id="@+id/badgeMenuOptionIcon"
+            android:layout_width="34dp"
+            android:layout_height="34dp"
+            android:background="@drawable/bg_icon_badge">
+
+            <ImageView
+                android:id="@+id/imgMenuOptionIcon"
+                android:layout_width="@dimen/icon_size_s"
+                android:layout_height="@dimen/icon_size_s"
+                android:layout_gravity="center"
+                app:tint="@color/white" />
+        </FrameLayout>
+
+        <TextView
+            android:id="@+id/txtMenuOptionLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/spacing_m"
+            android:textColor="?attr/customTextPrimaryColor"
+            android:textSize="@dimen/text_size_body_small"
+            android:fontFamily="sans-serif-medium"
+            android:maxLines="1"
+            android:ellipsize="end" />
+
+    </LinearLayout>
+
+    <View
+        android:id="@+id/dividerMenuOption"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginHorizontal="@dimen/spacing_m"
+        android:background="@color/divider"
+        android:alpha="0.4" />
 
 </LinearLayout>

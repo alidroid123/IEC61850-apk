@@ -53,6 +53,14 @@
     <string name="msg_mms_definitions_export_empty">Tidak ada data untuk diekspor</string>
     <string name="msg_mms_definitions_export_fail">Gagal ekspor CSV: %s</string>
     <string name="ttl_mms_definitions_share_chooser">Bagikan node_definitions.csv</string>
+    <string name="ttl_mms_definitions_pick">Pilih Tabel</string>
+    <string name="msg_mms_definitions_empty_pick">Belum ada definisi tersimpan - gunakan Get Definition di device yang terhubung dulu</string>
+    <string name="lbl_mms_definitions_pick_subtitle">%1$s • %2$d node</string>
+    <string name="lbl_mms_definitions_subtitle">%1$s • %2$d node</string>
+    <string name="ttl_mms_definitions_delete_confirm">Hapus Tabel Ini?</string>
+    <string name="msg_mms_definitions_delete_confirm">Menghapus semua node \'d\' tersimpan untuk %1$s. Tidak bisa dibatalkan - Anda selalu bisa menjalankan Get Definition lagi nanti.</string>
+    <string name="msg_mms_definitions_deleted">Tabel dihapus</string>
+    <string name="lbl_mms_def_copied">Disalin</string>
     <string name="btn_mon_add">TAMBAH</string>
     <string name="btn_mon_save">SIMPAN</string>
     <string name="btn_mon_remove">HAPUS</string>
@@ -622,7 +630,7 @@
     <string name="help_feat_exp_4_title">Refresh &amp; Tutup Koneksi</string>
     <string name="help_feat_exp_4_steps">1. Ketuk ikon {ic:more} titik tiga, lalu Refresh, untuk membangun ulang struktur bila terasa sudah tidak sesuai.\n2. Ketuk CLOSE IED untuk memutus koneksi setelah selesai.</string>
     <string name="help_feat_exp_5_title">Mengambil Node Definitions</string>
-    <string name="help_feat_exp_5_steps">1. Saat sedang terhubung, ketuk ikon {ic:more} titik tiga, lalu Get Definition.\n2. Aplikasi memindai setiap logical node untuk atribut \'d\' (deskripsi) dan menyimpannya ke tabel - bisa memakan waktu cukup lama pada device besar.\n3. Ketuk {ic:more} lalu Table kapan saja (terhubung atau tidak) untuk melihat definisi tersimpan, atau pakai ikon export-nya untuk simpan sebagai CSV.</string>
+    <string name="help_feat_exp_5_steps">1. Saat sedang terhubung, ketuk ikon {ic:more} titik tiga, lalu Get Definition.\n2. Aplikasi memindai setiap logical node untuk atribut \'d\' (deskripsi) dan menyimpannya ke tabel - bisa memakan waktu cukup lama pada device besar.\n3. Ketuk {ic:more} lalu Table kapan saja (terhubung atau tidak), pilih device dari daftar, lalu lihat definisi tersimpannya - ketuk alamat atau value untuk menyalin, pakai {ic:add} untuk memantau titik itu, atau ikon tempat sampah untuk menghapus seluruh tabel.</string>
 
     <string name="help_ttl_viewer">Viewer DFR</string>
     <string name="help_sum_viewer">Tampilkan dan analisis gelombang rekaman COMTRADE</string>

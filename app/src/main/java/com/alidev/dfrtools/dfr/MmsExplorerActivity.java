@@ -939,10 +939,15 @@ public class MmsExplorerActivity extends BaseActivity {
             addMoreOption(container, popup, R.drawable.ic_definition, R.string.btn_mms_get_definition, this::fetchAllDefinitions);
         }
         addMoreOption(container, popup, R.drawable.ic_table, R.string.btn_mms_open_definitions,
-                () -> startActivity(new Intent(this, NodeDefinitionListActivity.class)));
+                this::showPickDefinitionDeviceDialog);
         addMoreOption(container, popup, R.drawable.ic_ied_monitor, R.string.btn_mms_open_monitoring,
                 () -> startActivity(new Intent(this, IEDMonitoringActivity.class)));
 
+        if (container.getChildCount() > 0) {
+            View lastRow = container.getChildAt(container.getChildCount() - 1);
+            View divider = lastRow.findViewById(R.id.dividerMenuOption);
+            if (divider != null) divider.setVisibility(View.GONE);
+        }
         container.measure(View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED),
                 View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED));
         int xOff = anchor.getWidth() - container.getMeasuredWidth();
@@ -964,6 +969,55 @@ public class MmsExplorerActivity extends BaseActivity {
 
     private int dpToPx(int dp) {
         return (int) (dp * getResources().getDisplayMetrics().density);
+    }
+
+    /** Lists every device that has a saved Node Definitions table (name + IP), so "Table" in the
+     *  overflow menu opens straight to the one the user means instead of one giant mixed table. */
+    private void showPickDefinitionDeviceDialog() {
+        List<NodeDefinition> all = new NodeDefinitionManager(this).getAll();
+        java.util.LinkedHashMap<String, List<NodeDefinition>> grouped = new java.util.LinkedHashMap<>();
+        for (NodeDefinition d : all) {
+            List<NodeDefinition> list = grouped.get(d.ip);
+            if (list == null) { list = new ArrayList<>(); grouped.put(d.ip, list); }
+            list.add(d);
+        }
+        if (grouped.isEmpty()) {
+            Toast.makeText(this, R.string.msg_mms_definitions_empty_pick, Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        View v = getLayoutInflater().inflate(R.layout.dialog_pick_list, null);
+        AlertDialog dialog = new AlertDialog.Builder(this, R.style.Theme_Comtrade_Dialog)
+                .setView(v)
+                .create();
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+            dialog.getWindow().setGravity(android.view.Gravity.CENTER);
+        }
+
+        ((TextView) v.findViewById(R.id.tvPickListTitle)).setText(R.string.ttl_mms_definitions_pick);
+        LinearLayout container = v.findViewById(R.id.llPickListItems);
+
+        for (java.util.Map.Entry<String, List<NodeDefinition>> entry : grouped.entrySet()) {
+            String ip = entry.getKey();
+            List<NodeDefinition> defs = entry.getValue();
+            String deviceName = defs.get(0).deviceName;
+
+            View row = getLayoutInflater().inflate(R.layout.item_dialog_pick_row, container, false);
+            ((TextView) row.findViewById(R.id.tvPickRowTitle)).setText(deviceName);
+            ((TextView) row.findViewById(R.id.tvPickRowSubtitle)).setText(
+                    getString(R.string.lbl_mms_definitions_pick_subtitle, ip, defs.size()));
+            row.setOnClickListener(view -> {
+                dialog.dismiss();
+                Intent intent = new Intent(this, NodeDefinitionListActivity.class);
+                intent.putExtra("ip", ip);
+                startActivity(intent);
+            });
+            container.addView(row);
+        }
+
+        v.findViewById(R.id.btnPickListCancel).setOnClickListener(view -> dialog.dismiss());
+        dialog.show();
     }
 
     /**
@@ -1027,7 +1081,17 @@ public class MmsExplorerActivity extends BaseActivity {
             String subPath = path + "." + sub;
             if (sub.equals("d")) {
                 Iec61850DfrClient.FcReadResult result = client.readWithFcFallback(subPath, nodeToFcMap.get(subPath));
-                out.add(new NodeDefinition(host, deviceName, subPath, result != null ? result.value : ""));
+                NodeDefinition def = new NodeDefinition(host, deviceName, subPath, result != null ? result.value : "");
+                if (subItems.contains("general")) {
+                    // Common data classes like ACD/ACT pair a "general" boolean alarm state with
+                    // "d" as its description at the same DO - surface it alongside the description
+                    // since that's usually the actual point worth monitoring.
+                    String generalPath = path + ".general";
+                    Iec61850DfrClient.FcReadResult genResult = client.readWithFcFallback(generalPath, nodeToFcMap.get(generalPath));
+                    def.hasGeneralStatus = true;
+                    def.generalStatusValue = genResult != null ? genResult.value : "";
+                }
+                out.add(def);
             } else {
                 collectDefinitionsUnderDO(subPath, host, deviceName, out);
             }

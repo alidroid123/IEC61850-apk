@@ -1159,22 +1159,33 @@ public class IEDMonitoringActivity extends BaseActivity {
         addHeaderMenuOption(container, popup, R.drawable.ic_delete, R.string.lbl_mon_delete_group,
                 R.color.status_danger, () -> confirmDeleteGroup(info));
 
+        hideLastMenuOptionDivider(container);
         container.measure(View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED),
                 View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED));
         int xOff = anchor.getWidth() - container.getMeasuredWidth();
         popup.showAsDropDown(anchor, xOff, 0);
     }
 
+    /** The last row's divider is a trailing line with nothing below it - hide it so the card's
+     *  own rounded bottom edge is the last thing the eye sees. */
+    private void hideLastMenuOptionDivider(LinearLayout container) {
+        if (container.getChildCount() == 0) return;
+        View lastRow = container.getChildAt(container.getChildCount() - 1);
+        View divider = lastRow.findViewById(R.id.dividerMenuOption);
+        if (divider != null) divider.setVisibility(View.GONE);
+    }
+
     private void addHeaderMenuOption(LinearLayout container, PopupWindow popup, int iconRes, int labelRes,
                                       int tintColorRes, Runnable action) {
         View row = getLayoutInflater().inflate(R.layout.item_header_menu_option, container, false);
+        View badge = row.findViewById(R.id.badgeMenuOptionIcon);
         ImageView icon = row.findViewById(R.id.imgMenuOptionIcon);
         TextView label = row.findViewById(R.id.txtMenuOptionLabel);
         icon.setImageResource(iconRes);
         label.setText(labelRes);
         if (tintColorRes != -1) {
             int color = ContextCompat.getColor(this, tintColorRes);
-            icon.setImageTintList(android.content.res.ColorStateList.valueOf(color));
+            badge.setBackgroundTintList(android.content.res.ColorStateList.valueOf(color));
             label.setTextColor(color);
         }
         row.setOnClickListener(v -> {

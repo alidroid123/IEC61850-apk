@@ -1,5 +1,8 @@
 package com.alidev.dfrtools.dfr;
 
+import android.content.ClipData;
+import android.content.ClipboardManager;
+import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -11,6 +14,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
+import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -23,31 +27,38 @@ import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
 
-/** Read-only table of "d" (description) attributes fetched via MMS Explorer's "Get Definition" - see NodeDefinitionManager. */
+/**
+ * Read-only table of "d" (description) attributes fetched via MMS Explorer's "Get Definition"
+ * for ONE device (picked beforehand in MmsExplorerActivity.showPickDefinitionDeviceDialog) -
+ * see NodeDefinitionManager.
+ */
 public class NodeDefinitionListActivity extends BaseActivity {
 
+    private String ip;
     private List<NodeDefinition> items;
+    private RecyclerView.Adapter<DefVH> adapter;
+    private View layoutEmpty;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_node_definitions);
 
+        ip = getIntent().getStringExtra("ip");
+        if (ip == null || ip.isEmpty()) {
+            finish();
+            return;
+        }
+
         findViewById(R.id.btnBack).setOnClickListener(v -> finish());
         findViewById(R.id.btnExportDefinitions).setOnClickListener(v -> exportToCsv());
+        findViewById(R.id.btnDeleteDefinitionsTable).setOnClickListener(v -> confirmDeleteTable());
 
-        items = new NodeDefinitionManager(this).getAll();
-        Collections.sort(items, (a, b) -> {
-            int byName = a.deviceName.compareToIgnoreCase(b.deviceName);
-            return byName != 0 ? byName : a.nodeAddress.compareToIgnoreCase(b.nodeAddress);
-        });
-
-        View layoutEmpty = findViewById(R.id.layoutDefinitionsEmpty);
-        layoutEmpty.setVisibility(items.isEmpty() ? View.VISIBLE : View.GONE);
+        layoutEmpty = findViewById(R.id.layoutDefinitionsEmpty);
 
         RecyclerView rv = findViewById(R.id.rvDefinitions);
         rv.setLayoutManager(new LinearLayoutManager(this));
-        rv.setAdapter(new RecyclerView.Adapter<DefVH>() {
+        adapter = new RecyclerView.Adapter<DefVH>() {
             @NonNull @Override
             public DefVH onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
                 return new DefVH(LayoutInflater.from(parent.getContext()).inflate(R.layout.item_node_definition_row, parent, false));
@@ -58,7 +69,80 @@ public class NodeDefinitionListActivity extends BaseActivity {
             }
 
             @Override public int getItemCount() { return items.size(); }
+        };
+        rv.setAdapter(adapter);
+
+        loadItems();
+    }
+
+    private void loadItems() {
+        items = new NodeDefinitionManager(this).getForIp(ip);
+        Collections.sort(items, (a, b) -> a.nodeAddress.compareToIgnoreCase(b.nodeAddress));
+
+        String deviceName = items.isEmpty() ? ip : items.get(0).deviceName;
+        ((TextView) findViewById(R.id.txtDefinitionsSubtitle)).setText(
+                getString(R.string.lbl_mms_definitions_subtitle, deviceName, items.size()));
+
+        layoutEmpty.setVisibility(items.isEmpty() ? View.VISIBLE : View.GONE);
+        adapter.notifyDataSetChanged();
+    }
+
+    private void confirmDeleteTable() {
+        String deviceName = items.isEmpty() ? ip : items.get(0).deviceName;
+
+        View dialogView = getLayoutInflater().inflate(R.layout.dialog_confirm_delete, null);
+        AlertDialog dialog = new AlertDialog.Builder(this, R.style.Theme_Comtrade_Dialog)
+                .setView(dialogView)
+                .create();
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+        }
+
+        ((TextView) dialogView.findViewById(R.id.tvConfirmTitle)).setText(R.string.ttl_mms_definitions_delete_confirm);
+        ((TextView) dialogView.findViewById(R.id.tvConfirmMessage)).setText(
+                getString(R.string.msg_mms_definitions_delete_confirm, deviceName));
+
+        dialogView.findViewById(R.id.btnCancel).setOnClickListener(v -> dialog.dismiss());
+        dialogView.findViewById(R.id.btnConfirm).setOnClickListener(v -> {
+            new NodeDefinitionManager(this).removeForIp(ip);
+            dialog.dismiss();
+            Toast.makeText(this, R.string.msg_mms_definitions_deleted, Toast.LENGTH_SHORT).show();
+            finish();
         });
+
+        dialog.show();
+    }
+
+    /**
+     * Adds this row to IED Monitoring: the "general" boolean (the actual alarm state) when the
+     * device model has one alongside "d", using the description text itself as the custom name -
+     * that pairing is the whole point of Get Definition, turning a raw IEC 61850 tag into a
+     * readable monitored point in one tap. Falls back to monitoring the "d" node itself (as a
+     * string) when there's no sibling "general" to point at instead.
+     */
+    private void addDefinitionToMonitoring(NodeDefinition d) {
+        String targetPath;
+        String type;
+        if (d.hasGeneralStatus && d.nodeAddress.endsWith(".d")) {
+            targetPath = d.nodeAddress.substring(0, d.nodeAddress.length() - 2) + ".general";
+            type = "boolean";
+        } else {
+            targetPath = d.nodeAddress;
+            type = "string";
+        }
+        String nodeName = targetPath.contains(".") ? targetPath.substring(targetPath.lastIndexOf('.') + 1) : targetPath;
+
+        MonitoredNode mn = new MonitoredNode(d.deviceName, d.ip, nodeName, targetPath, type);
+        mn.customName = !d.value.trim().isEmpty() ? d.value.trim() : nodeName;
+        new MonitoringManager(this).addNode(mn);
+        Toast.makeText(this, R.string.lbl_mon_added, Toast.LENGTH_SHORT).show();
+    }
+
+    private void copyToClipboard(String text) {
+        if (text == null || text.isEmpty()) return;
+        ClipboardManager cm = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+        cm.setPrimaryClip(ClipData.newPlainText("node_definition", text));
+        Toast.makeText(this, R.string.lbl_mms_def_copied, Toast.LENGTH_SHORT).show();
     }
 
     private void exportToCsv() {
@@ -73,9 +157,10 @@ public class NodeDefinitionListActivity extends BaseActivity {
 
             File file = new File(exportDir, "node_definitions.csv");
             FileOutputStream fos = new FileOutputStream(file);
-            fos.write("NAMA,ALAMAT NODE,VALUE\n".getBytes(StandardCharsets.UTF_8));
+            fos.write("NAMA,ALAMAT NODE,STATUS GENERAL,VALUE\n".getBytes(StandardCharsets.UTF_8));
             for (NodeDefinition d : items) {
-                String line = String.format("\"%s\",\"%s\",\"%s\"\n", d.deviceName, d.nodeAddress, d.value);
+                String line = String.format("\"%s\",\"%s\",\"%s\",\"%s\"\n",
+                        d.deviceName, d.nodeAddress, d.hasGeneralStatus ? d.generalStatusValue : "", d.value);
                 fos.write(line.getBytes(StandardCharsets.UTF_8));
             }
             fos.close();
@@ -122,20 +207,39 @@ public class NodeDefinitionListActivity extends BaseActivity {
         }
     }
 
-    static class DefVH extends RecyclerView.ViewHolder {
-        final TextView txtName, txtAddress, txtValue;
+    class DefVH extends RecyclerView.ViewHolder {
+        final View layoutStatus, dotStatus;
+        final TextView txtStatus, txtAddress, txtValue;
+        final View btnAdd;
 
         DefVH(@NonNull View v) {
             super(v);
-            txtName = v.findViewById(R.id.txtDefName);
+            layoutStatus = v.findViewById(R.id.layoutDefStatus);
+            dotStatus = v.findViewById(R.id.dotDefStatus);
+            txtStatus = v.findViewById(R.id.txtDefStatus);
             txtAddress = v.findViewById(R.id.txtDefAddress);
             txtValue = v.findViewById(R.id.txtDefValue);
+            btnAdd = v.findViewById(R.id.btnDefAddMonitor);
         }
 
         void bind(NodeDefinition d) {
-            txtName.setText(d.deviceName);
+            if (d.hasGeneralStatus) {
+                layoutStatus.setVisibility(View.VISIBLE);
+                boolean on = d.generalStatusValue.equalsIgnoreCase("true");
+                txtStatus.setText(on ? "TRUE" : "FALSE");
+                int color = ContextCompat.getColor(NodeDefinitionListActivity.this,
+                        on ? R.color.status_danger : R.color.status_safe);
+                txtStatus.setTextColor(color);
+                dotStatus.setBackgroundTintList(android.content.res.ColorStateList.valueOf(color));
+            } else {
+                layoutStatus.setVisibility(View.GONE);
+            }
+
             txtAddress.setText(d.nodeAddress);
             txtValue.setText(d.value);
+            txtAddress.setOnClickListener(v -> copyToClipboard(d.nodeAddress));
+            txtValue.setOnClickListener(v -> copyToClipboard(d.value));
+            btnAdd.setOnClickListener(v -> addDefinitionToMonitoring(d));
         }
     }
 }

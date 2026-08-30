@@ -35,6 +35,8 @@ public class NodeDefinitionManager {
                 d.deviceName = o.optString("deviceName", "");
                 d.nodeAddress = o.optString("nodeAddress", "");
                 d.value = o.optString("value", "");
+                d.hasGeneralStatus = o.optBoolean("hasGeneralStatus", false);
+                d.generalStatusValue = o.optString("generalStatusValue", "");
                 items.add(d);
             }
         } catch (JSONException ignored) {}
@@ -50,6 +52,8 @@ public class NodeDefinitionManager {
                 o.put("deviceName", d.deviceName);
                 o.put("nodeAddress", d.nodeAddress);
                 o.put("value", d.value);
+                o.put("hasGeneralStatus", d.hasGeneralStatus);
+                o.put("generalStatusValue", d.generalStatusValue);
                 arr.put(o);
             }
         } catch (JSONException ignored) {}
@@ -62,6 +66,21 @@ public class NodeDefinitionManager {
         List<NodeDefinition> all = getAll();
         all.removeIf(d -> d.ip.equals(ip));
         all.addAll(fresh);
+        saveAll(all);
+    }
+
+    public List<NodeDefinition> getForIp(String ip) {
+        List<NodeDefinition> result = new ArrayList<>();
+        for (NodeDefinition d : getAll()) {
+            if (d.ip.equals(ip)) result.add(d);
+        }
+        return result;
+    }
+
+    /** Deletes every stored row for this ip - used by the "delete table" action. */
+    public void removeForIp(String ip) {
+        List<NodeDefinition> all = getAll();
+        all.removeIf(d -> d.ip.equals(ip));
         saveAll(all);
     }
 }
