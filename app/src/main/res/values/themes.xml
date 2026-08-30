@@ -47,6 +47,76 @@
         <item name="customAccentColor">#0284C7</item>
     </style>
 
+    <!--
+        Theme 5 - ABSTRACT (light). Unlike themes 1-4 (one hue app-wide), this one is a 6-colour
+        hexad - six hues ~60 degrees apart, i.e. two interlocking equilateral triangles on the
+        colour wheel. ThemeManager picks one of these six slots per activity, so moving between
+        screens rotates the palette instead of repeating a single hue.
+
+        Per slot n: primary = palette[n], secondary = palette[n+1], accent = palette[n+2].
+        Primary -> secondary is only ~60 degrees apart so the header/button gradients stay clean;
+        the accent sits ~120 degrees away (the balanced-triangle partner) and is only ever used
+        FLAT (decorative blobs, icon tints), never as a gradient endpoint - blending a 120-degree
+        hue jump into a gradient is what produced the muddy headers in v1.0.21.
+
+        Palette: 0 Azure #0369A1 | 1 Violet #6D28D9 | 2 Magenta #BE185D
+                 3 Coral #C2410C | 4 Moss   #4D7C0F | 5 Green   #15803D
+        Neutrals are identical across all six slots so the app still reads as one product.
+    -->
+    <style name="Theme.DFRtools.Abstract.S0" parent="Theme.DFRtools">
+        <item name="colorPrimary">#0369A1</item>
+        <item name="colorSecondary">#6D28D9</item>
+        <item name="customAccentColor">#BE185D</item>
+        <item name="customBackgroundColor">#FAFAFA</item>
+        <item name="customSurfaceColor">#FFFFFF</item>
+        <item name="customTextPrimaryColor">#111827</item>
+    </style>
+
+    <style name="Theme.DFRtools.Abstract.S1" parent="Theme.DFRtools">
+        <item name="colorPrimary">#6D28D9</item>
+        <item name="colorSecondary">#BE185D</item>
+        <item name="customAccentColor">#C2410C</item>
+        <item name="customBackgroundColor">#FAFAFA</item>
+        <item name="customSurfaceColor">#FFFFFF</item>
+        <item name="customTextPrimaryColor">#111827</item>
+    </style>
+
+    <style name="Theme.DFRtools.Abstract.S2" parent="Theme.DFRtools">
+        <item name="colorPrimary">#BE185D</item>
+        <item name="colorSecondary">#C2410C</item>
+        <item name="customAccentColor">#4D7C0F</item>
+        <item name="customBackgroundColor">#FAFAFA</item>
+        <item name="customSurfaceColor">#FFFFFF</item>
+        <item name="customTextPrimaryColor">#111827</item>
+    </style>
+
+    <style name="Theme.DFRtools.Abstract.S3" parent="Theme.DFRtools">
+        <item name="colorPrimary">#C2410C</item>
+        <item name="colorSecondary">#4D7C0F</item>
+        <item name="customAccentColor">#15803D</item>
+        <item name="customBackgroundColor">#FAFAFA</item>
+        <item name="customSurfaceColor">#FFFFFF</item>
+        <item name="customTextPrimaryColor">#111827</item>
+    </style>
+
+    <style name="Theme.DFRtools.Abstract.S4" parent="Theme.DFRtools">
+        <item name="colorPrimary">#4D7C0F</item>
+        <item name="colorSecondary">#15803D</item>
+        <item name="customAccentColor">#0369A1</item>
+        <item name="customBackgroundColor">#FAFAFA</item>
+        <item name="customSurfaceColor">#FFFFFF</item>
+        <item name="customTextPrimaryColor">#111827</item>
+    </style>
+
+    <style name="Theme.DFRtools.Abstract.S5" parent="Theme.DFRtools">
+        <item name="colorPrimary">#15803D</item>
+        <item name="colorSecondary">#0369A1</item>
+        <item name="customAccentColor">#6D28D9</item>
+        <item name="customBackgroundColor">#FAFAFA</item>
+        <item name="customSurfaceColor">#FFFFFF</item>
+        <item name="customTextPrimaryColor">#111827</item>
+    </style>
+
     <style name="Theme.Comtrade.Dialog" parent="Theme.MaterialComponents.DayNight.Dialog.Alert">
         <item name="android:windowBackground">@android:color/transparent</item>
         <item name="android:background">@android:color/transparent</item>

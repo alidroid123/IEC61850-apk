@@ -11,11 +11,15 @@ public class ThemeManager {
     private static final String KEY_THEME_INDEX = "selected_theme_index";
     private static final String KEY_DARK_MODE = "dark_mode";
 
+    /** Index of the ABSTRACT theme in THEME_NAMES / THEME_COLORS - the only multi-slot theme. */
+    private static final int THEME_INDEX_ABSTRACT = 4;
+
     public static final String[] THEME_NAMES = {
         "MODERN BLUE",
         "EMERALD",
         "PURPLE PREMIUM",
-        "RED ENERGY"
+        "RED ENERGY",
+        "ABSTRACT"
     };
 
     /**
@@ -37,8 +41,59 @@ public class ThemeManager {
         { // THEME 4 - RED ENERGY
             {"#B91C1C", "#7F1D1D", "#FAFAFA", "#FFFFFF", "#111827", "#0284C7"}, // Light
             {"#EF4444", "#B91C1C", "#111827", "#1F2937", "#F9FAFB", "#0EA5E9"}  // Dark
+        },
+        { // THEME 5 - ABSTRACT. Has no single colour of its own (see ABSTRACT_STYLES); slot 0
+          // stands in here so this array stays index-aligned for getThemeColorPrimary/Secondary.
+            {"#0369A1", "#6D28D9", "#FAFAFA", "#FFFFFF", "#111827", "#BE185D"}, // Light
+            {"#0EA5E9", "#8B5CF6", "#131318", "#1E1E26", "#FAFAFA", "#EC4899"}  // Dark
         }
     };
+
+    /**
+     * The six ABSTRACT slots, in palette order (Azure, Violet, Magenta, Coral, Moss, Green).
+     * Each rotates which hue plays primary/secondary/accent - see the comment in values/themes.xml.
+     */
+    private static final int[] ABSTRACT_STYLES = {
+        R.style.Theme_DFRtools_Abstract_S0,
+        R.style.Theme_DFRtools_Abstract_S1,
+        R.style.Theme_DFRtools_Abstract_S2,
+        R.style.Theme_DFRtools_Abstract_S3,
+        R.style.Theme_DFRtools_Abstract_S4,
+        R.style.Theme_DFRtools_Abstract_S5
+    };
+
+    /**
+     * Which ABSTRACT slot each screen gets. Grouped by function (acquisition, device DB, live
+     * monitoring, config) and ordered so the jumps users make most often - Home to DFR Download,
+     * Home to IED Monitoring - land on strongly contrasting hues rather than neighbouring ones.
+     *
+     * Keyed on Class objects, not class-name strings: the app builds with minifyEnabled false
+     * today, but if R8 is ever switched on, name-based matching would silently fall through to
+     * slot 0 on every screen (a theme that quietly stops rotating, with no crash to point at it).
+     * Class identity survives obfuscation.
+     *
+     * Anything not listed - and any non-Activity Context - falls back to slot 0.
+     */
+    private static final java.util.Map<Class<?>, Integer> ABSTRACT_SLOT_BY_ACTIVITY;
+    static {
+        java.util.Map<Class<?>, Integer> m = new java.util.HashMap<>();
+        m.put(HomeActivity.class,                0); // Azure
+        m.put(DeviceListActivity.class,          1); // Violet
+        m.put(IEDMonitoringActivity.class,       2); // Magenta
+        m.put(RelayTemplateEditActivity.class,   2);
+        m.put(DfrDownloadActivity.class,         3); // Coral
+        m.put(InternalFileManagerActivity.class, 3);
+        m.put(MmsExplorerActivity.class,         4); // Moss
+        m.put(SettingsActivity.class,            5); // Green
+        m.put(AboutActivity.class,               5);
+        m.put(HelpActivity.class,                5);
+        ABSTRACT_SLOT_BY_ACTIVITY = m;
+    }
+
+    private static int abstractSlotFor(Context context) {
+        Integer slot = ABSTRACT_SLOT_BY_ACTIVITY.get(context.getClass());
+        return slot != null ? slot : 0;
+    }
 
     public static void applyTheme(Context context) {
         SharedPreferences pref = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
@@ -64,6 +119,10 @@ public class ThemeManager {
             case 1: themeResId = R.style.Theme_DFRtools_Emerald; break;
             case 2: themeResId = R.style.Theme_DFRtools_Purple; break;
             case 3: themeResId = R.style.Theme_DFRtools_Red; break;
+            // ABSTRACT is the one theme that resolves to a different style per screen, so which
+            // activity is being themed decides the palette slot. Works without touching any
+            // layout because they all already read ?attr/colorPrimary / colorSecondary / accent.
+            case THEME_INDEX_ABSTRACT: themeResId = ABSTRACT_STYLES[abstractSlotFor(context)]; break;
         }
 
         // Only set theme if it's not already applied to the context to prevent flickering

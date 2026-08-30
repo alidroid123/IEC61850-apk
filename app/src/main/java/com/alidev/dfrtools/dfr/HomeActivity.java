@@ -229,8 +229,8 @@ public class HomeActivity extends BaseActivity {
         int current = ThemeManager.getSelectedThemeIndex(this);
         
         // Setup buttons and checkmarks
-        int[] btnIds = {R.id.theme_btn_0, R.id.theme_btn_1, R.id.theme_btn_2, R.id.theme_btn_3};
-        int[] checkIds = {R.id.check_0, R.id.check_1, R.id.check_2, R.id.check_3};
+        int[] btnIds = {R.id.theme_btn_0, R.id.theme_btn_1, R.id.theme_btn_2, R.id.theme_btn_3, R.id.theme_btn_4};
+        int[] checkIds = {R.id.check_0, R.id.check_1, R.id.check_2, R.id.check_3, R.id.check_4};
         
         for (int i = 0; i < btnIds.length; i++) {
             final int index = i;

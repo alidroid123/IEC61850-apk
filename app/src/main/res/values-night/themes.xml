@@ -43,4 +43,68 @@
         <item name="customTextPrimaryColor">#F9FAFB</item>
         <item name="customAccentColor">#0EA5E9</item>
     </style>
+
+    <!--
+        Theme 5 - ABSTRACT (dark). Same six-slot hexad rotation as the light variants in
+        values/themes.xml - see the long comment there for the palette rules. Only the six hues
+        and the neutrals differ here; the primary/secondary/accent offsets per slot are identical.
+
+        Palette: 0 Azure #0EA5E9 | 1 Violet #8B5CF6 | 2 Magenta #EC4899
+                 3 Coral #F97316 | 4 Moss   #65A30D | 5 Green   #22C55E
+        Neutrals are a slightly warm near-black rather than the slate/zinc the other dark themes
+        use, so Abstract keeps its own identity in dark mode too.
+    -->
+    <style name="Theme.DFRtools.Abstract.S0" parent="Theme.DFRtools">
+        <item name="colorPrimary">#0EA5E9</item>
+        <item name="colorSecondary">#8B5CF6</item>
+        <item name="customAccentColor">#EC4899</item>
+        <item name="customBackgroundColor">#131318</item>
+        <item name="customSurfaceColor">#1E1E26</item>
+        <item name="customTextPrimaryColor">#FAFAFA</item>
+    </style>
+
+    <style name="Theme.DFRtools.Abstract.S1" parent="Theme.DFRtools">
+        <item name="colorPrimary">#8B5CF6</item>
+        <item name="colorSecondary">#EC4899</item>
+        <item name="customAccentColor">#F97316</item>
+        <item name="customBackgroundColor">#131318</item>
+        <item name="customSurfaceColor">#1E1E26</item>
+        <item name="customTextPrimaryColor">#FAFAFA</item>
+    </style>
+
+    <style name="Theme.DFRtools.Abstract.S2" parent="Theme.DFRtools">
+        <item name="colorPrimary">#EC4899</item>
+        <item name="colorSecondary">#F97316</item>
+        <item name="customAccentColor">#65A30D</item>
+        <item name="customBackgroundColor">#131318</item>
+        <item name="customSurfaceColor">#1E1E26</item>
+        <item name="customTextPrimaryColor">#FAFAFA</item>
+    </style>
+
+    <style name="Theme.DFRtools.Abstract.S3" parent="Theme.DFRtools">
+        <item name="colorPrimary">#F97316</item>
+        <item name="colorSecondary">#65A30D</item>
+        <item name="customAccentColor">#22C55E</item>
+        <item name="customBackgroundColor">#131318</item>
+        <item name="customSurfaceColor">#1E1E26</item>
+        <item name="customTextPrimaryColor">#FAFAFA</item>
+    </style>
+
+    <style name="Theme.DFRtools.Abstract.S4" parent="Theme.DFRtools">
+        <item name="colorPrimary">#65A30D</item>
+        <item name="colorSecondary">#22C55E</item>
+        <item name="customAccentColor">#0EA5E9</item>
+        <item name="customBackgroundColor">#131318</item>
+        <item name="customSurfaceColor">#1E1E26</item>
+        <item name="customTextPrimaryColor">#FAFAFA</item>
+    </style>
+
+    <style name="Theme.DFRtools.Abstract.S5" parent="Theme.DFRtools">
+        <item name="colorPrimary">#22C55E</item>
+        <item name="colorSecondary">#0EA5E9</item>
+        <item name="customAccentColor">#8B5CF6</item>
+        <item name="customBackgroundColor">#131318</item>
+        <item name="customSurfaceColor">#1E1E26</item>
+        <item name="customTextPrimaryColor">#FAFAFA</item>
+    </style>
 </resources>

@@ -113,6 +113,7 @@
             android:id="@+id/theme_btn_3"
             android:layout_width="@dimen/icon_size_ms"
             android:layout_height="@dimen/icon_size_ms"
+            android:layout_marginEnd="@dimen/spacing_m"
             android:clickable="true"
             android:focusable="true">
             <View
@@ -122,6 +123,27 @@
                 android:backgroundTint="#EF4444" />
             <ImageView
                 android:id="@+id/check_3"
+                android:layout_width="@dimen/icon_size_xs"
+                android:layout_height="@dimen/icon_size_xs"
+                android:layout_gravity="center"
+                android:src="@drawable/ic_check"
+                android:visibility="gone" />
+        </FrameLayout>
+
+        <!-- Abstract: no backgroundTint here - the swatch drawable carries its own multi-colour
+             sweep gradient, and tinting it would flatten it back to a single colour. -->
+        <FrameLayout
+            android:id="@+id/theme_btn_4"
+            android:layout_width="@dimen/icon_size_ms"
+            android:layout_height="@dimen/icon_size_ms"
+            android:clickable="true"
+            android:focusable="true">
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@drawable/bg_theme_swatch_abstract" />
+            <ImageView
+                android:id="@+id/check_4"
                 android:layout_width="@dimen/icon_size_xs"
                 android:layout_height="@dimen/icon_size_xs"
                 android:layout_gravity="center"
