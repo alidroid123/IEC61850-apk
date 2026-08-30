@@ -312,7 +312,7 @@ public class SettingsActivity extends BaseActivity {
             JSONObject root = new JSONObject(sb.toString());
             BackupManager.ImportResult result = BackupManager.importConfig(this, root);
             Toast.makeText(this, getString(R.string.msg_backup_import_ok,
-                    result.devicesAdded, result.nodesAdded, result.templatesAdded), Toast.LENGTH_LONG).show();
+                    result.devicesAdded, result.nodesAdded, result.templatesAdded, result.definitionsAdded), Toast.LENGTH_LONG).show();
         } catch (Exception e) {
             Toast.makeText(this, getString(R.string.msg_backup_import_fail, e.getMessage()), Toast.LENGTH_LONG).show();
         }

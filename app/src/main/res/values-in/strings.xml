@@ -195,7 +195,7 @@
     <string name="msg_mon_template_no_device">Pilih device terlebih dahulu</string>
     <string name="msg_mon_template_invalid_ip">Masukkan alamat IP yang valid</string>
     <string name="lbl_set_section_backup">Backup &amp; Pemulihan</string>
-    <string name="lbl_set_backup_desc">Simpan daftar device, titik pantau, dan template relay jadi satu file, atau pulihkan dari file backup sebelumnya.</string>
+    <string name="lbl_set_backup_desc">Simpan daftar device, titik pantau, template relay, dan definisi node jadi satu file, atau pulihkan dari file backup sebelumnya.</string>
     <!-- Indonesian spelling is "ekspor"/"impor", not the raw English "export"/"import". -->
     <string name="btn_set_export_config">Ekspor Konfigurasi</string>
     <string name="btn_set_import_config">Impor Konfigurasi</string>
@@ -203,7 +203,7 @@
     <string name="ttl_backup_share_chooser">Bagikan File Backup</string>
     <string name="msg_backup_export_ok">Konfigurasi berhasil diekspor</string>
     <string name="msg_backup_export_fail">Ekspor gagal: %1$s</string>
-    <string name="msg_backup_import_ok">Impor selesai: %1$d device, %2$d titik pantau, %3$d template ditambahkan</string>
+    <string name="msg_backup_import_ok">Impor selesai: %1$d device, %2$d titik pantau, %3$d template, %4$d definisi ditambahkan</string>
     <string name="msg_backup_import_fail">Impor gagal: file bukan backup yang valid (%1$s)</string>
     <string name="ttl_tmpl_edit_main">Edit Template Relay</string>
     <string name="btn_tmpl_add_template">Tambah Template</string>
@@ -611,8 +611,8 @@
     <string name="help_cmp_exp_3_desc">Menyaring struktur data model berdasarkan nama atau path.</string>
     <string name="help_cmp_exp_4_name">Ikon + (per nilai)</string>
     <string name="help_cmp_exp_4_desc">Membuka dialog untuk menambahkan titik data tersebut ke IED Monitoring, lengkap dengan nama custom, tipe (Float/Boolean/String), dan - khusus Float - unit serta multiplier.</string>
-    <string name="help_cmp_exp_5_name">Ikon Refresh</string>
-    <string name="help_cmp_exp_5_desc">Membangun ulang struktur data model dari awal bila terasa sudah tidak sesuai.</string>
+    <string name="help_cmp_exp_5_name">Ikon titik tiga (⋮)</string>
+    <string name="help_cmp_exp_5_desc">Membuka Refresh, Get Definition, tabel Node Definitions tersimpan, dan IED Monitoring - Refresh dan Get Definition hanya muncul saat sedang terhubung.</string>
     <string name="help_feat_exp_1_title">Menyambung ke IED</string>
     <string name="help_feat_exp_1_steps">1. Masukkan alamat IP, atau ketuk {ic:list} untuk memilih dari Daftar Relay.\n2. Ketuk EXPLORE untuk menyambung.</string>
     <string name="help_feat_exp_2_title">Menjelajah Struktur Data</string>
@@ -620,7 +620,9 @@
     <string name="help_feat_exp_3_title">Menambah Titik ke Monitoring</string>
     <string name="help_feat_exp_3_steps">1. Ketuk ikon {ic:add} di samping sebuah nilai.\n2. Atur nama custom dan pilih tipe (Float/Boolean/String).\n3. Khusus Float, atur juga unit dan multiplier agar nilainya terskala dan berlabel dengan benar.\n4. Ketuk ADD untuk menyimpannya ke IED Monitoring.</string>
     <string name="help_feat_exp_4_title">Refresh &amp; Tutup Koneksi</string>
-    <string name="help_feat_exp_4_steps">1. Ketuk {ic:sync} untuk membangun ulang struktur bila terasa sudah tidak sesuai.\n2. Ketuk CLOSE IED untuk memutus koneksi setelah selesai.</string>
+    <string name="help_feat_exp_4_steps">1. Ketuk ikon {ic:more} titik tiga, lalu Refresh, untuk membangun ulang struktur bila terasa sudah tidak sesuai.\n2. Ketuk CLOSE IED untuk memutus koneksi setelah selesai.</string>
+    <string name="help_feat_exp_5_title">Mengambil Node Definitions</string>
+    <string name="help_feat_exp_5_steps">1. Saat sedang terhubung, ketuk ikon {ic:more} titik tiga, lalu Get Definition.\n2. Aplikasi memindai setiap logical node untuk atribut \'d\' (deskripsi) dan menyimpannya ke tabel - bisa memakan waktu cukup lama pada device besar.\n3. Ketuk {ic:more} lalu Table kapan saja (terhubung atau tidak) untuk melihat definisi tersimpan, atau pakai ikon export-nya untuk simpan sebagai CSV.</string>
 
     <string name="help_ttl_viewer">Viewer DFR</string>
     <string name="help_sum_viewer">Tampilkan dan analisis gelombang rekaman COMTRADE</string>
@@ -655,20 +657,18 @@
     <string name="help_cmp_mon_4_desc">Membuka atau menutup daftar titik pada satu kelompok device.</string>
     <string name="help_cmp_mon_5_name">Ikon Refresh Grup</string>
     <string name="help_cmp_mon_5_desc">Memperbarui hanya satu kelompok device tersebut, bukan seluruh daftar.</string>
-    <string name="help_cmp_mon_6_name">Ikon Bulk Edit</string>
-    <string name="help_cmp_mon_6_desc">Membuka tabel untuk mengedit nama, alamat, unit, dan multiplier semua titik pada kelompok device itu sekaligus, atau menghapus beberapa sekaligus.</string>
-    <string name="help_cmp_mon_7_name">Ikon Delete Group</string>
-    <string name="help_cmp_mon_7_desc">Menghapus seluruh kelompok device beserta semua titik pantaunya.</string>
+    <string name="help_cmp_mon_6_name">Ikon titik tiga (⋮)</string>
+    <string name="help_cmp_mon_6_desc">Membuka Bulk Edit (tabel untuk mengedit nama, alamat, tipe, unit, dan multiplier semua titik di grup itu sekaligus), Delete Group, dan - untuk device yang belum terdaftar - Add Device.</string>
     <string name="help_cmp_mon_8_name">Ikon Pensil per Titik</string>
-    <string name="help_cmp_mon_8_desc">Mengedit satu titik: ganti nama, atur unit/multiplier, balik nilai boolean, atau atur ambang batas Alarm.</string>
+    <string name="help_cmp_mon_8_desc">Mengedit satu titik: ganti nama, atur unit/multiplier, balik nilai boolean atau warna merah/hijaunya, atau atur ambang batas Alarm.</string>
     <string name="help_feat_mon_1_title">Menambah Titik</string>
     <string name="help_feat_mon_1_steps">1. Tambahkan titik satu per satu dari IED Explorer lewat ikon {ic:add}.\n2. Atau tambah sekaligus semua titik untuk satu tipe relay lewat ikon {ic:template} Template di header - lihat bagian Edit Template di bawah.</string>
     <string name="help_feat_mon_2_title">Membaca Status Device</string>
-    <string name="help_feat_mon_2_steps">1. Setiap header kelompok menampilkan titik status koneksi dan tanggal/waktu update terakhir secara lengkap.\n2. Untuk titik boolean, nilai TRUE ditampilkan warna merah dan FALSE warna hijau - sesuai kondisi gangguan/alarm yang biasanya bernilai TRUE.</string>
+    <string name="help_feat_mon_2_steps">1. Setiap header kelompok menampilkan titik status koneksi dan tanggal/waktu update terakhir secara lengkap.\n2. Untuk titik boolean, nilai TRUE ditampilkan warna merah dan FALSE warna hijau - sesuai kondisi gangguan/alarm yang biasanya bernilai TRUE.\n3. Gunakan "Invert Color (Boolean)" di dialog edit titik kalau sinyal tertentu memang harus terbaca sebaliknya.</string>
     <string name="help_feat_mon_3_title">Bulk Edit Satu Grup</string>
-    <string name="help_feat_mon_3_steps">1. Ketuk {ic:edit} Bulk Edit pada header kelompok device.\n2. Edit nama, alamat, unit, atau multiplier semua titik sekaligus, atau hapus beberapa - lalu ketuk Simpan.</string>
+    <string name="help_feat_mon_3_steps">1. Ketuk ikon {ic:more} titik tiga pada header kelompok device, lalu Bulk Edit.\n2. Edit nama, alamat, tipe, unit, atau multiplier semua titik sekaligus - ketuk {ic:list} untuk memilih alamat baru langsung dari device, atau Add Row untuk titik baru.\n3. Seret baris dari handle di kiri untuk mengubah urutan, atau hapus beberapa - lalu ketuk Simpan.</string>
     <string name="help_feat_mon_4_title">Mengedit Satu Titik</string>
-    <string name="help_feat_mon_4_steps">1. Ketuk ikon {ic:edit} pensil pada sebuah titik.\n2. Ganti nama, atur unit/multiplier, balik nilai boolean, atau aktifkan Alarm dengan ambang batas atas/bawah.\n3. Saat sebuah titik melewati ambang alarmnya, nilainya berubah warna merah sebagai peringatan sekilas.</string>
+    <string name="help_feat_mon_4_steps">1. Ketuk ikon {ic:edit} pensil pada sebuah titik.\n2. Ganti nama, atur unit/multiplier, balik nilai boolean atau warna merah/hijaunya, atau aktifkan Alarm dengan ambang batas atas/bawah.\n3. Saat sebuah titik melewati ambang alarmnya, nilainya berubah warna merah sebagai peringatan sekilas.</string>
     <string name="help_feat_mon_5_title">Memperbarui Data</string>
     <string name="help_feat_mon_5_steps">1. Ketuk {ic:sync} di header untuk memperbarui semua device, atau tarik daftar ke bawah.\n2. Ketuk ikon refresh pada satu header grup untuk memperbarui hanya device itu.</string>
 

@@ -203,7 +203,7 @@
     <string name="msg_mon_template_no_device">Please select a device</string>
     <string name="msg_mon_template_invalid_ip">Please enter a valid IP address</string>
     <string name="lbl_set_section_backup">Backup &amp; Restore</string>
-    <string name="lbl_set_backup_desc">Save the device list, monitoring points, and relay templates to one file, or restore them from a previously exported file.</string>
+    <string name="lbl_set_backup_desc">Save the device list, monitoring points, relay templates, and node definitions to one file, or restore them from a previously exported file.</string>
     <string name="btn_set_export_config">Export Configuration</string>
     <string name="btn_set_import_config">Import Configuration</string>
     <string name="menu_home_edit_template">Edit Template</string>
@@ -211,7 +211,7 @@
     <string name="msg_backup_export_ok">Configuration exported successfully</string>
     <string name="msg_backup_export_fail">Export failed: %1$s</string>
     <string name="msg_backup_save_as_ok">File konfigurasi berhasil disimpan</string>
-    <string name="msg_backup_import_ok">Import complete: %1$d device(s), %2$d monitoring point(s), %3$d template(s) added</string>
+    <string name="msg_backup_import_ok">Import complete: %1$d device(s), %2$d monitoring point(s), %3$d template(s), %4$d definition(s) added</string>
     <string name="msg_backup_import_fail">Import failed: file is not a valid backup (%1$s)</string>
     <string name="ttl_tmpl_edit_main">Edit Relay Template</string>
     <string name="btn_tmpl_add_template">Add Template</string>
@@ -645,8 +645,8 @@
     <string name="help_cmp_exp_3_desc">Filters the data model tree by name or path.</string>
     <string name="help_cmp_exp_4_name">+ icon (per value)</string>
     <string name="help_cmp_exp_4_desc">Opens a dialog to add that data point to IED Monitoring, with a custom name, type (Float/Boolean/String), and - for Float - unit and multiplier.</string>
-    <string name="help_cmp_exp_5_name">Refresh icon</string>
-    <string name="help_cmp_exp_5_desc">Rebuilds the data model structure from scratch if it looks outdated.</string>
+    <string name="help_cmp_exp_5_name">More options icon (⋮)</string>
+    <string name="help_cmp_exp_5_desc">Opens Refresh, Get Definition, the saved Node Definitions table, and IED Monitoring - Refresh and Get Definition only appear while connected.</string>
     <string name="help_feat_exp_1_title">Connecting to an IED</string>
     <string name="help_feat_exp_1_steps">1. Enter the IP address, or tap {ic:list} to pick from the Relay List.\n2. Tap EXPLORE to connect.</string>
     <string name="help_feat_exp_2_title">Browsing the Data Model</string>
@@ -654,7 +654,9 @@
     <string name="help_feat_exp_3_title">Adding Points to Monitoring</string>
     <string name="help_feat_exp_3_steps">1. Tap the {ic:add} icon next to a value.\n2. Set a custom name and pick the type (Float/Boolean/String).\n3. For Float, also set the unit and multiplier so the value is scaled and labeled correctly.\n4. Tap ADD to save it to IED Monitoring.</string>
     <string name="help_feat_exp_4_title">Refreshing &amp; Disconnecting</string>
-    <string name="help_feat_exp_4_steps">1. Tap {ic:sync} to rebuild the structure if it looks outdated.\n2. Tap CLOSE IED to disconnect when finished.</string>
+    <string name="help_feat_exp_4_steps">1. Tap the {ic:more} more-options icon, then Refresh, to rebuild the structure if it looks outdated.\n2. Tap CLOSE IED to disconnect when finished.</string>
+    <string name="help_feat_exp_5_title">Getting Node Definitions</string>
+    <string name="help_feat_exp_5_steps">1. While connected, tap the {ic:more} more-options icon, then Get Definition.\n2. The app scans every logical node for \'d\' (description) attributes and saves them to a table - this can take a while on a large device.\n3. Tap {ic:more} then Table anytime (connected or not) to browse the saved definitions, or use its export icon to save them as CSV.</string>
 
     <string name="help_ttl_viewer">DFR Viewer</string>
     <string name="help_sum_viewer">View and analyze COMTRADE waveform recordings</string>
@@ -689,20 +691,18 @@
     <string name="help_cmp_mon_4_desc">Expands or collapses a device group\'s point list.</string>
     <string name="help_cmp_mon_5_name">Group refresh icon</string>
     <string name="help_cmp_mon_5_desc">Refreshes only that one device group instead of the whole list.</string>
-    <string name="help_cmp_mon_6_name">Bulk Edit icon</string>
-    <string name="help_cmp_mon_6_desc">Opens a table to edit name, address, unit, and multiplier for every point in that device group at once, or delete several at once.</string>
-    <string name="help_cmp_mon_7_name">Delete Group icon</string>
-    <string name="help_cmp_mon_7_desc">Removes an entire device group and all of its monitored points.</string>
+    <string name="help_cmp_mon_6_name">More options icon (⋮)</string>
+    <string name="help_cmp_mon_6_desc">Opens Bulk Edit (table to edit name, address, type, unit, and multiplier for every point in that group at once), Delete Group, and - for an unregistered device - Add Device.</string>
     <string name="help_cmp_mon_8_name">Point pencil icon</string>
-    <string name="help_cmp_mon_8_desc">Edits a single point: rename it, set unit/multiplier, invert a boolean, or set an Alarm threshold.</string>
+    <string name="help_cmp_mon_8_desc">Edits a single point: rename it, set unit/multiplier, invert a boolean\'s value or its red/green color, or set an Alarm threshold.</string>
     <string name="help_feat_mon_1_title">Adding Points</string>
     <string name="help_feat_mon_1_steps">1. Add individual points from IED Explorer using its {ic:add} icon.\n2. Or bulk-add a whole relay type\'s points at once with the {ic:template} Template icon in the header - see Edit Template below.</string>
     <string name="help_feat_mon_2_title">Reading Device Status</string>
-    <string name="help_feat_mon_2_steps">1. Each group header shows a connection dot and the full last-update date/time.\n2. For boolean points, TRUE shows in red and FALSE in green, matching a fault/alarm condition usually being TRUE.</string>
+    <string name="help_feat_mon_2_steps">1. Each group header shows a connection dot and the full last-update date/time.\n2. For boolean points, TRUE shows in red and FALSE in green, matching a fault/alarm condition usually being TRUE.\n3. Use "Invert Color (Boolean)" on a point\'s edit dialog if that particular signal should read the other way around.</string>
     <string name="help_feat_mon_3_title">Bulk-Editing a Group</string>
-    <string name="help_feat_mon_3_steps">1. Tap {ic:edit} Bulk Edit on a device group header.\n2. Edit name, address, unit, or multiplier for every point at once, or delete several - then tap Save.</string>
+    <string name="help_feat_mon_3_steps">1. Tap the {ic:more} more-options icon on a device group header, then Bulk Edit.\n2. Edit name, address, type, unit, or multiplier for every point at once - tap {ic:list} to pick a new address live from the device, or Add Row to create a brand-new point.\n3. Drag a row by its handle (left edge) to reorder points, or delete several - then tap Save.</string>
     <string name="help_feat_mon_4_title">Editing a Single Point</string>
-    <string name="help_feat_mon_4_steps">1. Tap the {ic:edit} pencil icon on a point.\n2. Rename it, set its unit/multiplier, invert a boolean, or enable an Alarm with a high/low threshold.\n3. When a point breaches its alarm, its value turns red for an at-a-glance warning.</string>
+    <string name="help_feat_mon_4_steps">1. Tap the {ic:edit} pencil icon on a point.\n2. Rename it, set its unit/multiplier, invert a boolean\'s value or its red/green color, or enable an Alarm with a high/low threshold.\n3. When a point breaches its alarm, its value turns red for an at-a-glance warning.</string>
     <string name="help_feat_mon_5_title">Refreshing Data</string>
     <string name="help_feat_mon_5_steps">1. Tap {ic:sync} in the header to refresh every device, or pull down the list.\n2. Tap the refresh icon on a single group header to refresh only that device.</string>
 

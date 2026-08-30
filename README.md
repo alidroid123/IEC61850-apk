@@ -32,10 +32,10 @@ Requirement: `compileSdk 34`, `minSdk 24` (Android 7.0+), `targetSdk 34`, Java 8
 | **Viewer DFR** | Plot channel analog & digital, kursor T1/T2, ekspor grafik/laporan PDF. |
 | **Riwayat Unduhan** | Kelola file COMTRADE yang sudah diunduh, per folder. |
 | **Database Relay** | Data gardu induk/bay/IP/merk/tipe per relay, ping satuan & massal, impor/ekspor CSV. |
-| **IED Explorer** | Jelajahi model data IEC 61850 (LD/LN/DO/DA) sebuah IED secara langsung. |
-| **Monitoring IED** | Polling titik pantau dari banyak IED, ambang alarm, bulk edit, refresh per grup. |
+| **IED Explorer** | Jelajahi model data IEC 61850 (LD/LN/DO/DA) sebuah IED secara langsung; "Get Definition" memindai seluruh device untuk atribut `d` (deskripsi) dan menyimpannya ke tabel Node Definitions (bisa di-export CSV). |
+| **Monitoring IED** | Polling titik pantau dari banyak IED, ambang alarm, invert warna boolean per-titik, bulk edit (tabel dengan tipe dropdown, tambah baris, pilih alamat live, drag reorder), refresh per grup. |
 | **Template Relay** | Set titik pantau yang bisa dipakai ulang per tipe/merk relay. |
-| **Backup & Pemulihan** | Ekspor/impor seluruh device + titik pantau + template jadi satu file JSON. |
+| **Backup & Pemulihan** | Ekspor/impor seluruh device + titik pantau + template + definisi node jadi satu file JSON. |
 | **Notifikasi** | Ikon lonceng di Home; mencatat riwayat update (lihat bagian 6). |
 | **Tema & Bahasa** | 5 skema warna (termasuk tema Abstract multi-warna, rotasi per layar), Terang/Gelap, Indonesia/Inggris — default Indonesia. |
 
@@ -49,7 +49,9 @@ app/src/main/java/com/alidev/dfrtools/
  │   ├─ HomeActivity, DfrDownloadActivity, DfrViewerActivity
  │   ├─ MmsExplorerActivity, IEDMonitoringActivity, RelayTemplateEditActivity
  │   ├─ DeviceListActivity, InternalFileManagerActivity, SettingsActivity
+ │   ├─ NodeDefinition, NodeDefinitionManager, NodeDefinitionListActivity <- tabel atribut 'd' (Get Definition di MMS Explorer)
  │   ├─ ThemeManager                 <- 5 tema, rotasi warna per-Activity untuk tema Abstract
+ │   ├─ BackupManager                <- ekspor/impor config (device/monitoring/template/definisi node) jadi satu JSON
  │   ├─ Iec61850DfrClient            <- wrapper Java atas native (BLOCKING, panggil dari background thread)
  │   └─ ComtradeSmartSearch          <- logika pencarian folder COMTRADE per-vendor
  ├─ update/                  <- update otomatis + notifikasi in-app
