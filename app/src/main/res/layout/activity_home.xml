@@ -490,32 +490,27 @@
             app:tint="@color/white" />
         </FrameLayout>
 
-        <!-- Bottom app/version banner -->
+        <!-- App-version footer. Deliberately a small centred pill rather than the full-width
+             solid banner this used to be: at full width it read as a rigid slab and repeated the
+             app name that is already in the header two lines above. -->
         <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@drawable/bg_bottom_banner">
-
-            <View
-                android:layout_width="70dp"
-                android:layout_height="70dp"
-                android:layout_gravity="top|end"
-                android:layout_marginTop="-30dp"
-                android:layout_marginEnd="10dp"
-                android:alpha="0.16"
-                android:background="@drawable/shape_decor_blob_accent" />
+            android:paddingTop="@dimen/spacing_xs"
+            android:paddingBottom="@dimen/spacing_m">
 
             <TextView
                 android:id="@+id/tvBottomBanner"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:paddingVertical="@dimen/spacing_ms"
-                android:textColor="@color/white"
-                android:textSize="@dimen/text_size_body"
+                android:background="@drawable/bg_version_pill"
+                android:paddingHorizontal="@dimen/spacing_m"
+                android:paddingVertical="@dimen/spacing_xs"
+                android:textColor="?attr/colorPrimary"
+                android:textSize="@dimen/text_size_caption"
                 android:fontFamily="sans-serif-medium"
-                android:textStyle="bold"
-                android:letterSpacing="0.03" />
+                android:letterSpacing="0.05" />
         </FrameLayout>
     </LinearLayout>
 

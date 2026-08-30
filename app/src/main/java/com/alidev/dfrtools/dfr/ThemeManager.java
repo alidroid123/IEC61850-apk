@@ -79,11 +79,14 @@ public class ThemeManager {
         java.util.Map<Class<?>, Integer> m = new java.util.HashMap<>();
         m.put(HomeActivity.class,                0); // Azure
         m.put(DeviceListActivity.class,          1); // Violet
-        m.put(IEDMonitoringActivity.class,       2); // Magenta
-        m.put(RelayTemplateEditActivity.class,   2);
+        m.put(RelayTemplateEditActivity.class,   2); // Magenta
         m.put(DfrDownloadActivity.class,         3); // Coral
         m.put(InternalFileManagerActivity.class, 3);
-        m.put(MmsExplorerActivity.class,         4); // Teal
+        // The two live-IED screens sit on the cool Teal slot on purpose. Both colour-code their
+        // own data by status - red for an alarm or an offline device, green for healthy - so a
+        // warm magenta/coral chrome around them reads as an alarm state that isn't there.
+        m.put(IEDMonitoringActivity.class,       4); // Teal
+        m.put(MmsExplorerActivity.class,         4);
         m.put(SettingsActivity.class,            5); // Green
         m.put(AboutActivity.class,               5);
         m.put(HelpActivity.class,                5);

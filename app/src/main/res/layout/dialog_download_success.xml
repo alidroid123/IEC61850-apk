@@ -11,7 +11,7 @@
         android:layout_margin="@dimen/spacing_l"
         app:cardCornerRadius="@dimen/card_corner_radius_huge"
         app:cardBackgroundColor="@color/bg_card"
-        app:strokeColor="@color/brand_primary"
+        app:strokeColor="?attr/colorPrimary"
         app:strokeWidth="2dp"
         app:cardElevation="@dimen/card_elevation_huge">
 
@@ -36,7 +36,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/spacing_xl"
                 android:text="@string/ttl_dl_success"
-                android:textColor="@color/brand_primary"
+                android:textColor="?attr/colorPrimary"
                 android:textSize="@dimen/text_size_title_small"
                 android:fontFamily="sans-serif-medium"
                 android:textStyle="bold"

@@ -137,7 +137,7 @@ public class HomeActivity extends BaseActivity {
         try {
             PackageInfo pInfo = getPackageManager().getPackageInfo(getPackageName(), 0);
             ((TextView) findViewById(R.id.tvBottomBanner)).setText(
-                    getString(R.string.lbl_home_bottom_banner, getString(R.string.ttl_home_app_title), pInfo.versionName));
+                    getString(R.string.lbl_home_bottom_banner, pInfo.versionName));
         } catch (PackageManager.NameNotFoundException ignored) {}
     }
 

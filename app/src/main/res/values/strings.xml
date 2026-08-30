@@ -374,7 +374,9 @@
     <string name="ttl_file_permission">File Access Permission</string>
     <string name="ttl_file_share_folder">Share folder %s</string>
     <string name="ttl_home_app_title">IEC61850 UTILITY</string>
-    <string name="lbl_home_bottom_banner">%1$s V %2$s</string>
+    <!-- Version footer on Home. Only the version number is shown - the app name sits in the
+         header right above it, so repeating it here just made the footer long. -->
+    <string name="lbl_home_bottom_banner">v%1$s</string>
     <string name="ttl_mms_explorer_adv">IED Explorer</string>
     <string name="ttl_view_channel_config">Channel Configuration</string>
     <string name="ttl_view_companion_files">File Pendukung</string>
