@@ -129,6 +129,7 @@
     <string name="msg_mon_delete_group_confirm">Hapus semua titik pantau untuk %1$s?</string>
     <string name="lbl_mon_add_device">Tambah Perangkat</string>
     <string name="lbl_mon_delete_group">Hapus Grup</string>
+    <string name="lbl_mon_bulk_row_drag">Seret untuk mengubah urutan</string>
     <string name="ttl_mon_refresh_many_confirm">Refresh Semua Node?</string>
     <string name="msg_mon_refresh_many_confirm">Anda akan me-refresh %1$d node sekaligus. Proses ini bisa memakan waktu dan membebani jaringan. Lanjutkan?</string>
     <string name="btn_mon_refresh_confirm">REFRESH</string>

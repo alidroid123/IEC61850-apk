@@ -12,6 +12,16 @@
         android:gravity="center_vertical"
         android:paddingVertical="@dimen/spacing_xs">
 
+        <ImageView
+            android:id="@+id/btnRowDrag"
+            android:layout_width="@dimen/bulk_col_drag_width"
+            android:layout_height="@dimen/bulk_row_input_height"
+            android:layout_marginEnd="@dimen/spacing_xs"
+            android:src="@drawable/ic_drag_handle"
+            android:padding="4dp"
+            app:tint="@color/text_secondary"
+            android:contentDescription="@string/lbl_mon_bulk_row_drag" />
+
         <EditText
             android:id="@+id/etRowName"
             android:layout_width="@dimen/bulk_col_name_width"
@@ -48,15 +58,13 @@
             app:tint="?attr/colorPrimary"
             android:contentDescription="@string/btn_mon_browse_address" />
 
-        <TextView
-            android:id="@+id/txtRowType"
+        <Spinner
+            android:id="@+id/spRowType"
             android:layout_width="@dimen/bulk_col_type_width"
             android:layout_height="@dimen/bulk_row_input_height"
             android:layout_marginEnd="@dimen/spacing_xs"
-            android:gravity="center"
-            android:textColor="@color/text_secondary"
-            android:textSize="@dimen/text_size_micro"
-            android:textStyle="bold" />
+            android:background="@drawable/bg_spinner_strong"
+            android:spinnerMode="dropdown" />
 
         <EditText
             android:id="@+id/etRowUnit"

@@ -72,6 +72,7 @@
     <dimen name="tmpl_row_input_height">40dp</dimen>
 
     <!-- // Monitoring Bulk Edit Dialog Table Columns (compact) -->
+    <dimen name="bulk_col_drag_width">28dp</dimen>
     <dimen name="bulk_col_name_width">100dp</dimen>
     <dimen name="bulk_col_path_width">150dp</dimen>
     <dimen name="bulk_col_type_width">56dp</dimen>

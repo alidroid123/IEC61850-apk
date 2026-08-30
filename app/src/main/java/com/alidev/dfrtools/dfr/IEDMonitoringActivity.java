@@ -1,5 +1,6 @@
 package com.alidev.dfrtools.dfr;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -35,6 +36,7 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
 import androidx.recyclerview.widget.DiffUtil;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
@@ -627,12 +629,12 @@ public class IEDMonitoringActivity extends BaseActivity {
     }
 
     /**
-     * @param freeType       when true, any leaf can be picked and node.type is updated to match it -
-     *                       used for Bulk Edit rows that don't have an established type to protect yet
-     *                       (a brand-new row, or a row whose address the user is still filling in).
-     * @param txtTypeToUpdate row's type label to refresh when freeType picks a new type; null if none.
+     * @param freeType     when true, any leaf can be picked and node.type is updated to match it -
+     *                     used for Bulk Edit rows that don't have an established type to protect yet
+     *                     (a brand-new row, or a row whose address the user is still filling in).
+     * @param spTypeToUpdate row's type spinner to refresh when freeType picks a new type; null if none.
      */
-    private void showBrowseAddressDialog(MonitoredNode node, EditText etNodeAddress, boolean freeType, TextView txtTypeToUpdate) {
+    private void showBrowseAddressDialog(MonitoredNode node, EditText etNodeAddress, boolean freeType, Spinner spTypeToUpdate) {
         View v = getLayoutInflater().inflate(R.layout.dialog_browse_address, null);
         AlertDialog dialog = new AlertDialog.Builder(this, R.style.Theme_Comtrade_Dialog)
                 .setView(v)
@@ -662,7 +664,10 @@ public class IEDMonitoringActivity extends BaseActivity {
         BrowseAdapter browseAdapter = new BrowseAdapter(finalClient, node.type, freeType, leaf -> {
             if (freeType) {
                 node.type = classifyValueType(leaf.value);
-                if (txtTypeToUpdate != null) txtTypeToUpdate.setText(node.type.toUpperCase(Locale.US));
+                if (spTypeToUpdate != null) {
+                    int idx = TYPE_OPTIONS.indexOf(node.type);
+                    spTypeToUpdate.setSelection(idx >= 0 ? idx : 1);
+                }
             }
             etNodeAddress.setText(leaf.fullPath);
             dialog.dismiss();
@@ -702,6 +707,15 @@ public class IEDMonitoringActivity extends BaseActivity {
         });
 
         dialog.show();
+    }
+
+    // Same order/default ("float" at index 1) as RelayTemplateEditActivity's row type spinner, for consistency.
+    private static final List<String> TYPE_OPTIONS = java.util.Arrays.asList("string", "float", "boolean");
+
+    private ArrayAdapter<String> createTypeSpinnerAdapter() {
+        ArrayAdapter<String> spAdapter = new ArrayAdapter<>(this, R.layout.spinner_item_futuristic, TYPE_OPTIONS);
+        spAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item_futuristic);
+        return spAdapter;
     }
 
     /** Classifies a raw formatted MMS value the same way MonitoredNode's own type system does. */
@@ -1244,7 +1258,6 @@ public class IEDMonitoringActivity extends BaseActivity {
         final String oldFullPath, oldIp; // captured before any edit, needed to find the node again at save time
         String customName, fullPath, unit;
         float multiplier;
-        boolean deleted = false;
         boolean isNew = false; // added via "Add Row" in this session - saved with addNode() instead of updateNode()
 
         BulkEditRow(MonitoredNode original) {
@@ -1270,6 +1283,7 @@ public class IEDMonitoringActivity extends BaseActivity {
             if (n.ipAddress.equals(ip)) rows.add(new BulkEditRow(n));
         }
         if (rows.isEmpty()) return;
+        List<MonitoredNode> pendingRemovals = new ArrayList<>(); // rows deleted in this session, applied on Save
 
         View v = getLayoutInflater().inflate(R.layout.dialog_bulk_edit_nodes, null);
         AlertDialog dialog = new AlertDialog.Builder(this, R.style.Theme_Comtrade_Dialog)
@@ -1283,10 +1297,13 @@ public class IEDMonitoringActivity extends BaseActivity {
         ((TextView) v.findViewById(R.id.tvBulkEditSubtitle)).setText(
                 getString(R.string.lbl_mon_bulk_edit_subtitle, deviceName, rows.size()));
 
-        LinearLayout llRows = v.findViewById(R.id.llBulkEditRows);
-        for (BulkEditRow row : rows) {
-            llRows.addView(buildBulkEditRowView(llRows, row));
-        }
+        RecyclerView rvRows = v.findViewById(R.id.rvBulkEditRows);
+        rvRows.setLayoutManager(new LinearLayoutManager(this));
+        BulkEditRowAdapter rowsAdapter = new BulkEditRowAdapter(rows, pendingRemovals);
+        rvRows.setAdapter(rowsAdapter);
+        ItemTouchHelper touchHelper = new ItemTouchHelper(new BulkRowDragCallback(rowsAdapter));
+        touchHelper.attachToRecyclerView(rvRows);
+        rowsAdapter.setTouchHelper(touchHelper);
 
         v.findViewById(R.id.btnAddBulkRow).setOnClickListener(view -> {
             // Manually-added point, same "type defaults to float" convention as CSV import -
@@ -1294,7 +1311,7 @@ public class IEDMonitoringActivity extends BaseActivity {
             BulkEditRow newRow = new BulkEditRow(new MonitoredNode(deviceName, ip, "", "", "float"));
             newRow.isNew = true;
             rows.add(newRow);
-            llRows.addView(buildBulkEditRowView(llRows, newRow));
+            rowsAdapter.notifyItemInserted(rows.size() - 1);
         });
         v.findViewById(R.id.btnBulkImportCsv).setOnClickListener(view -> {
             dialog.dismiss();
@@ -1302,15 +1319,10 @@ public class IEDMonitoringActivity extends BaseActivity {
         });
         v.findViewById(R.id.btnCancelBulkEdit).setOnClickListener(view -> dialog.dismiss());
         v.findViewById(R.id.btnSaveBulkEdit).setOnClickListener(view -> {
-            int updated = 0, deletedCount = 0;
+            for (MonitoredNode removed : pendingRemovals) manager.removeNode(removed);
+            int deletedCount = pendingRemovals.size();
+            int updated = 0;
             for (BulkEditRow row : rows) {
-                if (row.deleted) {
-                    if (!row.isNew) {
-                        manager.removeNode(row.original);
-                        deletedCount++;
-                    }
-                    continue;
-                }
                 if (row.isNew) {
                     if (row.fullPath.trim().isEmpty()) continue; // no address entered - drop silently
                     row.original.customName = row.customName;
@@ -1347,41 +1359,120 @@ public class IEDMonitoringActivity extends BaseActivity {
         dialog.show();
     }
 
-    private View buildBulkEditRowView(ViewGroup parent, BulkEditRow row) {
-        View item = getLayoutInflater().inflate(R.layout.item_bulk_edit_node_row, parent, false);
-
-        EditText etName = item.findViewById(R.id.etRowName);
-        EditText etPath = item.findViewById(R.id.etRowPath);
-        TextView txtType = item.findViewById(R.id.txtRowType);
-        EditText etUnit = item.findViewById(R.id.etRowUnit);
-        EditText etMultiplier = item.findViewById(R.id.etRowMultiplier);
-
-        etName.setText(row.customName);
-        etPath.setText(row.fullPath);
-        txtType.setText(row.original.type != null ? row.original.type.toUpperCase(Locale.US) : "");
-        etUnit.setText(row.unit);
-        etMultiplier.setText(String.valueOf(row.multiplier));
-
-        etName.addTextChangedListener(bulkTextWatcher(s -> row.customName = s));
-        etPath.addTextChangedListener(bulkTextWatcher(s -> row.fullPath = s));
-        etUnit.addTextChangedListener(bulkTextWatcher(s -> row.unit = s));
-        item.findViewById(R.id.btnRowBrowse).setOnClickListener(v ->
-                showBrowseAddressDialog(row.original, etPath, row.isNew, txtType));
-
-        etMultiplier.addTextChangedListener(bulkTextWatcher(s -> {
-            try {
-                row.multiplier = Float.parseFloat(s);
-            } catch (NumberFormatException ignored) {
-                // Leave the last valid multiplier in place while the user is mid-edit.
-            }
-        }));
-
-        item.findViewById(R.id.btnRowDelete).setOnClickListener(v -> confirmDeleteBulkRow(row, item, parent));
-
-        return item;
+    /** Lets the user drag rows up/down by their handle to reorder the Bulk Edit table; swiping is unused. */
+    private static class BulkRowDragCallback extends ItemTouchHelper.SimpleCallback {
+        private final BulkEditRowAdapter rowsAdapter;
+        BulkRowDragCallback(BulkEditRowAdapter rowsAdapter) {
+            super(ItemTouchHelper.UP | ItemTouchHelper.DOWN, 0);
+            this.rowsAdapter = rowsAdapter;
+        }
+        @Override public boolean onMove(@NonNull RecyclerView rv, @NonNull RecyclerView.ViewHolder vh, @NonNull RecyclerView.ViewHolder target) {
+            int from = vh.getAdapterPosition(), to = target.getAdapterPosition();
+            if (from == RecyclerView.NO_POSITION || to == RecyclerView.NO_POSITION) return false;
+            rowsAdapter.moveRow(from, to);
+            return true;
+        }
+        @Override public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {}
     }
 
-    private void confirmDeleteBulkRow(BulkEditRow row, View rowView, ViewGroup parent) {
+    /** Backs the Bulk Edit table's RecyclerView - draft rows are edited/reordered/removed in place, applied on Save. */
+    private class BulkEditRowAdapter extends RecyclerView.Adapter<BulkEditRowAdapter.VH> {
+        private final List<BulkEditRow> rows;
+        private final List<MonitoredNode> pendingRemovals;
+        private ItemTouchHelper touchHelper;
+
+        BulkEditRowAdapter(List<BulkEditRow> rows, List<MonitoredNode> pendingRemovals) {
+            this.rows = rows;
+            this.pendingRemovals = pendingRemovals;
+        }
+
+        void setTouchHelper(ItemTouchHelper touchHelper) { this.touchHelper = touchHelper; }
+
+        void moveRow(int from, int to) {
+            Collections.swap(rows, from, to);
+            notifyItemMoved(from, to);
+        }
+
+        void removeRow(int position) {
+            BulkEditRow row = rows.get(position);
+            if (!row.isNew) pendingRemovals.add(row.original);
+            rows.remove(position);
+            notifyItemRemoved(position);
+        }
+
+        @NonNull @Override
+        public VH onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+            return new VH(getLayoutInflater().inflate(R.layout.item_bulk_edit_node_row, parent, false));
+        }
+
+        @Override public void onBindViewHolder(@NonNull VH holder, int position) {
+            holder.bind(rows.get(position));
+        }
+
+        @Override public int getItemCount() { return rows.size(); }
+
+        class VH extends RecyclerView.ViewHolder {
+            private BulkEditRow row;
+            private final EditText etName, etPath, etUnit, etMultiplier;
+            private final Spinner spType;
+
+            @SuppressLint("ClickableViewAccessibility")
+            VH(View item) {
+                super(item);
+                etName = item.findViewById(R.id.etRowName);
+                etPath = item.findViewById(R.id.etRowPath);
+                spType = item.findViewById(R.id.spRowType);
+                etUnit = item.findViewById(R.id.etRowUnit);
+                etMultiplier = item.findViewById(R.id.etRowMultiplier);
+                spType.setAdapter(createTypeSpinnerAdapter());
+
+                // Listeners are wired once here (not per bind()) since the RecyclerView reuses this
+                // View across rows - they always act on whichever row `bind()` last pointed them at.
+                etName.addTextChangedListener(bulkTextWatcher(s -> { if (row != null) row.customName = s; }));
+                etPath.addTextChangedListener(bulkTextWatcher(s -> { if (row != null) row.fullPath = s; }));
+                etUnit.addTextChangedListener(bulkTextWatcher(s -> { if (row != null) row.unit = s; }));
+                etMultiplier.addTextChangedListener(bulkTextWatcher(s -> {
+                    if (row == null) return;
+                    try {
+                        row.multiplier = Float.parseFloat(s);
+                    } catch (NumberFormatException ignored) {
+                        // Leave the last valid multiplier in place while the user is mid-edit.
+                    }
+                }));
+                spType.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                    @Override public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                        if (row != null) row.original.type = TYPE_OPTIONS.get(position);
+                    }
+                    @Override public void onNothingSelected(AdapterView<?> parent) {}
+                });
+                item.findViewById(R.id.btnRowBrowse).setOnClickListener(v -> {
+                    if (row != null) showBrowseAddressDialog(row.original, etPath, row.isNew, spType);
+                });
+                item.findViewById(R.id.btnRowDelete).setOnClickListener(v -> {
+                    int pos = getAdapterPosition();
+                    if (pos != RecyclerView.NO_POSITION) confirmDeleteBulkRow(rows.get(pos), pos, BulkEditRowAdapter.this);
+                });
+                item.findViewById(R.id.btnRowDrag).setOnTouchListener((v, event) -> {
+                    if (event.getActionMasked() == android.view.MotionEvent.ACTION_DOWN && touchHelper != null) {
+                        touchHelper.startDrag(this);
+                    }
+                    return false;
+                });
+            }
+
+            void bind(BulkEditRow r) {
+                row = r;
+                etName.setText(r.customName);
+                etPath.setText(r.fullPath);
+                etUnit.setText(r.unit);
+                etMultiplier.setText(String.valueOf(r.multiplier));
+                int typeIndex = TYPE_OPTIONS.indexOf(r.original.type);
+                spType.setSelection(typeIndex >= 0 ? typeIndex : 1); // default to "float" if unset/unrecognized
+            }
+        }
+    }
+
+    private void confirmDeleteBulkRow(BulkEditRow row, int position, BulkEditRowAdapter rowsAdapter) {
         String label = !row.customName.isEmpty() ? row.customName : row.fullPath;
 
         View dialogView = getLayoutInflater().inflate(R.layout.dialog_confirm_delete, null);
@@ -1397,8 +1488,7 @@ public class IEDMonitoringActivity extends BaseActivity {
 
         dialogView.findViewById(R.id.btnCancel).setOnClickListener(v -> dialog.dismiss());
         dialogView.findViewById(R.id.btnConfirm).setOnClickListener(v -> {
-            row.deleted = true;
-            parent.removeView(rowView);
+            rowsAdapter.removeRow(position);
             dialog.dismiss();
         });
 
