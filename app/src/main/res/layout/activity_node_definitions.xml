@@ -54,6 +54,31 @@
                 android:textColor="@color/white"
                 android:textSize="@dimen/text_size_title_small"
                 android:textStyle="bold" />
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:gravity="center_horizontal"
+                android:layout_marginStart="@dimen/spacing_xs">
+
+                <ImageButton
+                    android:id="@+id/btnExportDefinitions"
+                    android:layout_width="@dimen/icon_size_xl"
+                    android:layout_height="@dimen/icon_size_xl"
+                    android:padding="@dimen/spacing_s"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:src="@drawable/ic_export"
+                    android:contentDescription="@string/btn_mms_definitions_export"
+                    app:tint="@color/white" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/btn_mms_definitions_export"
+                    android:textColor="@color/white"
+                    android:textSize="@dimen/text_size_tiny" />
+            </LinearLayout>
         </LinearLayout>
     </FrameLayout>
 

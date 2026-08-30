@@ -1,22 +1,32 @@
 package com.alidev.dfrtools.dfr;
 
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
+import androidx.core.content.FileProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.alidev.dfrtools.R;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
 
 /** Read-only table of "d" (description) attributes fetched via MMS Explorer's "Get Definition" - see NodeDefinitionManager. */
 public class NodeDefinitionListActivity extends BaseActivity {
+
+    private List<NodeDefinition> items;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -24,8 +34,9 @@ public class NodeDefinitionListActivity extends BaseActivity {
         setContentView(R.layout.activity_node_definitions);
 
         findViewById(R.id.btnBack).setOnClickListener(v -> finish());
+        findViewById(R.id.btnExportDefinitions).setOnClickListener(v -> exportToCsv());
 
-        List<NodeDefinition> items = new NodeDefinitionManager(this).getAll();
+        items = new NodeDefinitionManager(this).getAll();
         Collections.sort(items, (a, b) -> {
             int byName = a.deviceName.compareToIgnoreCase(b.deviceName);
             return byName != 0 ? byName : a.nodeAddress.compareToIgnoreCase(b.nodeAddress);
@@ -48,6 +59,67 @@ public class NodeDefinitionListActivity extends BaseActivity {
 
             @Override public int getItemCount() { return items.size(); }
         });
+    }
+
+    private void exportToCsv() {
+        if (items.isEmpty()) {
+            Toast.makeText(this, R.string.msg_mms_definitions_export_empty, Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        try {
+            File exportDir = new File(getExternalFilesDir(null), "Exports");
+            if (!exportDir.exists()) exportDir.mkdirs();
+
+            File file = new File(exportDir, "node_definitions.csv");
+            FileOutputStream fos = new FileOutputStream(file);
+            fos.write("NAMA,ALAMAT NODE,VALUE\n".getBytes(StandardCharsets.UTF_8));
+            for (NodeDefinition d : items) {
+                String line = String.format("\"%s\",\"%s\",\"%s\"\n", d.deviceName, d.nodeAddress, d.value);
+                fos.write(line.getBytes(StandardCharsets.UTF_8));
+            }
+            fos.close();
+            showExportSuccessDialog(file);
+        } catch (Exception e) {
+            Toast.makeText(this, getString(R.string.msg_mms_definitions_export_fail, e.getMessage()), Toast.LENGTH_LONG).show();
+        }
+    }
+
+    private void showExportSuccessDialog(File file) {
+        View dialogView = getLayoutInflater().inflate(R.layout.dialog_export_success, null);
+        AlertDialog dialog = new AlertDialog.Builder(this, R.style.Theme_Comtrade_Dialog)
+                .setView(dialogView)
+                .create();
+
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+            dialog.getWindow().setGravity(android.view.Gravity.CENTER);
+        }
+
+        dialogView.findViewById(R.id.btnOpenFolder).setOnClickListener(v -> {
+            startActivity(new Intent(this, InternalFileManagerActivity.class));
+            dialog.dismiss();
+        });
+
+        dialogView.findViewById(R.id.btnShare).setOnClickListener(v -> {
+            shareFile(file);
+            dialog.dismiss();
+        });
+
+        dialog.show();
+    }
+
+    private void shareFile(File file) {
+        try {
+            Uri uri = FileProvider.getUriForFile(this, getPackageName() + ".fileprovider", file);
+            Intent intent = new Intent(Intent.ACTION_SEND);
+            intent.setType("text/csv");
+            intent.putExtra(Intent.EXTRA_STREAM, uri);
+            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            startActivity(Intent.createChooser(intent, getString(R.string.ttl_mms_definitions_share_chooser)));
+        } catch (Exception e) {
+            Toast.makeText(this, R.string.msg_all_share_fail, Toast.LENGTH_SHORT).show();
+        }
     }
 
     static class DefVH extends RecyclerView.ViewHolder {

@@ -52,6 +52,10 @@
     <string name="lbl_mms_def_col_name">Name</string>
     <string name="lbl_mms_def_col_address">Node Address</string>
     <string name="lbl_mms_def_col_value">Value</string>
+    <string name="btn_mms_definitions_export">EXPORT</string>
+    <string name="msg_mms_definitions_export_empty">No definitions to export</string>
+    <string name="msg_mms_definitions_export_fail">Failed to export CSV: %s</string>
+    <string name="ttl_mms_definitions_share_chooser">Share node_definitions.csv</string>
     <string name="btn_mon_add">ADD</string>
     <string name="btn_mon_save">SAVE</string>
     <string name="btn_mon_remove">REMOVE</string>

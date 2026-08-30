@@ -49,6 +49,10 @@
     <string name="lbl_mms_def_col_name">Nama</string>
     <string name="lbl_mms_def_col_address">Alamat Node</string>
     <string name="lbl_mms_def_col_value">Nilai</string>
+    <string name="btn_mms_definitions_export">EXPORT</string>
+    <string name="msg_mms_definitions_export_empty">Tidak ada data untuk diekspor</string>
+    <string name="msg_mms_definitions_export_fail">Gagal ekspor CSV: %s</string>
+    <string name="ttl_mms_definitions_share_chooser">Bagikan node_definitions.csv</string>
     <string name="btn_mon_add">TAMBAH</string>
     <string name="btn_mon_save">SIMPAN</string>
     <string name="btn_mon_remove">HAPUS</string>
