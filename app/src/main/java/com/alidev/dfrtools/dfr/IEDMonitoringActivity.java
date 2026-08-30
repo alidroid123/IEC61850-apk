@@ -715,6 +715,12 @@ public class IEDMonitoringActivity extends BaseActivity {
         return ContextCompat.getColor(this, UNIT_ACCENT_COLORS[idx]);
     }
 
+    /** Deterministic color per device IP, so a given device's group header always carries the same accent line. */
+    private int getDeviceAccentColor(String ip) {
+        int idx = Math.abs((ip == null ? "" : ip).hashCode()) % UNIT_ACCENT_COLORS.length;
+        return ContextCompat.getColor(this, UNIT_ACCENT_COLORS[idx]);
+    }
+
     private interface OnLeafPicked { void onPicked(MmsExplorerActivity.MmsNode leaf); }
 
     /** Flat, expandable LD/LN/DO/DA tree for the address picker dialog - reuses MmsExplorerActivity's node model. */
@@ -1758,7 +1764,7 @@ public class IEDMonitoringActivity extends BaseActivity {
         TextView txtHeader, txtHeaderIp, txtHeaderUpdate, txtHeaderCompact;
         View layoutHeaderDetails;
         ImageView btnEditDevice, btnBulkEdit, btnDeleteGroup, btnRefreshGroup, imgExpand;
-        View statusDot;
+        View statusDot, viewDeviceAccent;
         final boolean isSticky;
         HeaderVH(View v, boolean isSticky) {
             super(v);
@@ -1774,6 +1780,7 @@ public class IEDMonitoringActivity extends BaseActivity {
             btnRefreshGroup = v.findViewById(R.id.btnRefreshGroup);
             imgExpand = v.findViewById(R.id.imgExpand);
             statusDot = v.findViewById(R.id.statusDot);
+            viewDeviceAccent = v.findViewById(R.id.viewDeviceAccent);
         }
         void bind(HeaderInfo info) {
             // Cycle through a small set of theme-native gradient variants per device (stable via
@@ -1795,6 +1802,7 @@ public class IEDMonitoringActivity extends BaseActivity {
                 txtHeaderCompact.setText(getCompactHeaderLine(info.ip));
 
                 if (statusDot != null) statusDot.setVisibility(View.GONE);
+                if (viewDeviceAccent != null) viewDeviceAccent.setVisibility(View.GONE);
                 if (imgExpand != null) imgExpand.setVisibility(View.GONE);
                 if (btnEditDevice != null) btnEditDevice.setVisibility(View.GONE);
                 if (btnBulkEdit != null) btnBulkEdit.setVisibility(View.GONE);
@@ -1807,6 +1815,10 @@ public class IEDMonitoringActivity extends BaseActivity {
             layoutHeaderDetails.setVisibility(View.VISIBLE);
             txtHeaderCompact.setVisibility(View.GONE);
             if (statusDot != null) statusDot.setVisibility(View.VISIBLE);
+            if (viewDeviceAccent != null) {
+                viewDeviceAccent.setVisibility(View.VISIBLE);
+                viewDeviceAccent.setBackgroundTintList(android.content.res.ColorStateList.valueOf(getDeviceAccentColor(info.ip)));
+            }
             if (imgExpand != null) imgExpand.setVisibility(View.VISIBLE);
             if (btnBulkEdit != null) btnBulkEdit.setVisibility(View.VISIBLE);
             if (btnDeleteGroup != null) btnDeleteGroup.setVisibility(View.VISIBLE);

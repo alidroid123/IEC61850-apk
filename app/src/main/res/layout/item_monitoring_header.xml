@@ -15,6 +15,13 @@
     android:focusable="true"
     android:foreground="?attr/selectableItemBackground">
 
+    <View
+        android:id="@+id/viewDeviceAccent"
+        android:layout_width="3dp"
+        android:layout_height="match_parent"
+        android:layout_marginEnd="@dimen/spacing_xs"
+        android:background="@drawable/bg_device_accent_line" />
+
     <ImageView
         android:id="@+id/imgExpand"
         android:layout_width="@dimen/icon_size_m"
