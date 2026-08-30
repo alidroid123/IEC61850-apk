@@ -960,7 +960,10 @@ public class MmsExplorerActivity extends BaseActivity {
         TextView label = row.findViewById(R.id.txtMenuOptionLabel);
         icon.setImageResource(iconRes);
         label.setText(labelRes);
-        row.setOnClickListener(v -> {
+        // The clickable/ripple widget is the inner rowMenuOption (see item_header_menu_option.xml),
+        // not the row's own root - listening on the root instead lets the inner view swallow the
+        // tap (it's still clickable=true for its ripple) without ever firing this listener.
+        row.findViewById(R.id.rowMenuOption).setOnClickListener(v -> {
             popup.dismiss();
             action.run();
         });
