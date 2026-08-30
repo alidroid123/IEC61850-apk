@@ -16,44 +16,83 @@ import com.alidev.dfrtools.R;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /** Expandable, searchable usage guide covering every screen in the app. */
 public class HelpActivity extends BaseActivity {
 
+    /** One icon-labeled button referenced by a section's steps, shown as a chip. */
+    private static class HelpChip {
+        final int iconRes, labelRes;
+        HelpChip(int iconRes, int labelRes) {
+            this.iconRes = iconRes;
+            this.labelRes = labelRes;
+        }
+    }
+
     private static class HelpSection {
         final int iconRes, titleRes, summaryRes, funcRes, stepsRes;
-        HelpSection(int iconRes, int titleRes, int summaryRes, int funcRes, int stepsRes) {
+        final HelpChip[] chips;
+        HelpSection(int iconRes, int titleRes, int summaryRes, int funcRes, int stepsRes, HelpChip... chips) {
             this.iconRes = iconRes;
             this.titleRes = titleRes;
             this.summaryRes = summaryRes;
             this.funcRes = funcRes;
             this.stepsRes = stepsRes;
+            this.chips = chips;
         }
     }
 
+    private static final Pattern STEP_SPLIT_PATTERN = Pattern.compile("(?:^|\\n)\\d+\\.\\s*");
+
     private static final HelpSection[] SECTIONS = {
             new HelpSection(R.drawable.ic_menu, R.string.help_ttl_home, R.string.help_sum_home,
-                    R.string.help_func_home, R.string.help_steps_home),
+                    R.string.help_func_home, R.string.help_steps_home,
+                    new HelpChip(R.drawable.ic_menu, R.string.lbl_help_chip_menu)),
             new HelpSection(R.drawable.ic_download, R.string.help_ttl_download, R.string.help_sum_download,
-                    R.string.help_func_download, R.string.help_steps_download),
+                    R.string.help_func_download, R.string.help_steps_download,
+                    new HelpChip(R.drawable.ic_list, R.string.btn_dl_list),
+                    new HelpChip(R.drawable.ic_download, R.string.btn_dl_start_download)),
             new HelpSection(R.drawable.ic_history, R.string.help_ttl_history, R.string.help_sum_history,
-                    R.string.help_func_history, R.string.help_steps_history),
+                    R.string.help_func_history, R.string.help_steps_history,
+                    new HelpChip(R.drawable.ic_delete, R.string.btn_all_delete),
+                    new HelpChip(R.drawable.ic_share, R.string.btn_all_share)),
             new HelpSection(R.drawable.ic_list, R.string.help_ttl_devices, R.string.help_sum_devices,
-                    R.string.help_func_devices, R.string.help_steps_devices),
+                    R.string.help_func_devices, R.string.help_steps_devices,
+                    new HelpChip(R.drawable.ic_bulk_ping, R.string.btn_dev_ping),
+                    new HelpChip(R.drawable.ic_export, R.string.btn_dev_export),
+                    new HelpChip(R.drawable.ic_import, R.string.btn_dev_import)),
             new HelpSection(R.drawable.ic_mms, R.string.help_ttl_explorer, R.string.help_sum_explorer,
-                    R.string.help_func_explorer, R.string.help_steps_explorer),
+                    R.string.help_func_explorer, R.string.help_steps_explorer,
+                    new HelpChip(R.drawable.ic_add, R.string.lbl_help_chip_add_point),
+                    new HelpChip(R.drawable.ic_sync, R.string.btn_mms_refresh)),
             new HelpSection(R.drawable.ic_dfr_chart, R.string.help_ttl_viewer, R.string.help_sum_viewer,
-                    R.string.help_func_viewer, R.string.help_steps_viewer),
+                    R.string.help_func_viewer, R.string.help_steps_viewer,
+                    new HelpChip(R.drawable.ic_zoom, R.string.lbl_view_icon_zoom),
+                    new HelpChip(R.drawable.ic_cursor, R.string.lbl_view_icon_cursor),
+                    new HelpChip(R.drawable.ic_settings, R.string.lbl_view_icon_settings)),
             new HelpSection(R.drawable.ic_ied_monitor, R.string.help_ttl_monitoring, R.string.help_sum_monitoring,
-                    R.string.help_func_monitoring, R.string.help_steps_monitoring),
+                    R.string.help_func_monitoring, R.string.help_steps_monitoring,
+                    new HelpChip(R.drawable.ic_template, R.string.btn_mon_add_template),
+                    new HelpChip(R.drawable.ic_edit_small, R.string.lbl_help_chip_edit),
+                    new HelpChip(R.drawable.ic_sync, R.string.btn_mon_refresh_confirm)),
             new HelpSection(R.drawable.ic_template, R.string.help_ttl_template, R.string.help_sum_template,
-                    R.string.help_func_template, R.string.help_steps_template),
+                    R.string.help_func_template, R.string.help_steps_template,
+                    new HelpChip(R.drawable.ic_add, R.string.btn_tmpl_add_template),
+                    new HelpChip(R.drawable.ic_copy, R.string.btn_tmpl_duplicate_template),
+                    new HelpChip(R.drawable.ic_delete, R.string.btn_all_delete),
+                    new HelpChip(R.drawable.ic_save, R.string.btn_all_save_small)),
             new HelpSection(R.drawable.ic_settings, R.string.help_ttl_settings, R.string.help_sum_settings,
-                    R.string.help_func_settings, R.string.help_steps_settings),
+                    R.string.help_func_settings, R.string.help_steps_settings,
+                    new HelpChip(R.drawable.ic_export, R.string.btn_dev_export),
+                    new HelpChip(R.drawable.ic_import, R.string.btn_dev_import)),
             new HelpSection(R.drawable.ic_info, R.string.help_ttl_about, R.string.help_sum_about,
                     R.string.help_func_about, R.string.help_steps_about),
             new HelpSection(R.drawable.ic_check, R.string.help_ttl_tips, R.string.help_sum_tips,
-                    R.string.help_func_tips, R.string.help_steps_tips),
+                    R.string.help_func_tips, R.string.help_steps_tips,
+                    new HelpChip(R.drawable.ic_vpn, R.string.lbl_help_chip_vpn),
+                    new HelpChip(R.drawable.ic_theme, R.string.lbl_help_chip_theme)),
     };
 
     private final List<View> sectionViews = new ArrayList<>();
@@ -123,7 +162,32 @@ public class HelpActivity extends BaseActivity {
         ((TextView) item.findViewById(R.id.txtSectionTitle)).setText(section.titleRes);
         ((TextView) item.findViewById(R.id.txtSectionSummary)).setText(section.summaryRes);
         ((TextView) item.findViewById(R.id.txtSectionFunction)).setText(section.funcRes);
-        ((TextView) item.findViewById(R.id.txtSectionSteps)).setText(section.stepsRes);
+
+        View chipsSection = item.findViewById(R.id.chipsSection);
+        LinearLayout chipsContainer = item.findViewById(R.id.chipsContainer);
+        if (section.chips.length == 0) {
+            chipsSection.setVisibility(View.GONE);
+        } else {
+            for (HelpChip chip : section.chips) {
+                View chipView = inflater.inflate(R.layout.item_help_chip, chipsContainer, false);
+                ((ImageView) chipView.findViewById(R.id.imgChipIcon)).setImageResource(chip.iconRes);
+                ((TextView) chipView.findViewById(R.id.txtChipLabel)).setText(chip.labelRes);
+                chipsContainer.addView(chipView);
+            }
+        }
+
+        LinearLayout stepsContainer = item.findViewById(R.id.stepsContainer);
+        String[] steps = STEP_SPLIT_PATTERN.split(getString(section.stepsRes));
+        int stepNumber = 1;
+        for (String step : steps) {
+            String stepText = step.trim();
+            if (stepText.isEmpty()) continue;
+            View stepRow = inflater.inflate(R.layout.item_help_step_row, stepsContainer, false);
+            ((TextView) stepRow.findViewById(R.id.txtStepNumber)).setText(String.valueOf(stepNumber));
+            ((TextView) stepRow.findViewById(R.id.txtStepText)).setText(stepText);
+            stepsContainer.addView(stepRow);
+            stepNumber++;
+        }
 
         View header = item.findViewById(R.id.sectionHeader);
         View body = item.findViewById(R.id.bodyContainer);

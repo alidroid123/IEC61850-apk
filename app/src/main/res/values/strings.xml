@@ -230,6 +230,10 @@
     <string name="lbl_view_chart_view">Chart View:</string>
     <string name="lbl_view_cursor_delta_default">C2 - C1 = 0.0 ms</string>
     <string name="lbl_view_cursor_select_label">Cursor Select:</string>
+    <string name="lbl_view_icon_zoom">Zoom</string>
+    <string name="lbl_view_icon_cursor">Cursor</string>
+    <string name="lbl_view_icon_cfg">Buka CFG</string>
+    <string name="lbl_view_icon_settings">Setting</string>
     <string name="lbl_view_date_label">Date :</string>
     <string name="lbl_view_digital_channel_header">DIGITAL CHANNEL</string>
     <string name="lbl_view_incident_title_label">Incident Title :</string>
@@ -482,6 +486,12 @@
     <string name="msg_help_no_results">No help topics match your search</string>
     <string name="lbl_help_function">Function:</string>
     <string name="lbl_help_howto">How to use:</string>
+    <string name="lbl_help_related_buttons">Related buttons:</string>
+    <string name="lbl_help_chip_menu">Menu</string>
+    <string name="lbl_help_chip_add_point">Add Point</string>
+    <string name="lbl_help_chip_edit">Edit</string>
+    <string name="lbl_help_chip_vpn">VPN</string>
+    <string name="lbl_help_chip_theme">Theme</string>
 
     <string name="help_ttl_home">Home</string>
     <string name="help_sum_home">Main menu and shortcuts to every feature</string>

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:layout_marginTop="@dimen/spacing_s">
+
+    <TextView
+        android:id="@+id/txtStepNumber"
+        android:layout_width="22dp"
+        android:layout_height="22dp"
+        android:background="@drawable/bg_step_number"
+        android:gravity="center"
+        android:textColor="@color/white"
+        android:textSize="@dimen/text_size_tiny"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/txtStepText"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:layout_marginStart="@dimen/spacing_s"
+        android:textColor="?attr/customTextPrimaryColor"
+        android:textSize="@dimen/text_size_body"
+        android:lineSpacingExtra="@dimen/spacing_xs" />
+
+</LinearLayout>

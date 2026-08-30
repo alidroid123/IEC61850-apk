@@ -31,123 +31,109 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
         android:paddingHorizontal="@dimen/spacing_l"
         android:paddingVertical="@dimen/spacing_s">
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center_vertical"
-            android:orientation="horizontal">
+        <ImageView
+            android:id="@+id/btnBack"
+            android:layout_width="@dimen/icon_size_xl"
+            android:layout_height="@dimen/icon_size_xl"
+            android:padding="@dimen/spacing_s"
+            android:src="@drawable/ic_arrow_back"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            app:tint="@color/white" />
 
-            <ImageView
-                android:id="@+id/btnBack"
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginStart="@dimen/spacing_m"
+            android:text="@string/ttl_mms_explorer_adv"
+            android:textColor="@color/white"
+            android:textSize="@dimen/text_size_title_small"
+            android:textStyle="bold" />
+
+        <ProgressBar
+            android:id="@+id/topProgressBar"
+            android:layout_width="@dimen/icon_size_m"
+            android:layout_height="@dimen/icon_size_m"
+            android:layout_marginStart="@dimen/spacing_s"
+            android:visibility="gone"
+            android:indeterminateTint="@color/white" />
+
+        <LinearLayout
+            android:id="@+id/layoutRefreshGroup"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center_horizontal"
+            android:layout_marginStart="@dimen/spacing_xs"
+            android:visibility="gone">
+
+            <ImageButton
+                android:id="@+id/btnRefresh"
                 android:layout_width="@dimen/icon_size_xl"
                 android:layout_height="@dimen/icon_size_xl"
                 android:padding="@dimen/spacing_s"
-                android:src="@drawable/ic_arrow_back"
+                android:src="@drawable/ic_sync"
                 android:background="?attr/selectableItemBackgroundBorderless"
                 app:tint="@color/white" />
 
             <TextView
-                android:layout_width="0dp"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:layout_marginStart="@dimen/spacing_m"
-                android:text="@string/ttl_mms_explorer_adv"
+                android:text="@string/btn_mms_refresh"
                 android:textColor="@color/white"
-                android:textSize="@dimen/text_size_title_small"
-                android:textStyle="bold" />
-
-            <ProgressBar
-                android:id="@+id/topProgressBar"
-                android:layout_width="@dimen/icon_size_m"
-                android:layout_height="@dimen/icon_size_m"
-                android:layout_marginStart="@dimen/spacing_s"
-                android:visibility="gone"
-                android:indeterminateTint="@color/white" />
+                android:textSize="@dimen/text_size_tiny" />
         </LinearLayout>
 
-        <!-- Full-width action row, evenly spaced so it never fights the title for room -->
         <LinearLayout
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_marginTop="@dimen/spacing_s">
+            android:orientation="vertical"
+            android:gravity="center_horizontal"
+            android:layout_marginStart="@dimen/spacing_xs">
 
-            <LinearLayout
-                android:id="@+id/layoutRefreshGroup"
-                android:layout_width="0dp"
-                android:layout_weight="1"
+            <ImageButton
+                android:id="@+id/btnOpenMonitoring"
+                android:layout_width="@dimen/icon_size_xl"
+                android:layout_height="@dimen/icon_size_xl"
+                android:padding="@dimen/spacing_s"
+                android:src="@drawable/ic_ied_monitor"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                app:tint="@color/white" />
+
+            <TextView
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:gravity="center_horizontal"
-                android:visibility="gone">
+                android:text="@string/btn_mms_open_monitoring"
+                android:textColor="@color/white"
+                android:textSize="@dimen/text_size_tiny" />
+        </LinearLayout>
 
-                <ImageButton
-                    android:id="@+id/btnRefresh"
-                    android:layout_width="@dimen/icon_size_xl"
-                    android:layout_height="@dimen/icon_size_xl"
-                    android:padding="@dimen/spacing_s"
-                    android:src="@drawable/ic_sync"
-                    android:background="?attr/selectableItemBackgroundBorderless"
-                    app:tint="@color/white" />
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center_horizontal"
+            android:layout_marginStart="@dimen/spacing_xs">
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/btn_mms_refresh"
-                    android:textColor="@color/white"
-                    android:textSize="@dimen/text_size_tiny" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_weight="1"
+            <androidx.appcompat.widget.SwitchCompat
+                android:id="@+id/swIntranetCheck"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:gravity="center_horizontal">
+                android:checked="true"
+                app:thumbTint="@color/switch_thumb_state"
+                app:trackTint="@color/switch_track_state" />
 
-                <ImageButton
-                    android:id="@+id/btnOpenMonitoring"
-                    android:layout_width="@dimen/icon_size_xl"
-                    android:layout_height="@dimen/icon_size_xl"
-                    android:padding="@dimen/spacing_s"
-                    android:src="@drawable/ic_ied_monitor"
-                    android:background="?attr/selectableItemBackgroundBorderless"
-                    app:tint="@color/white" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/btn_mms_open_monitoring"
-                    android:textColor="@color/white"
-                    android:textSize="@dimen/text_size_tiny" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_weight="1"
+            <TextView
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:gravity="center_horizontal">
-
-                <androidx.appcompat.widget.SwitchCompat
-                    android:id="@+id/swIntranetCheck"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:checked="true"
-                    app:thumbTint="@color/switch_thumb_state"
-                    app:trackTint="@color/switch_track_state" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/lbl_dl_intranet"
-                    android:textColor="@color/white"
-                    android:textSize="@dimen/text_size_tiny" />
-            </LinearLayout>
+                android:text="@string/lbl_dl_intranet"
+                android:textColor="@color/white"
+                android:textSize="@dimen/text_size_tiny" />
         </LinearLayout>
     </LinearLayout>
     </FrameLayout>

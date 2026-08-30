@@ -99,6 +99,37 @@
                     android:textSize="@dimen/text_size_body"
                     android:lineSpacingExtra="@dimen/spacing_xs" />
 
+                <LinearLayout
+                    android:id="@+id/chipsSection"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginTop="@dimen/spacing_m">
+
+                    <TextView
+                        android:text="@string/lbl_help_related_buttons"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textColor="?attr/colorPrimary"
+                        android:textSize="@dimen/text_size_body_small"
+                        android:textStyle="bold"
+                        android:letterSpacing="0.05" />
+
+                    <HorizontalScrollView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/spacing_xs"
+                        android:scrollbars="none"
+                        android:clipToPadding="false">
+
+                        <LinearLayout
+                            android:id="@+id/chipsContainer"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal" />
+                    </HorizontalScrollView>
+                </LinearLayout>
+
                 <TextView
                     android:text="@string/lbl_help_howto"
                     android:layout_width="match_parent"
@@ -109,14 +140,12 @@
                     android:textStyle="bold"
                     android:letterSpacing="0.05" />
 
-                <TextView
-                    android:id="@+id/txtSectionSteps"
+                <LinearLayout
+                    android:id="@+id/stepsContainer"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/spacing_xs"
-                    android:textColor="?attr/customTextPrimaryColor"
-                    android:textSize="@dimen/text_size_body"
-                    android:lineSpacingExtra="@dimen/spacing_s" />
+                    android:orientation="vertical"
+                    android:layout_marginTop="@dimen/spacing_xs" />
             </LinearLayout>
         </LinearLayout>
 

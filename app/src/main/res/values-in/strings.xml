@@ -450,6 +450,12 @@
     <string name="msg_help_no_results">Tidak ada topik bantuan yang cocok</string>
     <string name="lbl_help_function">Fungsi:</string>
     <string name="lbl_help_howto">Cara Penggunaan:</string>
+    <string name="lbl_help_related_buttons">Tombol terkait:</string>
+    <string name="lbl_help_chip_menu">Menu</string>
+    <string name="lbl_help_chip_add_point">Tambah Titik</string>
+    <string name="lbl_help_chip_edit">Edit</string>
+    <string name="lbl_help_chip_vpn">VPN</string>
+    <string name="lbl_help_chip_theme">Tema</string>
 
     <string name="help_ttl_home">Beranda</string>
     <string name="help_sum_home">Menu utama dan pintasan ke semua fitur</string>
