@@ -101,6 +101,11 @@
                             android:textStyle="bold"
                             android:gravity="center" />
 
+                        <View
+                            android:layout_width="@dimen/bulk_col_delete_width"
+                            android:layout_height="1dp"
+                            android:layout_marginEnd="@dimen/spacing_xs" />
+
                         <TextView
                             android:layout_width="@dimen/bulk_col_type_width"
                             android:layout_height="wrap_content"

@@ -37,6 +37,17 @@
             android:singleLine="true"
             android:gravity="end|center_vertical" />
 
+        <ImageButton
+            android:id="@+id/btnRowBrowse"
+            android:layout_width="@dimen/bulk_col_delete_width"
+            android:layout_height="@dimen/bulk_row_input_height"
+            android:layout_marginEnd="@dimen/spacing_xs"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@drawable/ic_list"
+            android:padding="4dp"
+            app:tint="?attr/colorPrimary"
+            android:contentDescription="@string/btn_mon_browse_address" />
+
         <TextView
             android:id="@+id/txtRowType"
             android:layout_width="@dimen/bulk_col_type_width"

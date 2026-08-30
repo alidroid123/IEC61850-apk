@@ -114,6 +114,7 @@
     <string name="ttl_mon_browse_address">Pilih Alamat dari Relay</string>
     <string name="btn_mon_browse_address">Cari dari device</string>
     <string name="msg_mon_browse_type_hint">Hanya titik bertipe %1$s yang bisa dipilih</string>
+    <string name="msg_mon_browse_type_hint_any">Pilih titik apa saja - tipenya akan dideteksi otomatis</string>
     <string name="msg_mon_browse_type_mismatch">Tipe tidak cocok: ini terbaca sebagai %1$s, tapi butuh %2$s</string>
     <string name="msg_mon_browse_empty">Tidak ada logical device ditemukan</string>
     <string name="lbl_mon_multiplier">Faktor Kali (Float/Int)</string>

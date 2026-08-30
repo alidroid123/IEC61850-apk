@@ -623,6 +623,16 @@ public class IEDMonitoringActivity extends BaseActivity {
      * isAlarming() for this node.
      */
     private void showBrowseAddressDialog(MonitoredNode node, EditText etNodeAddress) {
+        showBrowseAddressDialog(node, etNodeAddress, false, null);
+    }
+
+    /**
+     * @param freeType       when true, any leaf can be picked and node.type is updated to match it -
+     *                       used for Bulk Edit rows that don't have an established type to protect yet
+     *                       (a brand-new row, or a row whose address the user is still filling in).
+     * @param txtTypeToUpdate row's type label to refresh when freeType picks a new type; null if none.
+     */
+    private void showBrowseAddressDialog(MonitoredNode node, EditText etNodeAddress, boolean freeType, TextView txtTypeToUpdate) {
         View v = getLayoutInflater().inflate(R.layout.dialog_browse_address, null);
         AlertDialog dialog = new AlertDialog.Builder(this, R.style.Theme_Comtrade_Dialog)
                 .setView(v)
@@ -634,7 +644,8 @@ public class IEDMonitoringActivity extends BaseActivity {
         }
 
         TextView tvTypeHint = v.findViewById(R.id.tvBrowseTypeHint);
-        tvTypeHint.setText(getString(R.string.msg_mon_browse_type_hint, node.type.toUpperCase(Locale.ROOT)));
+        tvTypeHint.setText(freeType ? getString(R.string.msg_mon_browse_type_hint_any)
+                : getString(R.string.msg_mon_browse_type_hint, node.type.toUpperCase(Locale.ROOT)));
 
         RecyclerView rv = v.findViewById(R.id.rvBrowseNodes);
         rv.setLayoutManager(new LinearLayoutManager(this));
@@ -648,7 +659,11 @@ public class IEDMonitoringActivity extends BaseActivity {
         }
         final Iec61850DfrClient finalClient = client;
 
-        BrowseAdapter browseAdapter = new BrowseAdapter(finalClient, node.type, leaf -> {
+        BrowseAdapter browseAdapter = new BrowseAdapter(finalClient, node.type, freeType, leaf -> {
+            if (freeType) {
+                node.type = classifyValueType(leaf.value);
+                if (txtTypeToUpdate != null) txtTypeToUpdate.setText(node.type.toUpperCase(Locale.US));
+            }
             etNodeAddress.setText(leaf.fullPath);
             dialog.dismiss();
         });
@@ -729,11 +744,13 @@ public class IEDMonitoringActivity extends BaseActivity {
         private final List<MmsExplorerActivity.MmsNode> visible = new ArrayList<>();
         private final Iec61850DfrClient client;
         private final String targetType;
+        private final boolean freeType;
         private final OnLeafPicked callback;
 
-        BrowseAdapter(Iec61850DfrClient client, String targetType, OnLeafPicked callback) {
+        BrowseAdapter(Iec61850DfrClient client, String targetType, boolean freeType, OnLeafPicked callback) {
             this.client = client;
             this.targetType = targetType;
+            this.freeType = freeType;
             this.callback = callback;
         }
 
@@ -745,7 +762,7 @@ public class IEDMonitoringActivity extends BaseActivity {
 
         private void pickLeaf(MmsExplorerActivity.MmsNode leaf) {
             String actualType = classifyValueType(leaf.value);
-            if (actualType.equals(targetType)) {
+            if (freeType || actualType.equals(targetType)) {
                 callback.onPicked(leaf);
             } else {
                 Toast.makeText(IEDMonitoringActivity.this, getString(R.string.msg_mon_browse_type_mismatch,
@@ -1348,6 +1365,9 @@ public class IEDMonitoringActivity extends BaseActivity {
         etName.addTextChangedListener(bulkTextWatcher(s -> row.customName = s));
         etPath.addTextChangedListener(bulkTextWatcher(s -> row.fullPath = s));
         etUnit.addTextChangedListener(bulkTextWatcher(s -> row.unit = s));
+        item.findViewById(R.id.btnRowBrowse).setOnClickListener(v ->
+                showBrowseAddressDialog(row.original, etPath, row.isNew, txtType));
+
         etMultiplier.addTextChangedListener(bulkTextWatcher(s -> {
             try {
                 row.multiplier = Float.parseFloat(s);
