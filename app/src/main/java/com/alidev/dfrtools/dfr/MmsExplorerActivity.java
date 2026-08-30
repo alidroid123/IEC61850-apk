@@ -16,6 +16,8 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.PopupWindow;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -84,8 +86,8 @@ public class MmsExplorerActivity extends BaseActivity {
     }
 
     private Button btnConnect, btnDisconnect;
-    private ImageButton btnRefresh, btnOpenMonitoring, btnGetDefinition, btnOpenDefinitions;
-    private View layoutRefreshGroup, layoutGetDefinitionGroup;
+    private ImageButton btnMmsMoreOptions;
+    private boolean isFetchingDefinitions = false;
     private java.util.Set<String> pathsToRestore = null;
 
     @Override
@@ -106,12 +108,7 @@ public class MmsExplorerActivity extends BaseActivity {
         rvExplorer = findViewById(R.id.rvExplorer);
         btnConnect = findViewById(R.id.btnConnect);
         btnDisconnect = findViewById(R.id.btnDisconnect);
-        btnRefresh = findViewById(R.id.btnRefresh);
-        btnOpenMonitoring = findViewById(R.id.btnOpenMonitoring);
-        btnGetDefinition = findViewById(R.id.btnGetDefinition);
-        btnOpenDefinitions = findViewById(R.id.btnOpenDefinitions);
-        layoutRefreshGroup = findViewById(R.id.layoutRefreshGroup);
-        layoutGetDefinitionGroup = findViewById(R.id.layoutGetDefinitionGroup);
+        btnMmsMoreOptions = findViewById(R.id.btnMmsMoreOptions);
         layoutSearch = findViewById(R.id.layoutSearch);
         etSearch = findViewById(R.id.etSearch);
         btnClearSearch = findViewById(R.id.btnClearSearch);
@@ -119,11 +116,8 @@ public class MmsExplorerActivity extends BaseActivity {
         findViewById(R.id.btnBack).setOnClickListener(v -> finish());
         btnConnect.setOnClickListener(v -> checkIntranetAndExecute(this::startExploration));
         btnDisconnect.setOnClickListener(v -> stopExploration());
-        btnRefresh.setOnClickListener(v -> refreshStructure());
-        btnOpenMonitoring.setOnClickListener(v -> startActivity(new Intent(this, IEDMonitoringActivity.class)));
-        btnGetDefinition.setOnClickListener(v -> fetchAllDefinitions());
-        btnOpenDefinitions.setOnClickListener(v -> startActivity(new Intent(this, NodeDefinitionListActivity.class)));
-        
+        btnMmsMoreOptions.setOnClickListener(this::showMoreOptionsMenu);
+
         setupSearch();
         findViewById(R.id.btnListDevice).setOnClickListener(v -> {
             Intent intent = new Intent(this, DeviceListActivity.class);
@@ -313,8 +307,6 @@ public class MmsExplorerActivity extends BaseActivity {
                 if (ok) {
                     btnConnect.setVisibility(View.GONE);
                     btnDisconnect.setVisibility(View.VISIBLE);
-                    layoutRefreshGroup.setVisibility(View.VISIBLE);
-                    layoutGetDefinitionGroup.setVisibility(View.VISIBLE);
                     layoutSearch.setVisibility(View.VISIBLE);
                     loadLogicalDevices();
                     startRealtimeRefresh();
@@ -495,8 +487,6 @@ public class MmsExplorerActivity extends BaseActivity {
             client.disconnect();
             mainHandler.post(() -> {
                 btnDisconnect.setVisibility(View.GONE);
-                layoutRefreshGroup.setVisibility(View.GONE);
-                layoutGetDefinitionGroup.setVisibility(View.GONE);
                 layoutSearch.setVisibility(View.GONE);
                 etSearch.setText("");
                 btnConnect.setVisibility(View.VISIBLE);
@@ -930,6 +920,52 @@ public class MmsExplorerActivity extends BaseActivity {
         Toast.makeText(this, R.string.lbl_mon_added, Toast.LENGTH_SHORT).show();
     }
 
+    /** Themed replacement for a stock overflow menu - matches the app's card/dropdown look
+     *  (bg_popup_menu_card, theme-aware surface/text colors), same as IED Monitoring's header
+     *  menu. Refresh/Get Definition only make sense with a live connection, so they're left out
+     *  of the menu entirely while disconnected instead of showing them disabled. */
+    private void showMoreOptionsMenu(View anchor) {
+        LinearLayout container = new LinearLayout(this);
+        container.setOrientation(LinearLayout.VERTICAL);
+        container.setBackgroundResource(R.drawable.bg_popup_menu_card);
+
+        PopupWindow popup = new PopupWindow(container, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, true);
+        popup.setElevation(dpToPx(8));
+        popup.setOutsideTouchable(true);
+        popup.setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
+
+        if (client.isConnected()) {
+            addMoreOption(container, popup, R.drawable.ic_sync, R.string.btn_mms_refresh, this::refreshStructure);
+            addMoreOption(container, popup, R.drawable.ic_definition, R.string.btn_mms_get_definition, this::fetchAllDefinitions);
+        }
+        addMoreOption(container, popup, R.drawable.ic_table, R.string.btn_mms_open_definitions,
+                () -> startActivity(new Intent(this, NodeDefinitionListActivity.class)));
+        addMoreOption(container, popup, R.drawable.ic_ied_monitor, R.string.btn_mms_open_monitoring,
+                () -> startActivity(new Intent(this, IEDMonitoringActivity.class)));
+
+        container.measure(View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED),
+                View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED));
+        int xOff = anchor.getWidth() - container.getMeasuredWidth();
+        popup.showAsDropDown(anchor, xOff, 0);
+    }
+
+    private void addMoreOption(LinearLayout container, PopupWindow popup, int iconRes, int labelRes, Runnable action) {
+        View row = getLayoutInflater().inflate(R.layout.item_header_menu_option, container, false);
+        ImageView icon = row.findViewById(R.id.imgMenuOptionIcon);
+        TextView label = row.findViewById(R.id.txtMenuOptionLabel);
+        icon.setImageResource(iconRes);
+        label.setText(labelRes);
+        row.setOnClickListener(v -> {
+            popup.dismiss();
+            action.run();
+        });
+        container.addView(row);
+    }
+
+    private int dpToPx(int dp) {
+        return (int) (dp * getResources().getDisplayMetrics().density);
+    }
+
     /**
      * Walks the whole connected device's data model (every LD -> LN -> DO, recursing into any
      * nested SDO structure) looking for attributes literally named "d" (IEC 61850's free-text
@@ -941,13 +977,13 @@ public class MmsExplorerActivity extends BaseActivity {
      */
     private void fetchAllDefinitions() {
         String host = com.alidev.dfrtools.utils.IpAddressHelper.getIpFromInputs(etIp1, etIp2, etIp3, etIp4);
-        if (host.isEmpty() || !client.isConnected()) return;
+        if (host.isEmpty() || !client.isConnected() || isFetchingDefinitions) return;
 
         MonitoringManager.DeviceHeaderData headerData = MonitoringManager.getDeviceHeaderData(this, host);
         String deviceName = headerData != null ? headerData.title : host;
 
         topProgressBar.setVisibility(View.VISIBLE);
-        btnGetDefinition.setEnabled(false);
+        isFetchingDefinitions = true;
         executor.execute(() -> {
             List<NodeDefinition> found = new ArrayList<>();
             try {
@@ -968,7 +1004,7 @@ public class MmsExplorerActivity extends BaseActivity {
             int count = found.size();
             mainHandler.post(() -> {
                 topProgressBar.setVisibility(View.GONE);
-                btnGetDefinition.setEnabled(true);
+                isFetchingDefinitions = false;
                 Toast.makeText(this, count > 0
                         ? getString(R.string.msg_mms_definitions_saved, count)
                         : getString(R.string.msg_mms_definitions_none_found), Toast.LENGTH_SHORT).show();

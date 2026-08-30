@@ -63,105 +63,15 @@
             android:visibility="gone"
             android:indeterminateTint="@color/white" />
 
-        <LinearLayout
-            android:id="@+id/layoutRefreshGroup"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:gravity="center_horizontal"
+        <ImageButton
+            android:id="@+id/btnMmsMoreOptions"
+            android:layout_width="@dimen/icon_size_xl"
+            android:layout_height="@dimen/icon_size_xl"
+            android:padding="@dimen/spacing_s"
             android:layout_marginStart="@dimen/spacing_xs"
-            android:visibility="gone">
-
-            <ImageButton
-                android:id="@+id/btnRefresh"
-                android:layout_width="@dimen/icon_size_xl"
-                android:layout_height="@dimen/icon_size_xl"
-                android:padding="@dimen/spacing_s"
-                android:src="@drawable/ic_sync"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                app:tint="@color/white" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/btn_mms_refresh"
-                android:textColor="@color/white"
-                android:textSize="@dimen/text_size_tiny" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/layoutGetDefinitionGroup"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:gravity="center_horizontal"
-            android:layout_marginStart="@dimen/spacing_xs"
-            android:visibility="gone">
-
-            <ImageButton
-                android:id="@+id/btnGetDefinition"
-                android:layout_width="@dimen/icon_size_xl"
-                android:layout_height="@dimen/icon_size_xl"
-                android:padding="@dimen/spacing_s"
-                android:src="@drawable/ic_definition"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                app:tint="@color/white" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/btn_mms_get_definition"
-                android:textColor="@color/white"
-                android:textSize="@dimen/text_size_tiny" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:gravity="center_horizontal"
-            android:layout_marginStart="@dimen/spacing_xs">
-
-            <ImageButton
-                android:id="@+id/btnOpenDefinitions"
-                android:layout_width="@dimen/icon_size_xl"
-                android:layout_height="@dimen/icon_size_xl"
-                android:padding="@dimen/spacing_s"
-                android:src="@drawable/ic_table"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                app:tint="@color/white" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/btn_mms_open_definitions"
-                android:textColor="@color/white"
-                android:textSize="@dimen/text_size_tiny" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:gravity="center_horizontal"
-            android:layout_marginStart="@dimen/spacing_xs">
-
-            <ImageButton
-                android:id="@+id/btnOpenMonitoring"
-                android:layout_width="@dimen/icon_size_xl"
-                android:layout_height="@dimen/icon_size_xl"
-                android:padding="@dimen/spacing_s"
-                android:src="@drawable/ic_ied_monitor"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                app:tint="@color/white" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/btn_mms_open_monitoring"
-                android:textColor="@color/white"
-                android:textSize="@dimen/text_size_tiny" />
-        </LinearLayout>
+            android:src="@drawable/ic_more_vert"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            app:tint="@color/white" />
 
         <LinearLayout
             android:layout_width="wrap_content"
