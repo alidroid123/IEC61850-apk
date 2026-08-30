@@ -101,22 +101,25 @@ public class ThemeManager {
     public static void applyTheme(Context context) {
         SharedPreferences pref = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
         
-        // If first run, set default to dark mode
+        // If first run, default to light mode.
         if (!pref.contains(KEY_DARK_MODE)) {
-            pref.edit().putBoolean(KEY_DARK_MODE, true).apply();
+            pref.edit().putBoolean(KEY_DARK_MODE, false).apply();
         }
 
-        boolean isDark = pref.getBoolean(KEY_DARK_MODE, true);
-        
+        boolean isDark = pref.getBoolean(KEY_DARK_MODE, false);
+
         int currentMode = AppCompatDelegate.getDefaultNightMode();
         int targetMode = isDark ? AppCompatDelegate.MODE_NIGHT_YES : AppCompatDelegate.MODE_NIGHT_NO;
-        
+
         // Only call setDefaultNightMode if it's different to avoid potential recreate loops
         if (currentMode != targetMode) {
             AppCompatDelegate.setDefaultNightMode(targetMode);
         }
-        
-        int themeIdx = pref.getInt(KEY_THEME_INDEX, 0);
+
+        // Default theme is ABSTRACT (index 4): it's the one built to look intentional on first
+        // run without the user picking anything, since it rotates a real palette per screen
+        // rather than repeating one flat hue everywhere.
+        int themeIdx = pref.getInt(KEY_THEME_INDEX, THEME_INDEX_ABSTRACT);
         int themeResId = R.style.Theme_DFRtools_Blue; // Default
         switch (themeIdx) {
             case 1: themeResId = R.style.Theme_DFRtools_Emerald; break;
@@ -133,7 +136,7 @@ public class ThemeManager {
     }
 
     public static int getSelectedThemeIndex(Context context) {
-        return context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE).getInt(KEY_THEME_INDEX, 0);
+        return context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE).getInt(KEY_THEME_INDEX, THEME_INDEX_ABSTRACT);
     }
 
     public static void setSelectedThemeIndex(Context context, int index) {
@@ -141,7 +144,7 @@ public class ThemeManager {
     }
 
     public static boolean isDarkMode(Context context) {
-        return context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE).getBoolean(KEY_DARK_MODE, true);
+        return context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE).getBoolean(KEY_DARK_MODE, false);
     }
 
     public static void setDarkMode(Context context, boolean isDark) {

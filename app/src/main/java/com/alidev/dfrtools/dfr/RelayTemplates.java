@@ -44,52 +44,18 @@ public class RelayTemplates {
         }
     }
 
-    private static Map<String, List<Point>> defaultTemplates() {
-        Map<String, List<Point>> templates = new LinkedHashMap<>();
-        List<Point> p442 = new ArrayList<>();
-        p442.add(new Point("Records/PriRFLO1.FltDiskm", "Last FL", "float", "Km", 1f));
-        p442.add(new Point("System/GosGGIO2.Ind1.StVal", "VT Fail alarm", "boolean", "", 1f));
-        p442.add(new Point("System/GosGGIO2.Ind5.StVal", "CB Open", "boolean", "", 1f));
-        p442.add(new Point("System/GosGGIO2.Ind22.StVal", "Check Synchro OK", "boolean", "", 1f));
-        p442.add(new Point("Measurements/PriFouMMXU1.A.phsA.cVal.mag.f", "IR", "float", "A", 1f));
-        p442.add(new Point("Measurements/PriFouMMXU1.A.phsB.cVal.mag.f", "IS", "float", "A", 1f));
-        p442.add(new Point("Measurements/PriFouMMXU1.A.phsC.cVal.mag.f", "IT", "float", "A", 1f));
-        p442.add(new Point("Measurements/PriFouMMXU1.A.neut.cVal.mag.f", "3I0", "float", "A", 1f));
-        p442.add(new Point("Measurements/PriFouMMXU1.PhV.phsA.cVal.mag.f", "VRN", "float", "kV", 0.001f));
-        p442.add(new Point("Measurements/PriFouMMXU1.PhV.phsB.cVal.mag.f", "VSN", "float", "kV", 0.001f));
-        p442.add(new Point("Measurements/PriFouMMXU1.PhV.phsC.cVal.mag.f", "VTN", "float", "kV", 0.001f));
-        p442.add(new Point("Measurements/PriFouMMXU1.PhV.neut.cVal.mag.f", "3V0", "float", "kV", 0.001f));
-        p442.add(new Point("Measurements/PriFouMMXU1.PPV.phsAB.cVal.mag.f", "VRS", "float", "kV", 0.001f));
-        p442.add(new Point("Measurements/PriFouMMXU1.PPV.phsBC.cVal.mag.f", "VST", "float", "kV", 0.001f));
-        p442.add(new Point("Measurements/PriFouMMXU1.PPV.phsCA.cVal.mag.f", "VTR", "float", "kV", 0.001f));
-        p442.add(new Point("Measurements/PriFouMMXU1.TotVA.mag.f", "Total VA", "float", "MVA", 0.000001f));
-        p442.add(new Point("Measurements/PriFouMMXU1.TotW.mag.f", "Total Daya Aktif", "float", "MW", 0.000001f));
-        p442.add(new Point("Measurements/PriFouMMXU1.TotVAr.mag.f", "Total Daya Reaktif", "float", "MVAr", 0.000001f));
-        p442.add(new Point("Measurements/PriFouMMXU1.A.phsA.cVal.ang.f", "Angle IR", "float", "°", 1f));
-        p442.add(new Point("Measurements/PriFouMMXU1.A.phsB.cVal.ang.f", "Angle IS", "float", "°", 1f));
-        p442.add(new Point("Measurements/PriFouMMXU1.A.phsC.cVal.ang.f", "Angle IT", "float", "°", 1f));
-        p442.add(new Point("Measurements/PriFouMMXU1.A.neut.cVal.ang.f", "Angle 3I0", "float", "°", 1f));
-        p442.add(new Point("Measurements/PriFouMMXU1.PhV.phsA.cVal.ang.f", "Angle VRN", "float", "°", 1f));
-        p442.add(new Point("Measurements/PriFouMMXU1.PhV.phsB.cVal.ang.f", "Angle VSN", "float", "°", 1f));
-        p442.add(new Point("Measurements/PriFouMMXU1.PhV.phsC.cVal.ang.f", "Angle VTN", "float", "°", 1f));
-        p442.add(new Point("Measurements/PriFouMMXU1.PhV.neut.cVal.ang.f", "Angle 3V0", "float", "°", 1f));
-        p442.add(new Point("Measurements/PriFouMMXU1.PPV.phsAB.cVal.ang.f", "Angle VRS", "float", "°", 1f));
-        p442.add(new Point("Measurements/PriFouMMXU1.PPV.phsBC.cVal.ang.f", "Angle VST", "float", "°", 1f));
-        p442.add(new Point("Measurements/PriFouMMXU1.PPV.phsCA.cVal.ang.f", "Angle VTR", "float", "°", 1f));
-        templates.put("MiCom P442", p442);
-        return templates;
-    }
-
     private static SharedPreferences prefs(Context context) {
         return context.getApplicationContext().getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
     }
 
     private static Map<String, List<Point>> load(Context context) {
         SharedPreferences p = prefs(context);
+        // No seeded template on first run - IED Monitoring's Template picker stays empty until
+        // the user has actually authored and saved one via RelayTemplateEditActivity themselves.
         if (!p.contains(KEY_TEMPLATES)) {
-            Map<String, List<Point>> defaults = defaultTemplates();
-            save(context, defaults);
-            return defaults;
+            Map<String, List<Point>> empty = new LinkedHashMap<>();
+            save(context, empty);
+            return empty;
         }
         Map<String, List<Point>> result = new LinkedHashMap<>();
         try {
