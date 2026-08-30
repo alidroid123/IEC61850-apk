@@ -155,22 +155,98 @@ public class HomeActivity extends BaseActivity {
 
     /**
      * Silent background check against GitHub Releases; never surfaces errors to the user
-     * since this is a non-critical background check (see UpdateChecker).
+     * since this is a non-critical background check (see UpdateChecker). Doubles as the trigger
+     * for the first-run dialog (see maybeShowFirstRunDialog()) since both need the same check -
+     * whichever applies wins, never both, so a fresh install never stacks two dialogs.
      */
     private void checkForAppUpdate() {
         UpdatePrefs.recordOpen(this);
+        boolean firstRun = shouldShowFirstRunDialog();
         UpdateChecker.checkForUpdate(this, info -> {
-            if (info == null || isFinishing()) return;
-            // Logged to the in-app notification feed regardless of the dialog's own throttling
-            // below, so a user who dismissed the popup can still find the update (and what
-            // changed) later from the bell icon instead of it only ever appearing once.
-            AppNotifications.add(this, "update_" + info.versionName,
-                    getString(R.string.msg_all_update_available_title, UpdateChecker.getCurrentVersionName(this), info.versionName),
-                    info.releaseNotes);
-            refreshNotifBadge();
-            if (!UpdatePrefs.shouldShowPrompt(this)) return;
-            updateFlow.showUpdateDialog(info);
+            if (isFinishing()) return;
+            if (info != null) {
+                // Logged to the in-app notification feed regardless of the dialog's own throttling
+                // below, so a user who dismissed the popup can still find the update (and what
+                // changed) later from the bell icon instead of it only ever appearing once.
+                AppNotifications.add(this, "update_" + info.versionName,
+                        getString(R.string.msg_all_update_available_title, UpdateChecker.getCurrentVersionName(this), info.versionName),
+                        info.releaseNotes);
+                refreshNotifBadge();
+            }
+            if (firstRun) {
+                markFirstRunDialogShown();
+                showFirstRunDialog(info);
+                return;
+            }
+            if (info != null && UpdatePrefs.shouldShowPrompt(this)) {
+                updateFlow.showUpdateDialog(info);
+            }
         });
+    }
+
+    private static final String PREF_HOME = "home_prefs";
+    private static final String KEY_FIRST_RUN_SHOWN = "first_run_dialog_shown";
+
+    /** First-run dialog applies once, ever - gated by a flag rather than re-checked on every
+     *  empty-database state, so deleting all devices later never brings it back. */
+    private boolean shouldShowFirstRunDialog() {
+        if (getSharedPreferences(PREF_HOME, MODE_PRIVATE).getBoolean(KEY_FIRST_RUN_SHOWN, false)) return false;
+        return isConfigEmpty();
+    }
+
+    private void markFirstRunDialogShown() {
+        getSharedPreferences(PREF_HOME, MODE_PRIVATE).edit().putBoolean(KEY_FIRST_RUN_SHOWN, true).apply();
+    }
+
+    /** Reuses BackupManager's own view of "the config" so this never drifts out of sync with
+     *  whatever backup/restore actually covers. */
+    private boolean isConfigEmpty() {
+        try {
+            JSONObject config = BackupManager.exportConfig(this);
+            JSONArray devices = config.optJSONArray("deviceList");
+            JSONArray nodes = config.optJSONArray("monitoredNodes");
+            JSONObject templates = config.optJSONObject("relayTemplates");
+            JSONArray defs = config.optJSONArray("nodeDefinitions");
+            return (devices == null || devices.length() == 0)
+                    && (nodes == null || nodes.length() == 0)
+                    && (templates == null || templates.length() == 0)
+                    && (defs == null || defs.length() == 0);
+        } catch (Exception e) {
+            return false; // can't tell - don't risk nagging an existing user over a parsing hiccup
+        }
+    }
+
+    /** Combines the "empty database" recommendation (import a backup) with an update mention
+     *  when one happens to be available too, instead of showing two separate popups. */
+    private void showFirstRunDialog(@androidx.annotation.Nullable UpdateChecker.UpdateInfo info) {
+        View dialogView = getLayoutInflater().inflate(R.layout.dialog_first_run, null);
+        androidx.appcompat.app.AlertDialog dialog = new androidx.appcompat.app.AlertDialog.Builder(this, R.style.Theme_Comtrade_Dialog)
+                .setView(dialogView)
+                .create();
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+        }
+
+        View layoutUpdate = dialogView.findViewById(R.id.layoutFirstRunUpdate);
+        if (info != null) {
+            layoutUpdate.setVisibility(View.VISIBLE);
+            ((TextView) dialogView.findViewById(R.id.tvFirstRunUpdateMessage))
+                    .setText(getString(R.string.msg_home_first_run_update_available, info.versionName));
+            dialogView.findViewById(R.id.btnFirstRunCheckUpdate).setOnClickListener(v -> {
+                dialog.dismiss();
+                updateFlow.showUpdateDialog(info);
+            });
+        } else {
+            layoutUpdate.setVisibility(View.GONE);
+        }
+
+        dialogView.findViewById(R.id.btnFirstRunImport).setOnClickListener(v -> {
+            dialog.dismiss();
+            startActivity(new Intent(this, SettingsActivity.class).putExtra("open_import", true));
+        });
+        dialogView.findViewById(R.id.btnFirstRunSkip).setOnClickListener(v -> dialog.dismiss());
+
+        dialog.show();
     }
 
     private void refreshNotifBadge() {

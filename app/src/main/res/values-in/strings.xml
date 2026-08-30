@@ -452,6 +452,12 @@
     <string name="lbl_home_stat_gi">Gardu Induk</string>
     <string name="lbl_home_stat_device">Online</string>
     <string name="lbl_home_stat_alarm">Alarm Aktif</string>
+    <string name="ttl_home_first_run">Selamat Datang!</string>
+    <string name="msg_home_first_run_intro">Sepertinya ini pertama kali Anda menggunakan aplikasi ini. Kalau Anda punya file backup konfigurasi (device, titik pantau, template), impor sekarang daripada mengatur ulang dari awal.</string>
+    <string name="msg_home_first_run_update_available">Selain itu, ada versi lebih baru tersedia: v%1$s</string>
+    <string name="btn_home_first_run_import">IMPORT KONFIGURASI</string>
+    <string name="btn_home_first_run_check_update">LIHAT UPDATE</string>
+    <string name="btn_home_first_run_skip">Nanti Saja</string>
     <string name="menu_home_download_dfr">UNDUH DFR</string>
     <string name="menu_home_history">RIWAYAT UNDUHAN</string>
     <string name="menu_all_vpn">Hubungkan VPN</string>

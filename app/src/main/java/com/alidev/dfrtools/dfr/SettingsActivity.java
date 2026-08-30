@@ -44,6 +44,8 @@ public class SettingsActivity extends BaseActivity {
 
         initViews();
         loadSettings();
+
+        if (getIntent().getBooleanExtra("open_import", false)) pickConfigFile();
     }
 
     private void initViews() {

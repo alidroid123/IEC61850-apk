@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="320dp"
+    android:layout_height="wrap_content"
+    android:layout_gravity="center"
+    app:cardCornerRadius="@dimen/card_corner_radius_huge"
+    app:cardBackgroundColor="?attr/customSurfaceColor"
+    app:strokeColor="?attr/colorPrimary"
+    app:strokeWidth="1dp"
+    app:cardElevation="@dimen/card_elevation_huge">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="@dimen/spacing_l">
+
+        <ImageView
+            android:layout_width="@dimen/icon_size_huge"
+            android:layout_height="@dimen/icon_size_huge"
+            android:layout_gravity="center"
+            android:src="@drawable/ic_info"
+            app:tint="?attr/colorPrimary" />
+
+        <TextView
+            android:id="@+id/tvFirstRunTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_m"
+            android:text="@string/ttl_home_first_run"
+            android:textColor="?attr/colorPrimary"
+            android:textSize="@dimen/text_size_body_large"
+            android:textStyle="bold"
+            android:gravity="center" />
+
+        <TextView
+            android:id="@+id/tvFirstRunMessage"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_s"
+            android:text="@string/msg_home_first_run_intro"
+            android:textColor="?attr/customTextPrimaryColor"
+            android:textSize="@dimen/text_size_body_small"
+            android:gravity="center"
+            android:lineSpacingExtra="@dimen/spacing_tiny" />
+
+        <LinearLayout
+            android:id="@+id/layoutFirstRunUpdate"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginTop="@dimen/spacing_m"
+            android:background="@drawable/bg_spinner"
+            android:backgroundTint="@color/bg_navy_dim"
+            android:padding="@dimen/spacing_m"
+            android:visibility="gone">
+
+            <TextView
+                android:id="@+id/tvFirstRunUpdateMessage"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="?attr/customTextPrimaryColor"
+                android:textSize="@dimen/text_size_body_small"
+                android:gravity="center" />
+
+            <Button
+                android:id="@+id/btnFirstRunCheckUpdate"
+                style="@style/Widget.MaterialComponents.Button.TextButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginTop="@dimen/spacing_xs"
+                android:text="@string/btn_home_first_run_check_update"
+                android:textColor="?attr/colorPrimary" />
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/btnFirstRunImport"
+            style="@style/Widget.DFRtools.Button"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/standard_button_height"
+            android:layout_marginTop="@dimen/spacing_l"
+            android:text="@string/btn_home_first_run_import" />
+
+        <Button
+            android:id="@+id/btnFirstRunSkip"
+            style="@style/Widget.MaterialComponents.Button.TextButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_xs"
+            android:text="@string/btn_home_first_run_skip"
+            android:textColor="@color/text_secondary" />
+
+    </LinearLayout>
+</com.google.android.material.card.MaterialCardView>

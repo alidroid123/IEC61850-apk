@@ -160,6 +160,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="@dimen/standard_button_height"
                 android:layout_marginStart="@dimen/spacing_s"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"
                 android:text="@string/btn_mms_full_list"
                 android:textColor="?attr/colorPrimary"
                 app:strokeColor="?attr/colorPrimary" />
@@ -170,6 +172,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="@dimen/standard_button_height"
                 android:layout_marginStart="@dimen/spacing_s"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"
                 android:text="CLOSE IED"
                 android:textColor="@color/status_danger"
                 app:strokeColor="@color/status_danger"
