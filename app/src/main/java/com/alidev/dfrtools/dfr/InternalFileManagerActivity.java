@@ -66,7 +66,13 @@ public class InternalFileManagerActivity extends BaseActivity {
                     if (intent.resolveActivity(getPackageManager()) != null) {
                         startActivity(Intent.createChooser(intent, getString(R.string.ttl_file_open_chooser)));
                     } else {
-                        Toast.makeText(this, getString(R.string.msg_file_open_folder_unsupported, baseDir.getAbsolutePath()), Toast.LENGTH_LONG).show();
+                        // A Toast here got clipped/dismissed before the full folder path could be
+                        // read - a dialog stays on screen until the user dismisses it themselves.
+                        new AlertDialog.Builder(this, R.style.Theme_Comtrade_Dialog)
+                                .setTitle(R.string.ttl_file_open_chooser)
+                                .setMessage(getString(R.string.msg_file_open_folder_unsupported, baseDir.getAbsolutePath()))
+                                .setPositiveButton(android.R.string.ok, null)
+                                .show();
                     }
                 } catch (Exception e) {
                     Toast.makeText(this, getString(R.string.msg_view_general_error, e.getMessage()), Toast.LENGTH_SHORT).show();

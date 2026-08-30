@@ -384,6 +384,7 @@
     <string name="ttl_view_wrong_file">WRONG FILE!</string>
     <string name="ttl_mon_main">IED Monitoring</string>
     <string name="ttl_mon_edit">Edit Monitored Node</string>
+    <string name="ttl_mon_add_to_monitoring">Add to Monitoring</string>
     <string name="ttl_mon_import_csv">Import CSV Monitoring</string>
     <string name="ttl_mon_bulk_edit">Bulk Edit</string>
     <string name="lbl_mon_bulk_edit_subtitle">%1$s • %2$d point(s)</string>
@@ -576,7 +577,7 @@
     <string name="help_cmp_exp_3_name">Search bar</string>
     <string name="help_cmp_exp_3_desc">Filters the data model tree by name or path.</string>
     <string name="help_cmp_exp_4_name">+ icon (per value)</string>
-    <string name="help_cmp_exp_4_desc">Adds that data point to IED Monitoring - choose Float/Integer or Boolean.</string>
+    <string name="help_cmp_exp_4_desc">Opens a dialog to add that data point to IED Monitoring, with a custom name, type (Float/Boolean/String), and - for Float - unit and multiplier.</string>
     <string name="help_cmp_exp_5_name">Refresh icon</string>
     <string name="help_cmp_exp_5_desc">Rebuilds the data model structure from scratch if it looks outdated.</string>
     <string name="help_feat_exp_1_title">Connecting to an IED</string>
@@ -584,7 +585,7 @@
     <string name="help_feat_exp_2_title">Browsing the Data Model</string>
     <string name="help_feat_exp_2_steps">1. Tap a folder row to expand or collapse that branch.\n2. Use {ic:search} the search bar to filter by name or path.</string>
     <string name="help_feat_exp_3_title">Adding Points to Monitoring</string>
-    <string name="help_feat_exp_3_steps">1. Tap the {ic:add} icon next to a value.\n2. Choose Float/Integer or Boolean, then confirm.</string>
+    <string name="help_feat_exp_3_steps">1. Tap the {ic:add} icon next to a value.\n2. Set a custom name and pick the type (Float/Boolean/String).\n3. For Float, also set the unit and multiplier so the value is scaled and labeled correctly.\n4. Tap ADD to save it to IED Monitoring.</string>
     <string name="help_feat_exp_4_title">Refreshing &amp; Disconnecting</string>
     <string name="help_feat_exp_4_steps">1. Tap {ic:sync} to rebuild the structure if it looks outdated.\n2. Tap CLOSE IED to disconnect when finished.</string>
 

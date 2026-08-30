@@ -767,37 +767,80 @@ public class MmsExplorerActivity extends BaseActivity {
         }
     }
 
+    /**
+     * Lets the user set the custom name/unit/multiplier and pick the value type right when a
+     * point is added from IED Explorer, instead of adding it with just the raw node name and
+     * having to open IED Monitoring's separate edit dialog afterward to set those - mirrors the
+     * same fields (name/unit/multiplier) already editable per-point in Bulk Edit there.
+     */
     private void showAddMonitorDialog(MmsNode node) {
-        View dialogView = getLayoutInflater().inflate(R.layout.dialog_select_value_type, null);
+        View v = getLayoutInflater().inflate(R.layout.dialog_add_to_monitoring, null);
         AlertDialog dialog = new AlertDialog.Builder(this, R.style.Theme_Comtrade_Dialog)
-                .setView(dialogView)
+                .setView(v)
                 .create();
 
         if (dialog.getWindow() != null) {
             dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
         }
 
-        dialogView.findViewById(R.id.btnTypeFloat).setOnClickListener(v -> {
-            addToMonitoring(node, "float");
+        TextView tvPath = v.findViewById(R.id.tvAddNodePath);
+        EditText etCustomName = v.findViewById(R.id.etAddCustomName);
+        TextView optFloat = v.findViewById(R.id.optTypeFloat);
+        TextView optBool = v.findViewById(R.id.optTypeBool);
+        TextView optString = v.findViewById(R.id.optTypeString);
+        View layoutUnit = v.findViewById(R.id.layoutAddUnit);
+        View layoutMultiplier = v.findViewById(R.id.layoutAddMultiplier);
+        EditText etUnit = v.findViewById(R.id.etAddUnit);
+        EditText etMultiplier = v.findViewById(R.id.etAddMultiplier);
+
+        tvPath.setText(node.fullPath);
+        etCustomName.setText(node.name);
+
+        TextView[] options = {optFloat, optBool, optString};
+        String[] typeForOption = {"float", "boolean", "string"};
+        int[] selectedIndex = {0};
+
+        Runnable applySelection = () -> {
+            for (int i = 0; i < options.length; i++) {
+                boolean selected = i == selectedIndex[0];
+                options[i].setBackgroundResource(selected ? R.drawable.bg_type_option_selected : R.drawable.bg_edit_text);
+                options[i].setTextColor(ContextCompat.getColor(this, selected ? R.color.white : R.color.text_secondary));
+            }
+            boolean isFloat = "float".equals(typeForOption[selectedIndex[0]]);
+            layoutUnit.setVisibility(isFloat ? View.VISIBLE : View.GONE);
+            layoutMultiplier.setVisibility(isFloat ? View.VISIBLE : View.GONE);
+        };
+        applySelection.run();
+
+        for (int i = 0; i < options.length; i++) {
+            int index = i;
+            options[i].setOnClickListener(opt -> {
+                selectedIndex[0] = index;
+                applySelection.run();
+            });
+        }
+
+        v.findViewById(R.id.btnAddCancel).setOnClickListener(view -> dialog.dismiss());
+        v.findViewById(R.id.btnAddConfirm).setOnClickListener(view -> {
+            String type = typeForOption[selectedIndex[0]];
+            String customName = etCustomName.getText().toString().trim();
+            if (customName.isEmpty()) customName = node.name;
+
+            float multiplier = 1.0f;
+            if ("float".equals(type)) {
+                try {
+                    multiplier = Float.parseFloat(etMultiplier.getText().toString());
+                } catch (Exception ignored) {}
+            }
+
+            addToMonitoring(node, type, customName, "float".equals(type) ? etUnit.getText().toString().trim() : "", multiplier);
             dialog.dismiss();
         });
-
-        dialogView.findViewById(R.id.btnTypeBool).setOnClickListener(v -> {
-            addToMonitoring(node, "boolean");
-            dialog.dismiss();
-        });
-
-        dialogView.findViewById(R.id.btnTypeString).setOnClickListener(v -> {
-            addToMonitoring(node, "string");
-            dialog.dismiss();
-        });
-
-        dialogView.findViewById(R.id.btnCancel).setOnClickListener(v -> dialog.dismiss());
 
         dialog.show();
     }
 
-    private void addToMonitoring(MmsNode node, String type) {
+    private void addToMonitoring(MmsNode node, String type, String customName, String unit, float multiplier) {
         String host = com.alidev.dfrtools.utils.IpAddressHelper.getIpFromInputs(etIp1, etIp2, etIp3, etIp4);
         String deviceName = tvDeviceInfo.getText().toString();
         if (deviceName.isEmpty()) deviceName = host;
@@ -806,6 +849,9 @@ public class MmsExplorerActivity extends BaseActivity {
         }
 
         MonitoredNode mn = new MonitoredNode(deviceName, host, node.name, node.fullPath, type);
+        mn.customName = customName;
+        mn.unit = unit;
+        mn.multiplier = multiplier;
         new MonitoringManager(this).addNode(mn);
         Toast.makeText(this, R.string.lbl_mon_added, Toast.LENGTH_SHORT).show();
     }

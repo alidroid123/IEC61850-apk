@@ -347,6 +347,7 @@
     <string name="ttl_view_wrong_file">SALAH FILE!</string>
     <string name="ttl_mon_main">Monitoring IED</string>
     <string name="ttl_mon_edit">Edit Node Monitor</string>
+    <string name="ttl_mon_add_to_monitoring">Tambah ke Monitoring</string>
     <string name="ttl_mon_import_csv">Import CSV Monitoring</string>
     <string name="ttl_mon_bulk_edit">Bulk Edit</string>
     <string name="lbl_mon_bulk_edit_subtitle">%1$s • %2$d titik</string>
@@ -539,7 +540,7 @@
     <string name="help_cmp_exp_3_name">Kolom Pencarian</string>
     <string name="help_cmp_exp_3_desc">Menyaring struktur data model berdasarkan nama atau path.</string>
     <string name="help_cmp_exp_4_name">Ikon + (per nilai)</string>
-    <string name="help_cmp_exp_4_desc">Menambahkan titik data tersebut ke IED Monitoring - pilih tipe Float/Integer atau Boolean.</string>
+    <string name="help_cmp_exp_4_desc">Membuka dialog untuk menambahkan titik data tersebut ke IED Monitoring, lengkap dengan nama custom, tipe (Float/Boolean/String), dan - khusus Float - unit serta multiplier.</string>
     <string name="help_cmp_exp_5_name">Ikon Refresh</string>
     <string name="help_cmp_exp_5_desc">Membangun ulang struktur data model dari awal bila terasa sudah tidak sesuai.</string>
     <string name="help_feat_exp_1_title">Menyambung ke IED</string>
@@ -547,7 +548,7 @@
     <string name="help_feat_exp_2_title">Menjelajah Struktur Data</string>
     <string name="help_feat_exp_2_steps">1. Ketuk baris folder untuk membuka atau menutup cabang tersebut.\n2. Gunakan {ic:search} kolom pencarian untuk menyaring berdasarkan nama atau path.</string>
     <string name="help_feat_exp_3_title">Menambah Titik ke Monitoring</string>
-    <string name="help_feat_exp_3_steps">1. Ketuk ikon {ic:add} di samping sebuah nilai.\n2. Pilih tipe Float/Integer atau Boolean, lalu konfirmasi.</string>
+    <string name="help_feat_exp_3_steps">1. Ketuk ikon {ic:add} di samping sebuah nilai.\n2. Atur nama custom dan pilih tipe (Float/Boolean/String).\n3. Khusus Float, atur juga unit dan multiplier agar nilainya terskala dan berlabel dengan benar.\n4. Ketuk ADD untuk menyimpannya ke IED Monitoring.</string>
     <string name="help_feat_exp_4_title">Refresh &amp; Tutup Koneksi</string>
     <string name="help_feat_exp_4_steps">1. Ketuk {ic:sync} untuk membangun ulang struktur bila terasa sudah tidak sesuai.\n2. Ketuk CLOSE IED untuk memutus koneksi setelah selesai.</string>
 
