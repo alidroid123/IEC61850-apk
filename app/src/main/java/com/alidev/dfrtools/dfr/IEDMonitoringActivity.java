@@ -1664,9 +1664,10 @@ public class IEDMonitoringActivity extends BaseActivity {
 
         if (stickyHolder == null) {
             View v = getLayoutInflater().inflate(R.layout.item_monitoring_header, stickyHeaderContainer, false);
-            v.setBackgroundResource(R.drawable.bg_monitoring_group_header_pinned);
+            View banner = v.findViewById(R.id.layoutHeaderBanner);
+            banner.setBackgroundResource(R.drawable.bg_monitoring_group_header_pinned);
             int extraPad = dpToPx(6);
-            v.setPadding(v.getPaddingLeft(), v.getPaddingTop() + extraPad, v.getPaddingRight(), v.getPaddingBottom() + extraPad);
+            banner.setPadding(banner.getPaddingLeft(), banner.getPaddingTop() + extraPad, banner.getPaddingRight(), banner.getPaddingBottom() + extraPad);
             stickyHolder = new HeaderVH(v, true);
             stickyHeaderContainer.addView(v);
         }
@@ -1764,8 +1765,8 @@ public class IEDMonitoringActivity extends BaseActivity {
 
     class HeaderVH extends RecyclerView.ViewHolder {
         TextView txtHeader, txtHeaderIp, txtHeaderUpdate, txtHeaderCompact;
-        View layoutHeaderDetails;
-        ImageView btnEditDevice, btnBulkEdit, btnDeleteGroup, btnRefreshGroup, imgExpand;
+        View layoutHeaderDetails, layoutHeaderBanner;
+        ImageView btnRefreshGroup, btnMoreOptions, imgExpand;
         View statusDot, viewDeviceAccent;
         final boolean isSticky;
         HeaderVH(View v, boolean isSticky) {
@@ -1776,10 +1777,9 @@ public class IEDMonitoringActivity extends BaseActivity {
             txtHeaderUpdate = v.findViewById(R.id.txtHeaderUpdate);
             txtHeaderCompact = v.findViewById(R.id.txtHeaderCompact);
             layoutHeaderDetails = v.findViewById(R.id.layoutHeaderDetails);
-            btnEditDevice = v.findViewById(R.id.btnEditDevice);
-            btnBulkEdit = v.findViewById(R.id.btnBulkEdit);
-            btnDeleteGroup = v.findViewById(R.id.btnDeleteGroup);
+            layoutHeaderBanner = v.findViewById(R.id.layoutHeaderBanner);
             btnRefreshGroup = v.findViewById(R.id.btnRefreshGroup);
+            btnMoreOptions = v.findViewById(R.id.btnMoreOptions);
             imgExpand = v.findViewById(R.id.imgExpand);
             statusDot = v.findViewById(R.id.statusDot);
             viewDeviceAccent = v.findViewById(R.id.viewDeviceAccent);
@@ -1793,7 +1793,7 @@ public class IEDMonitoringActivity extends BaseActivity {
             // different groups underneath it.
             if (!isSticky) {
                 int variant = Math.floorMod(info.ip.hashCode(), GROUP_HEADER_VARIANTS.length);
-                itemView.setBackgroundResource(GROUP_HEADER_VARIANTS[variant]);
+                layoutHeaderBanner.setBackgroundResource(GROUP_HEADER_VARIANTS[variant]);
             }
             // While searching, collapse the header down to one thin identification line and hide
             // every action/status affordance - the point is to scan the flat match list quickly,
@@ -1806,11 +1806,9 @@ public class IEDMonitoringActivity extends BaseActivity {
                 if (statusDot != null) statusDot.setVisibility(View.GONE);
                 if (viewDeviceAccent != null) viewDeviceAccent.setVisibility(View.GONE);
                 if (imgExpand != null) imgExpand.setVisibility(View.GONE);
-                if (btnEditDevice != null) btnEditDevice.setVisibility(View.GONE);
-                if (btnBulkEdit != null) btnBulkEdit.setVisibility(View.GONE);
-                if (btnDeleteGroup != null) btnDeleteGroup.setVisibility(View.GONE);
+                if (btnMoreOptions != null) btnMoreOptions.setVisibility(View.GONE);
                 if (btnRefreshGroup != null) btnRefreshGroup.setVisibility(View.GONE);
-                itemView.setOnClickListener(null);
+                layoutHeaderBanner.setOnClickListener(null);
                 return;
             }
 
@@ -1822,8 +1820,7 @@ public class IEDMonitoringActivity extends BaseActivity {
                 viewDeviceAccent.setBackgroundTintList(android.content.res.ColorStateList.valueOf(getDeviceAccentColor(info.device)));
             }
             if (imgExpand != null) imgExpand.setVisibility(View.VISIBLE);
-            if (btnBulkEdit != null) btnBulkEdit.setVisibility(View.VISIBLE);
-            if (btnDeleteGroup != null) btnDeleteGroup.setVisibility(View.VISIBLE);
+            if (btnMoreOptions != null) btnMoreOptions.setVisibility(View.VISIBLE);
             if (btnRefreshGroup != null) btnRefreshGroup.setVisibility(View.VISIBLE);
 
             txtHeader.setText(info.title);
@@ -1832,24 +1829,37 @@ public class IEDMonitoringActivity extends BaseActivity {
             if (!info.isUnknown) {
                 txtHeaderIp.setVisibility(View.VISIBLE);
                 txtHeaderIp.setText(info.ipLine);
-                btnEditDevice.setVisibility(View.GONE);
             } else {
                 txtHeaderIp.setVisibility(View.GONE);
-                btnEditDevice.setVisibility(View.VISIBLE);
-                btnEditDevice.setOnClickListener(v -> {
-                    Intent intent = new Intent(IEDMonitoringActivity.this, DeviceListActivity.class);
-                    intent.putExtra("ip_prefill", info.ip);
-                    startActivity(intent);
-                });
             }
 
             if (imgExpand != null) imgExpand.setRotation(info.isCollapsed ? 0 : 90);
-            itemView.setOnClickListener(v -> adapter.toggleGroup(info.ip));
-            if (btnBulkEdit != null) {
-                btnBulkEdit.setOnClickListener(v -> showBulkEditDialog(info.ip, info.title));
-            }
-            if (btnDeleteGroup != null) {
-                btnDeleteGroup.setOnClickListener(v -> confirmDeleteGroup(info));
+            layoutHeaderBanner.setOnClickListener(v -> adapter.toggleGroup(info.ip));
+            if (btnMoreOptions != null) {
+                btnMoreOptions.setOnClickListener(v -> {
+                    androidx.appcompat.widget.PopupMenu menu = new androidx.appcompat.widget.PopupMenu(IEDMonitoringActivity.this, v);
+                    if (info.isUnknown) {
+                        menu.getMenu().add(0, 1, 0, R.string.lbl_mon_add_device);
+                    }
+                    menu.getMenu().add(0, 2, 1, R.string.ttl_mon_bulk_edit);
+                    menu.getMenu().add(0, 3, 2, R.string.lbl_mon_delete_group);
+                    menu.setOnMenuItemClickListener(item -> {
+                        if (item.getItemId() == 1) {
+                            Intent intent = new Intent(IEDMonitoringActivity.this, DeviceListActivity.class);
+                            intent.putExtra("ip_prefill", info.ip);
+                            startActivity(intent);
+                            return true;
+                        } else if (item.getItemId() == 2) {
+                            showBulkEditDialog(info.ip, info.title);
+                            return true;
+                        } else if (item.getItemId() == 3) {
+                            confirmDeleteGroup(info);
+                            return true;
+                        }
+                        return false;
+                    });
+                    menu.show();
+                });
             }
             if (btnRefreshGroup != null) {
                 btnRefreshGroup.setOnClickListener(v -> checkIntranetAndExecute(() -> manualRefreshGroup(info.ip)));

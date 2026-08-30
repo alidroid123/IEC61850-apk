@@ -153,6 +153,8 @@
     <string name="lbl_mon_alarm_on_match">Alarm when text matches (unchecked = alarm when it does NOT match)</string>
     <string name="lbl_mon_alarm_match_text">Alarm Match Text</string>
     <string name="msg_mon_delete_group_confirm">Delete all monitoring points for %1$s?</string>
+    <string name="lbl_mon_add_device">Add Device</string>
+    <string name="lbl_mon_delete_group">Delete Group</string>
     <string name="ttl_mon_refresh_many_confirm">Refresh All Nodes?</string>
     <string name="msg_mon_refresh_many_confirm">You\'re about to refresh %1$d nodes at once. This may take a while and put load on the network. Continue?</string>
     <string name="btn_mon_refresh_confirm">REFRESH</string>
