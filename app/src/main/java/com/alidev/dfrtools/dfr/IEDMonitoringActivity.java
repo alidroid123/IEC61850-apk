@@ -1228,6 +1228,7 @@ public class IEDMonitoringActivity extends BaseActivity {
         String customName, fullPath, unit;
         float multiplier;
         boolean deleted = false;
+        boolean isNew = false; // added via "Add Row" in this session - saved with addNode() instead of updateNode()
 
         BulkEditRow(MonitoredNode original) {
             this.original = original;
@@ -1270,6 +1271,14 @@ public class IEDMonitoringActivity extends BaseActivity {
             llRows.addView(buildBulkEditRowView(llRows, row));
         }
 
+        v.findViewById(R.id.btnAddBulkRow).setOnClickListener(view -> {
+            // Manually-added point, same "type defaults to float" convention as CSV import -
+            // there's no live device read here to auto-detect it from.
+            BulkEditRow newRow = new BulkEditRow(new MonitoredNode(deviceName, ip, "", "", "float"));
+            newRow.isNew = true;
+            rows.add(newRow);
+            llRows.addView(buildBulkEditRowView(llRows, newRow));
+        });
         v.findViewById(R.id.btnBulkImportCsv).setOnClickListener(view -> {
             dialog.dismiss();
             showImportCsvDialog(ip, deviceName);
@@ -1279,8 +1288,22 @@ public class IEDMonitoringActivity extends BaseActivity {
             int updated = 0, deletedCount = 0;
             for (BulkEditRow row : rows) {
                 if (row.deleted) {
-                    manager.removeNode(row.original);
-                    deletedCount++;
+                    if (!row.isNew) {
+                        manager.removeNode(row.original);
+                        deletedCount++;
+                    }
+                    continue;
+                }
+                if (row.isNew) {
+                    if (row.fullPath.trim().isEmpty()) continue; // no address entered - drop silently
+                    row.original.customName = row.customName;
+                    row.original.fullPath = row.fullPath;
+                    row.original.nodeName = row.fullPath.contains(".")
+                            ? row.fullPath.substring(row.fullPath.lastIndexOf('.') + 1) : row.fullPath;
+                    row.original.unit = row.unit;
+                    row.original.multiplier = row.multiplier;
+                    manager.addNode(row.original);
+                    updated++;
                     continue;
                 }
                 boolean addressChanged = !row.fullPath.equals(row.oldFullPath);

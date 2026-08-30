@@ -159,6 +159,16 @@
 
             </HorizontalScrollView>
 
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnAddBulkRow"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/standard_button_height"
+                android:layout_marginTop="@dimen/spacing_m"
+                android:text="@string/lbl_tmpl_add_row"
+                app:icon="@drawable/ic_add"
+                app:cornerRadius="@dimen/card_corner_radius_medium" />
+
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

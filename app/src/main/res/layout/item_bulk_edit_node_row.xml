@@ -21,6 +21,7 @@
             android:paddingHorizontal="@dimen/spacing_xs"
             android:textColor="@color/text_primary"
             android:textSize="@dimen/text_size_caption"
+            android:hint="@string/hint_tmpl_row_name"
             android:singleLine="true" />
 
         <EditText
@@ -32,6 +33,7 @@
             android:paddingHorizontal="@dimen/spacing_xs"
             android:textColor="@color/text_primary"
             android:textSize="@dimen/text_size_caption"
+            android:hint="@string/hint_tmpl_row_path"
             android:singleLine="true"
             android:gravity="end|center_vertical" />
 
