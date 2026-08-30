@@ -434,12 +434,15 @@
 
     <!-- // Settings -->
     <string name="ttl_set_main">App Settings</string>
-    <string name="lbl_set_mms_port">MMS Default Port</string>
-    <string name="lbl_set_intranet_ip">Intranet Check IP</string>
-    <string name="lbl_set_ping_count_single">Ping Count (Single/Check)</string>
-    <string name="lbl_set_ping_count_bulk">Ping Count (Bulk/Scan)</string>
-    <string name="lbl_set_thread_pool">Thread Pool Size (Max 5)</string>
-    <string name="lbl_set_dfr_points">DFR Default Data Points</string>
+    <string name="lbl_set_mms_port">MMS Port</string>
+    <string name="lbl_set_intranet_ip">Intranet Test IP</string>
+    <string name="lbl_set_ping_count_single">Ping Packets (per Device)</string>
+    <string name="lbl_set_ping_count_bulk">Ping Packets (Bulk Ping)</string>
+    <!-- "Thread Pool Size" is developer jargon; what it actually sets is how many relays get
+         pinged at once during a bulk ping. Likewise the DFR value is the number of sample points
+         plotted per channel - i.e. the chart's resolution - not some "default data". -->
+    <string name="lbl_set_thread_pool">Simultaneous Pings (Max 5)</string>
+    <string name="lbl_set_dfr_points">DFR Chart Resolution (points)</string>
     <string name="lbl_set_mon_interval">Monitoring Update Interval (seconds)</string>
     <string name="lbl_set_clear_cache">Clear Application Cache</string>
     <string name="msg_set_cache_cleared">Cache cleared: %s</string>
@@ -455,8 +458,10 @@
     <!-- // Device Stats -->
     <string name="stat_dev_total">%d Devices</string>
     <string name="stat_dev_online">%d Online</string>
-    <string name="stat_dev_open">%d Open</string>
-    <string name="stat_dev_closed">%d Closed</string>
+    <!-- These count MMS port 102 reachability, NOT breaker position. Bare "Open/Closed" in a
+         protection app reads as CB open/closed, so the port is named explicitly. -->
+    <string name="stat_dev_open">%d Port Open</string>
+    <string name="stat_dev_closed">%d Port Closed</string>
     <string name="stat_dev_offline">%d Offline</string>
 
     <!-- // Value -->

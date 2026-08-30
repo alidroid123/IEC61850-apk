@@ -19,8 +19,8 @@
     <string name="btn_all_update">Update</string>
     <string name="btn_base_toggle_mode">Ganti ke %s</string>
     <string name="btn_dev_choose_csv">PILIH FILE CSV</string>
-    <string name="btn_dev_export">Export</string>
-    <string name="btn_dev_import">Import</string>
+    <string name="btn_dev_export">Ekspor</string>
+    <string name="btn_dev_import">Impor</string>
     <string name="btn_dev_download_template">UNDUH TEMPLATE</string>
     <string name="btn_dev_ping">PING</string>
     <string name="btn_dev_action_delete">Hapus item</string>
@@ -44,7 +44,7 @@
     <string name="btn_mon_save">SIMPAN</string>
     <string name="btn_mon_remove">HAPUS</string>
     <string name="btn_view_download_img">DOWNLOAD IMG</string>
-    <string name="btn_view_export_pdf">EXPORT KE PDF</string>
+    <string name="btn_view_export_pdf">EKSPOR KE PDF</string>
     <string name="btn_view_open_small">Buka</string>
     <string name="btn_view_process">Proses</string>
     <string name="btn_view_update_channel">UPDATE CHANNEL</string>
@@ -125,7 +125,7 @@
     <string name="lbl_mon_type_string">String / Teks</string>
     <string name="lbl_mon_alarm_on_match">Alarm saat teks cocok (tidak dicentang = alarm saat teks TIDAK cocok)</string>
     <string name="lbl_mon_alarm_match_text">Teks Pembanding Alarm</string>
-    <string name="msg_mon_delete_group_confirm">Hapus semua titik monitoring untuk %1$s?</string>
+    <string name="msg_mon_delete_group_confirm">Hapus semua titik pantau untuk %1$s?</string>
     <string name="ttl_mon_refresh_many_confirm">Refresh Semua Node?</string>
     <string name="msg_mon_refresh_many_confirm">Anda akan me-refresh %1$d node sekaligus. Proses ini bisa memakan waktu dan membebani jaringan. Lanjutkan?</string>
     <string name="btn_mon_refresh_confirm">REFRESH</string>
@@ -155,25 +155,28 @@
     <string name="lbl_mon_target_pick_device_multi">Pilih Device (bisa lebih dari satu)</string>
     <string name="lbl_mon_target_enter_ip">Masukkan IP</string>
     <string name="btn_mon_apply_template">TERAPKAN</string>
-    <string name="lbl_mon_apply_mode">Jika sudah ada titik untuk device ini</string>
-    <string name="lbl_mon_apply_mode_merge">Timpa (tambahkan yang belum ada saja)</string>
-    <string name="lbl_mon_apply_mode_replace">Replace (hapus yang sudah ada, lalu tambahkan semua)</string>
+    <string name="lbl_mon_apply_mode">Jika device ini sudah punya titik pantau</string>
+    <!-- "Timpa" (= overwrite) was used here for Merge, which says the opposite of what the mode
+         does and sits right next to the genuinely destructive option - a mis-tap loses data. -->
+    <string name="lbl_mon_apply_mode_merge">Gabungkan (tambahkan hanya alamat yang belum ada)</string>
+    <string name="lbl_mon_apply_mode_replace">Ganti (hapus titik lama dulu, lalu tambahkan semua)</string>
     <string name="msg_mon_template_not_ready">Template \'%1$s\' belum dibuat</string>
     <string name="msg_mon_template_applying">Menerapkan template \'%1$s\'…</string>
     <string name="msg_mon_template_connect_fail">Gagal terhubung ke %1$s</string>
     <string name="msg_mon_template_result">Template diterapkan ke %1$s: %2$d titik ditambahkan, %3$d dilewati</string>
     <string name="msg_mon_template_no_device">Pilih device terlebih dahulu</string>
     <string name="msg_mon_template_invalid_ip">Masukkan alamat IP yang valid</string>
-    <string name="lbl_set_section_backup">Backup &amp; Restore</string>
-    <string name="lbl_set_backup_desc">Simpan daftar device, titik monitoring, dan template relay jadi satu file, atau pulihkan dari file backup sebelumnya.</string>
-    <string name="btn_set_export_config">Export Konfigurasi</string>
-    <string name="btn_set_import_config">Import Konfigurasi</string>
+    <string name="lbl_set_section_backup">Backup &amp; Pemulihan</string>
+    <string name="lbl_set_backup_desc">Simpan daftar device, titik pantau, dan template relay jadi satu file, atau pulihkan dari file backup sebelumnya.</string>
+    <!-- Indonesian spelling is "ekspor"/"impor", not the raw English "export"/"import". -->
+    <string name="btn_set_export_config">Ekspor Konfigurasi</string>
+    <string name="btn_set_import_config">Impor Konfigurasi</string>
     <string name="menu_home_edit_template">Edit Template</string>
     <string name="ttl_backup_share_chooser">Bagikan File Backup</string>
-    <string name="msg_backup_export_ok">Konfigurasi berhasil di-export</string>
-    <string name="msg_backup_export_fail">Export gagal: %1$s</string>
-    <string name="msg_backup_import_ok">Import selesai: %1$d device, %2$d titik monitoring, %3$d template ditambahkan</string>
-    <string name="msg_backup_import_fail">Import gagal: file bukan backup yang valid (%1$s)</string>
+    <string name="msg_backup_export_ok">Konfigurasi berhasil diekspor</string>
+    <string name="msg_backup_export_fail">Ekspor gagal: %1$s</string>
+    <string name="msg_backup_import_ok">Impor selesai: %1$d device, %2$d titik pantau, %3$d template ditambahkan</string>
+    <string name="msg_backup_import_fail">Impor gagal: file bukan backup yang valid (%1$s)</string>
     <string name="ttl_tmpl_edit_main">Edit Template Relay</string>
     <string name="btn_tmpl_add_template">Tambah Template</string>
     <string name="btn_tmpl_duplicate_template">Duplikat</string>
@@ -184,12 +187,14 @@
     <string name="lbl_tmpl_col_name">Nama</string>
     <string name="lbl_tmpl_col_path">Alamat (LD/LN.DO.DA)</string>
     <string name="lbl_tmpl_col_type">Tipe</string>
-    <string name="lbl_tmpl_col_unit">Unit</string>
-    <string name="lbl_tmpl_col_multiplier">Multiplier</string>
+    <!-- "Unit" in Indonesian reads as a countable unit/piece; the measurement sense (A, kV, MW)
+         is "Satuan". "Multiplier" likewise has a standard Indonesian term, "Pengali". -->
+    <string name="lbl_tmpl_col_unit">Satuan</string>
+    <string name="lbl_tmpl_col_multiplier">Pengali</string>
     <string name="lbl_tmpl_add_row">Tambah Baris</string>
     <string name="hint_tmpl_row_name">Nama</string>
     <string name="hint_tmpl_row_path">LDInst/LN.DO.DA</string>
-    <string name="hint_tmpl_row_unit">Unit</string>
+    <string name="hint_tmpl_row_unit">Satuan</string>
     <string name="hint_tmpl_row_multiplier">1.0</string>
     <string name="msg_tmpl_empty_state">Belum ada template. Tekan + Tambah Template untuk membuat.</string>
     <string name="msg_tmpl_no_rows">Template ini belum punya baris. Tekan Tambah Baris di bawah.</string>
@@ -208,8 +213,8 @@
     <string name="lbl_view_analog_channel_header">CHANNEL ANALOG</string>
     <string name="lbl_view_arus">ARUS</string>
     <string name="lbl_view_chart_row_default">CHANNEL | C1 = --- | C2 = ---</string>
-    <string name="lbl_view_chart_type">Tipe Chart:</string>
-    <string name="lbl_view_chart_view">Tampilan Chart:</string>
+    <string name="lbl_view_chart_type">Jenis Grafik:</string>
+    <string name="lbl_view_chart_view">Tampilan Grafik:</string>
     <string name="lbl_view_cursor_delta_default">C2 - C1 = 0.0 ms</string>
     <string name="lbl_view_cursor_select_label">Pilih Kursor:</string>
     <string name="lbl_view_date_label">Tanggal :</string>
@@ -246,7 +251,7 @@
     <string name="abt_feat_3_name">Riwayat Unduhan</string>
     <string name="abt_feat_3_desc">Telusuri, buka, bagikan, dan kelola semua file COMTRADE yang pernah diunduh, tersusun per folder.</string>
     <string name="abt_feat_4_name">Database Relay</string>
-    <string name="abt_feat_4_desc">Simpan gardu induk, bay, IP, merk, dan tipe tiap relay, lengkap dengan ping satuan/massal dan import/export CSV.</string>
+    <string name="abt_feat_4_desc">Simpan gardu induk, bay, IP, merk, dan tipe tiap relay, lengkap dengan ping satuan/massal dan impor/ekspor CSV.</string>
     <string name="abt_feat_5_name">IED Explorer</string>
     <string name="abt_feat_5_desc">Jelajahi struktur data IEC 61850 secara langsung (LD / LN / DO / DA) dan baca nilainya realtime.</string>
     <string name="abt_feat_6_name">IED Monitoring</string>
@@ -262,9 +267,9 @@
     <string name="msg_all_delete_confirm">Tindakan ini permanen dan tidak bisa dibatalkan.</string>
     <string name="msg_all_fields_required">Semua field harus diisi</string>
     <string name="msg_all_share_fail">Gagal membagikan file</string>
-    <string name="msg_dev_export_empty">Tidak ada data untuk di-export</string>
-    <string name="msg_dev_export_fail">Gagal export CSV: %s</string>
-    <string name="msg_dev_export_success">Daftar device telah diexport ke CSV.</string>
+    <string name="msg_dev_export_empty">Tidak ada data untuk diekspor</string>
+    <string name="msg_dev_export_fail">Gagal mengekspor CSV: %s</string>
+    <string name="msg_dev_export_success">Daftar device berhasil diekspor ke CSV.</string>
     <string name="msg_dev_import_fail">Gagal impor CSV: %s</string>
     <string name="msg_dev_import_instructions">Pastikan file CSV memiliki urutan kolom sebagai berikut agar dapat dibaca oleh aplikasi.</string>
     <string name="msg_dev_import_ok">Berhasil mengimpor/update %d device</string>
@@ -346,7 +351,7 @@
     <string name="ttl_base_theme_selection">Pilih Tema (%s)</string>
     <string name="ttl_dev_database">Database Device</string>
     <string name="ttl_dev_action_select">Pilih aksi %1$s - %2$s %3$s</string>
-    <string name="ttl_dev_export_success">EXPORT BERHASIL</string>
+    <string name="ttl_dev_export_success">EKSPOR BERHASIL</string>
     <string name="ttl_dev_import_csv">Import Database CSV</string>
     <string name="ttl_dev_save">Simpan Data Device</string>
     <string name="ttl_dev_share_chooser">Bagikan device.csv</string>
@@ -395,29 +400,34 @@
 
     <!-- // Settings -->
     <string name="ttl_set_main">Pengaturan Aplikasi</string>
-    <string name="lbl_set_mms_port">Port Default MMS</string>
-    <string name="lbl_set_intranet_ip">IP Cek Intranet</string>
-    <string name="lbl_set_ping_count_single">Jumlah Ping (Tunggal/Cek)</string>
-    <string name="lbl_set_ping_count_bulk">Jumlah Ping (Massal/Scan)</string>
-    <string name="lbl_set_thread_pool">Ukuran Thread Pool (Maks 5)</string>
-    <string name="lbl_set_dfr_points">Titik Data Default DFR</string>
-    <string name="lbl_set_mon_interval">Interval Update Monitoring (detik)</string>
-    <string name="lbl_set_clear_cache">Hapus Cache Aplikasi</string>
-    <string name="msg_set_cache_cleared">Cache dihapus: %s</string>
-    <string name="msg_set_invalid_range">Nilai di luar jangkauan</string>
+    <string name="lbl_set_mms_port">Port MMS</string>
+    <string name="lbl_set_intranet_ip">IP Uji Jaringan Intranet</string>
+    <string name="lbl_set_ping_count_single">Paket Ping (per Device)</string>
+    <string name="lbl_set_ping_count_bulk">Paket Ping (Ping Massal)</string>
+    <!-- "Thread Pool" is developer jargon; what this actually sets is how many relays get pinged
+         at the same time during a bulk ping. Same for the DFR value below: it is the number of
+         sample points plotted per channel, i.e. the chart's resolution. -->
+    <string name="lbl_set_thread_pool">Jumlah Ping Bersamaan (Maks 5)</string>
+    <string name="lbl_set_dfr_points">Resolusi Grafik DFR (jumlah titik)</string>
+    <string name="lbl_set_mon_interval">Interval Pembaruan Monitoring (detik)</string>
+    <string name="lbl_set_clear_cache">Bersihkan Cache Aplikasi</string>
+    <string name="msg_set_cache_cleared">Cache dibersihkan: %s</string>
+    <string name="msg_set_invalid_range">Nilai di luar rentang yang diizinkan</string>
     <string name="lbl_set_language">Bahasa Aplikasi</string>
     <string name="lbl_set_section_connection">PENGATURAN KONEKSI</string>
     <string name="lbl_set_section_general">PENGATURAN UMUM</string>
-    <string name="lbl_set_section_dfr">PENGATURAN VIEW DFR</string>
+    <string name="lbl_set_section_dfr">PENGATURAN VIEWER DFR</string>
     <string name="msg_set_saved">Pengaturan berhasil disimpan</string>
-    <string name="msg_set_input_error">Mohon periksa kembali nilai input Anda</string>
-    <string name="msg_set_cache_fail">Gagal menghapus cache</string>
+    <string name="msg_set_input_error">Mohon periksa kembali nilai yang Anda masukkan</string>
+    <string name="msg_set_cache_fail">Gagal membersihkan cache</string>
 
     <!-- // Device Stats -->
     <string name="stat_dev_total">%d Device</string>
     <string name="stat_dev_online">%d Online</string>
-    <string name="stat_dev_open">%d Terbuka</string>
-    <string name="stat_dev_closed">%d Tertutup</string>
+    <!-- These count MMS port 102 reachability, NOT breaker position. Bare "Terbuka/Tertutup" in a
+         protection app reads as PMT open/closed, so the port is named explicitly. -->
+    <string name="stat_dev_open">Port %d Terbuka</string>
+    <string name="stat_dev_closed">Port %d Tertutup</string>
     <string name="stat_dev_offline">%d Offline</string>
 
     <!-- // Value -->
@@ -532,9 +542,9 @@
     <string name="help_func_devices">Basis data relay proteksi (nama gardu induk, bay, nama device, IP, merk, dan tipe) agar tidak perlu memasukkan data yang sama berulang kali. Dilengkapi status ping online/offline.</string>
     <string name="help_cmp_dev_1_name">Ikon Ping All</string>
     <string name="help_cmp_dev_1_desc">Ping semua device pada daftar saat ini sekaligus untuk mengecek jangkauan.</string>
-    <string name="help_cmp_dev_2_name">Ikon Export</string>
+    <string name="help_cmp_dev_2_name">Ikon Ekspor</string>
     <string name="help_cmp_dev_2_desc">Menyimpan daftar device saat ini sebagai file cadangan CSV.</string>
-    <string name="help_cmp_dev_3_name">Ikon Import</string>
+    <string name="help_cmp_dev_3_name">Ikon Impor</string>
     <string name="help_cmp_dev_3_desc">Memuat device dari file CSV ke dalam basis data.</string>
     <string name="help_cmp_dev_4_name">Spinner Filter GI/Bay</string>
     <string name="help_cmp_dev_4_desc">Menyaring daftar device berdasarkan gardu induk (GI) dan bay.</string>
@@ -543,13 +553,13 @@
     <string name="help_cmp_dev_6_name">Kartu Device</string>
     <string name="help_cmp_dev_6_desc">Ketuk kartu untuk memilih aksi pada device tersebut: Download DFR, IED Explorer, Ping, atau Hapus.</string>
     <string name="help_feat_dev_1_title">Menambah Device</string>
-    <string name="help_feat_dev_1_steps">1. Tambah device secara manual, atau ketuk {ic:import} Import untuk memuat file CSV.\n2. Gunakan Export Template terlebih dahulu untuk melihat urutan kolom yang dibutuhkan.</string>
+    <string name="help_feat_dev_1_steps">1. Tambah device secara manual, atau ketuk {ic:import} Impor untuk memuat file CSV.\n2. Gunakan Export Template terlebih dahulu untuk melihat urutan kolom yang dibutuhkan.</string>
     <string name="help_feat_dev_2_title">Mengecek Jangkauan</string>
     <string name="help_feat_dev_2_steps">1. Ketuk PING pada satu kartu device untuk mengeceknya.\n2. Atau ketuk {ic:ping} di bagian atas untuk ping semua device sekaligus.</string>
     <string name="help_feat_dev_3_title">Aksi pada Device</string>
     <string name="help_feat_dev_3_steps">1. Ketuk kartu device.\n2. Pilih Download DFR, IED Explorer, Ping, atau Hapus pada popup yang muncul.</string>
     <string name="help_feat_dev_4_title">Mencadangkan Daftar</string>
-    <string name="help_feat_dev_4_steps">1. Ketuk {ic:export} Export untuk menyimpan daftar device saat ini sebagai file CSV.</string>
+    <string name="help_feat_dev_4_steps">1. Ketuk {ic:export} Ekspor untuk menyimpan daftar device saat ini sebagai file CSV.</string>
 
     <string name="help_ttl_explorer">IED Explorer</string>
     <string name="help_sum_explorer">Jelajahi struktur data IEC 61850 sebuah IED secara langsung</string>
@@ -590,7 +600,7 @@
     <string name="help_feat_view_2_steps">1. Geser kursor T1/T2 pada grafik.\n2. Baca selisih waktu dan nilai antara dua titik tersebut.</string>
     <string name="help_feat_view_3_title">Konfigurasi Channel</string>
     <string name="help_feat_view_3_steps">1. Ketuk {ic:settings} untuk membuka menu channel.\n2. Ganti nama, kelompokkan, atau sembunyikan channel sesuai kebutuhan.</string>
-    <string name="help_feat_view_4_title">Zoom &amp; Export</string>
+    <string name="help_feat_view_4_title">Zoom &amp; Ekspor</string>
     <string name="help_feat_view_4_steps">1. Cubit layar (pinch) untuk zoom, atau ketuk {ic:zoom} untuk mengunci level zoom di semua channel.\n2. Gunakan DOWNLOAD IMG atau EXPORT TO PDF untuk menyimpan grafik/laporan.</string>
 
     <string name="help_ttl_monitoring">IED Monitoring</string>
@@ -624,8 +634,8 @@
     <string name="help_feat_mon_5_steps">1. Ketuk {ic:sync} di header untuk memperbarui semua device, atau tarik daftar ke bawah.\n2. Ketuk ikon refresh pada satu header grup untuk memperbarui hanya device itu.</string>
 
     <string name="help_ttl_template">Edit Template</string>
-    <string name="help_sum_template">Buat set titik monitoring yang bisa dipakai ulang per tipe/merk relay</string>
-    <string name="help_func_template">Tempat membuat dan mengelola template relay - satu set titik monitoring bernama (nama, alamat IEC 61850 tanpa nama device, tipe, unit, multiplier) yang terikat pada tipe/merk relay, bukan satu device fisik. Setelah dibuat, template ini bisa diterapkan ke device manapun dari tipe tersebut lewat tombol \"Template\" di IED Monitoring, tanpa perlu menambahkan tiap titik satu-satu lewat IED Explorer.</string>
+    <string name="help_sum_template">Buat set titik pantau yang bisa dipakai ulang per tipe/merk relay</string>
+    <string name="help_func_template">Tempat membuat dan mengelola template relay - satu set titik pantau bernama (nama, alamat IEC 61850 tanpa nama device, tipe, satuan, pengali) yang terikat pada tipe/merk relay, bukan satu device fisik. Setelah dibuat, template ini bisa diterapkan ke device manapun dari tipe tersebut lewat tombol \"Template\" di IED Monitoring, tanpa perlu menambahkan tiap titik satu-satu lewat IED Explorer.</string>
     <string name="help_cmp_tmpl_1_name">Ikon Add Template</string>
     <string name="help_cmp_tmpl_1_desc">Membuat template baru yang kosong.</string>
     <string name="help_cmp_tmpl_2_name">Ikon Duplicate</string>
@@ -656,16 +666,16 @@
     <string name="help_cmp_set_2_desc">Membebaskan ruang penyimpanan yang dipakai cache struktur hasil unduhan.</string>
     <string name="help_cmp_set_3_name">Spinner Bahasa Aplikasi</string>
     <string name="help_cmp_set_3_desc">Mengganti seluruh bahasa aplikasi antara Indonesia dan Inggris secara langsung.</string>
-    <string name="help_cmp_set_4_name">Export Konfigurasi</string>
-    <string name="help_cmp_set_4_desc">Menyimpan daftar device, titik monitoring, dan template relay jadi satu file JSON cadangan.</string>
-    <string name="help_cmp_set_5_name">Import Konfigurasi</string>
-    <string name="help_cmp_set_5_desc">Menggabungkan device/titik/template dari file hasil export sebelumnya ke data yang sudah ada di HP ini, tanpa menimpa data yang sudah ada.</string>
+    <string name="help_cmp_set_4_name">Ekspor Konfigurasi</string>
+    <string name="help_cmp_set_4_desc">Menyimpan daftar device, titik pantau, dan template relay jadi satu file JSON cadangan.</string>
+    <string name="help_cmp_set_5_name">Impor Konfigurasi</string>
+    <string name="help_cmp_set_5_desc">Menggabungkan device/titik/template dari file hasil ekspor sebelumnya ke data yang sudah ada di HP ini, tanpa menimpa data yang sudah ada.</string>
     <string name="help_feat_set_1_title">Mengatur Nilai Default Teknis</string>
     <string name="help_feat_set_1_steps">1. Ubah nilai pada kolom yang diinginkan.\n2. Ketuk Simpan pada bagian tersebut untuk menerapkannya.</string>
     <string name="help_feat_set_2_title">Mengelola Cache &amp; Bahasa</string>
     <string name="help_feat_set_2_steps">1. Gunakan {ic:delete} Bersihkan Cache Aplikasi bila cache struktur hasil unduhan mulai memakan banyak ruang penyimpanan.\n2. Ubah Bahasa Aplikasi untuk mengganti bahasa secara langsung antara Indonesia dan Inggris.</string>
     <string name="help_feat_set_3_title">Backup &amp; Restore</string>
-    <string name="help_feat_set_3_steps">1. Ketuk {ic:export} Export Konfigurasi untuk menyimpan semuanya jadi satu file JSON.\n2. Ketuk {ic:import} Import Konfigurasi dan pilih file hasil export sebelumnya untuk menggabungkannya - data yang sudah ada tidak akan ditimpa atau dihapus.</string>
+    <string name="help_feat_set_3_steps">1. Ketuk {ic:export} Ekspor Konfigurasi untuk menyimpan semuanya jadi satu file JSON.\n2. Ketuk {ic:import} Impor Konfigurasi dan pilih file hasil ekspor sebelumnya untuk menggabungkannya - data yang sudah ada tidak akan ditimpa atau dihapus.</string>
 
     <string name="help_ttl_about">Tentang Aplikasi</string>
     <string name="help_sum_about">Versi aplikasi, pengembang, dan deskripsi singkat</string>
