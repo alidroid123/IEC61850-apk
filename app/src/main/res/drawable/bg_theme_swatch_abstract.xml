@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
     Swatch for the ABSTRACT theme. The other four themes are one hue each, so a solid dot tinted
-    via backgroundTint is enough for them; this one is a 6-colour hexad and needs to read as
+    via backgroundTint is enough for them; this one is a 6-colour palette and needs to read as
     multi-colour at 20dp. A sweep gradient gives a colour-wheel hint in a single shape - XML sweep
-    gradients only take start/center/end, so it samples three of the six (one full triangle of the
-    hexad: Azure, Magenta, Moss) rather than trying to cram all six into the dot.
+    gradients only take start/center/end, so it samples three of the six that sit far apart
+    (Azure, Magenta, Green) rather than trying to cram all six into the dot.
     Colours are the dark-mode values, matching how the other four swatches are tinted.
 -->
 <shape xmlns:android="http://schemas.android.com/apk/res/android"
@@ -13,7 +13,7 @@
         android:type="sweep"
         android:startColor="#0EA5E9"
         android:centerColor="#EC4899"
-        android:endColor="#65A30D" />
+        android:endColor="#22C55E" />
     <size android:width="28dp" android:height="28dp" />
     <stroke android:width="2dp" android:color="#1A000000" />
 </shape>

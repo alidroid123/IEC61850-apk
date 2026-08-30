@@ -50,7 +50,7 @@ public class ThemeManager {
     };
 
     /**
-     * The six ABSTRACT slots, in palette order (Azure, Violet, Magenta, Coral, Moss, Green).
+     * The six ABSTRACT slots, in palette order (Azure, Violet, Magenta, Coral, Teal, Green).
      * Each rotates which hue plays primary/secondary/accent - see the comment in values/themes.xml.
      */
     private static final int[] ABSTRACT_STYLES = {
@@ -83,7 +83,7 @@ public class ThemeManager {
         m.put(RelayTemplateEditActivity.class,   2);
         m.put(DfrDownloadActivity.class,         3); // Coral
         m.put(InternalFileManagerActivity.class, 3);
-        m.put(MmsExplorerActivity.class,         4); // Moss
+        m.put(MmsExplorerActivity.class,         4); // Teal
         m.put(SettingsActivity.class,            5); // Green
         m.put(AboutActivity.class,               5);
         m.put(HelpActivity.class,                5);
