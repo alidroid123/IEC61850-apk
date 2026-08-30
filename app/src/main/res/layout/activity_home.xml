@@ -129,6 +129,44 @@
             android:layout_height="0dp"
             android:layout_weight="1">
 
+        <!-- The card grid + summary strip only ever fill the top portion of this FrameLayout
+             (it's match_parent height so the About FAB below always anchors to the real screen
+             bottom regardless of content length) - on a tall screen or a phone with few
+             substations that left a large, flatly empty canvas that read as broken rather than
+             intentional. A faint centred watermark of the app's own icon plus two of the
+             already-established decorative blobs (see shape_decor_blob_accent, used the same way
+             in every header this app has) turn that into deliberate breathing room instead.
+             shape_decor_blob_light is skipped here - it's a translucent white circle meant to
+             stand out against a colour-gradient header; on this page's plain light background it
+             would simply be invisible. Sized and positioned so they never reach up into the card
+             grid itself - content is never covered, same rule as everywhere else these blobs are
+             used. -->
+        <ImageView
+            android:layout_width="220dp"
+            android:layout_height="220dp"
+            android:layout_gravity="center"
+            android:layout_marginTop="80dp"
+            android:alpha="0.05"
+            android:src="@mipmap/ic_launcher" />
+
+        <View
+            android:layout_width="210dp"
+            android:layout_height="210dp"
+            android:layout_gravity="bottom|start"
+            android:layout_marginBottom="-70dp"
+            android:layout_marginStart="-70dp"
+            android:alpha="0.09"
+            android:background="@drawable/shape_decor_blob_accent" />
+
+        <View
+            android:layout_width="130dp"
+            android:layout_height="130dp"
+            android:layout_gravity="bottom|end"
+            android:layout_marginBottom="60dp"
+            android:layout_marginEnd="-30dp"
+            android:alpha="0.07"
+            android:background="@drawable/shape_decor_blob_accent" />
+
         <ScrollView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
