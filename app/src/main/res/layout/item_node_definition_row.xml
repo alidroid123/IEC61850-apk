@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingVertical="@dimen/spacing_s">
+
+        <TextView
+            android:id="@+id/txtDefName"
+            android:layout_width="@dimen/def_col_name_width"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/spacing_m"
+            android:textColor="?attr/customTextPrimaryColor"
+            android:textSize="@dimen/text_size_body_small"
+            android:textStyle="bold"
+            android:maxLines="2"
+            android:ellipsize="end" />
+
+        <TextView
+            android:id="@+id/txtDefAddress"
+            android:layout_width="@dimen/def_col_address_width"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/spacing_m"
+            android:textColor="@color/text_secondary"
+            android:textSize="@dimen/text_size_small"
+            android:fontFamily="monospace"
+            android:maxLines="2"
+            android:ellipsize="end" />
+
+        <TextView
+            android:id="@+id/txtDefValue"
+            android:layout_width="@dimen/def_col_value_width"
+            android:layout_height="wrap_content"
+            android:textColor="?attr/customTextPrimaryColor"
+            android:textSize="@dimen/text_size_body_small"
+            android:maxLines="2"
+            android:ellipsize="end" />
+
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/divider"
+        android:alpha="0.4" />
+
+</LinearLayout>

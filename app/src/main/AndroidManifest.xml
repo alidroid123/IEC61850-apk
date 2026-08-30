@@ -64,6 +64,11 @@
             android:label="MMS Explorer (Advanced)" />
 
         <activity
+            android:name=".dfr.NodeDefinitionListActivity"
+            android:exported="false"
+            android:label="Node Definitions" />
+
+        <activity
             android:name=".dfr.DfrViewerActivity"
             android:exported="true"
             android:label="DFR Viewer"

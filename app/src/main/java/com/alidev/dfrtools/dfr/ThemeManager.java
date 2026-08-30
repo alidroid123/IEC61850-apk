@@ -88,6 +88,7 @@ public class ThemeManager {
         // warm magenta/coral chrome around them reads as an alarm state that isn't there.
         m.put(IEDMonitoringActivity.class,       4); // Teal
         m.put(MmsExplorerActivity.class,         4);
+        m.put(NodeDefinitionListActivity.class,  4);
         m.put(SettingsActivity.class,            5); // Green
         m.put(AboutActivity.class,               5);
         m.put(HelpActivity.class,                5);

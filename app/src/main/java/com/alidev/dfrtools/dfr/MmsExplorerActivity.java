@@ -84,8 +84,8 @@ public class MmsExplorerActivity extends BaseActivity {
     }
 
     private Button btnConnect, btnDisconnect;
-    private ImageButton btnRefresh, btnOpenMonitoring;
-    private View layoutRefreshGroup;
+    private ImageButton btnRefresh, btnOpenMonitoring, btnGetDefinition, btnOpenDefinitions;
+    private View layoutRefreshGroup, layoutGetDefinitionGroup;
     private java.util.Set<String> pathsToRestore = null;
 
     @Override
@@ -108,7 +108,10 @@ public class MmsExplorerActivity extends BaseActivity {
         btnDisconnect = findViewById(R.id.btnDisconnect);
         btnRefresh = findViewById(R.id.btnRefresh);
         btnOpenMonitoring = findViewById(R.id.btnOpenMonitoring);
+        btnGetDefinition = findViewById(R.id.btnGetDefinition);
+        btnOpenDefinitions = findViewById(R.id.btnOpenDefinitions);
         layoutRefreshGroup = findViewById(R.id.layoutRefreshGroup);
+        layoutGetDefinitionGroup = findViewById(R.id.layoutGetDefinitionGroup);
         layoutSearch = findViewById(R.id.layoutSearch);
         etSearch = findViewById(R.id.etSearch);
         btnClearSearch = findViewById(R.id.btnClearSearch);
@@ -118,6 +121,8 @@ public class MmsExplorerActivity extends BaseActivity {
         btnDisconnect.setOnClickListener(v -> stopExploration());
         btnRefresh.setOnClickListener(v -> refreshStructure());
         btnOpenMonitoring.setOnClickListener(v -> startActivity(new Intent(this, IEDMonitoringActivity.class)));
+        btnGetDefinition.setOnClickListener(v -> fetchAllDefinitions());
+        btnOpenDefinitions.setOnClickListener(v -> startActivity(new Intent(this, NodeDefinitionListActivity.class)));
         
         setupSearch();
         findViewById(R.id.btnListDevice).setOnClickListener(v -> {
@@ -309,6 +314,7 @@ public class MmsExplorerActivity extends BaseActivity {
                     btnConnect.setVisibility(View.GONE);
                     btnDisconnect.setVisibility(View.VISIBLE);
                     layoutRefreshGroup.setVisibility(View.VISIBLE);
+                    layoutGetDefinitionGroup.setVisibility(View.VISIBLE);
                     layoutSearch.setVisibility(View.VISIBLE);
                     loadLogicalDevices();
                     startRealtimeRefresh();
@@ -490,6 +496,7 @@ public class MmsExplorerActivity extends BaseActivity {
             mainHandler.post(() -> {
                 btnDisconnect.setVisibility(View.GONE);
                 layoutRefreshGroup.setVisibility(View.GONE);
+                layoutGetDefinitionGroup.setVisibility(View.GONE);
                 layoutSearch.setVisibility(View.GONE);
                 etSearch.setText("");
                 btnConnect.setVisibility(View.VISIBLE);
@@ -921,6 +928,74 @@ public class MmsExplorerActivity extends BaseActivity {
         mn.multiplier = multiplier;
         new MonitoringManager(this).addNode(mn);
         Toast.makeText(this, R.string.lbl_mon_added, Toast.LENGTH_SHORT).show();
+    }
+
+    /**
+     * Walks the whole connected device's data model (every LD -> LN -> DO, recursing into any
+     * nested SDO structure) looking for attributes literally named "d" (IEC 61850's free-text
+     * description field, e.g. "System/AlmGGIO1.Alm10.d") and saves them to the Node Definitions
+     * table - a per-node human-readable lookup, independent of IED Monitoring. Only the "d"
+     * leaves themselves are read (a live MMS value read); every other node along the way is just
+     * directory-listed to find its children, same cost model as prefetchPriorityFolder's
+     * eagerLoadSubtree. Can take a while on a device with many logical nodes.
+     */
+    private void fetchAllDefinitions() {
+        String host = com.alidev.dfrtools.utils.IpAddressHelper.getIpFromInputs(etIp1, etIp2, etIp3, etIp4);
+        if (host.isEmpty() || !client.isConnected()) return;
+
+        MonitoringManager.DeviceHeaderData headerData = MonitoringManager.getDeviceHeaderData(this, host);
+        String deviceName = headerData != null ? headerData.title : host;
+
+        topProgressBar.setVisibility(View.VISIBLE);
+        btnGetDefinition.setEnabled(false);
+        executor.execute(() -> {
+            List<NodeDefinition> found = new ArrayList<>();
+            try {
+                List<String> lds = client.getLogicalDevices();
+                for (String ld : lds) {
+                    List<String> lns = client.getLogicalDeviceDirectory(ld);
+                    for (String ln : lns) {
+                        String lnPath = ld + "/" + ln;
+                        List<String> dos = client.getLogicalNodeDirectory(lnPath);
+                        for (String doName : dos) {
+                            collectDefinitionsUnderDO(lnPath + "." + doName, host, deviceName, found);
+                        }
+                    }
+                }
+            } catch (Exception ignored) {}
+
+            new NodeDefinitionManager(this).replaceForIp(host, found);
+            int count = found.size();
+            mainHandler.post(() -> {
+                topProgressBar.setVisibility(View.GONE);
+                btnGetDefinition.setEnabled(true);
+                Toast.makeText(this, count > 0
+                        ? getString(R.string.msg_mms_definitions_saved, count)
+                        : getString(R.string.msg_mms_definitions_none_found), Toast.LENGTH_SHORT).show();
+            });
+        });
+    }
+
+    /** Runs on the background executor - recurses into path's sub-structure, reading only the
+     *  leaves literally named "d" (see fetchAllDefinitions()). */
+    private void collectDefinitionsUnderDO(String path, String host, String deviceName, List<NodeDefinition> out) {
+        List<String> subItems;
+        try {
+            subItems = client.getDataDirectory(path);
+        } catch (Exception e) {
+            return;
+        }
+        if (subItems == null || subItems.isEmpty()) return; // leaf - nothing under it to check
+
+        for (String sub : subItems) {
+            String subPath = path + "." + sub;
+            if (sub.equals("d")) {
+                Iec61850DfrClient.FcReadResult result = client.readWithFcFallback(subPath, nodeToFcMap.get(subPath));
+                out.add(new NodeDefinition(host, deviceName, subPath, result != null ? result.value : ""));
+            } else {
+                collectDefinitionsUnderDO(subPath, host, deviceName, out);
+            }
+        }
     }
 
     @Override

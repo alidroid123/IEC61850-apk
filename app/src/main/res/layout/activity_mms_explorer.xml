@@ -90,6 +90,56 @@
         </LinearLayout>
 
         <LinearLayout
+            android:id="@+id/layoutGetDefinitionGroup"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center_horizontal"
+            android:layout_marginStart="@dimen/spacing_xs"
+            android:visibility="gone">
+
+            <ImageButton
+                android:id="@+id/btnGetDefinition"
+                android:layout_width="@dimen/icon_size_xl"
+                android:layout_height="@dimen/icon_size_xl"
+                android:padding="@dimen/spacing_s"
+                android:src="@drawable/ic_definition"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                app:tint="@color/white" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/btn_mms_get_definition"
+                android:textColor="@color/white"
+                android:textSize="@dimen/text_size_tiny" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center_horizontal"
+            android:layout_marginStart="@dimen/spacing_xs">
+
+            <ImageButton
+                android:id="@+id/btnOpenDefinitions"
+                android:layout_width="@dimen/icon_size_xl"
+                android:layout_height="@dimen/icon_size_xl"
+                android:padding="@dimen/spacing_s"
+                android:src="@drawable/ic_table"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                app:tint="@color/white" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/btn_mms_open_definitions"
+                android:textColor="@color/white"
+                android:textSize="@dimen/text_size_tiny" />
+        </LinearLayout>
+
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="vertical"

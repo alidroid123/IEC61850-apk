@@ -40,6 +40,15 @@
     <string name="btn_mms_explore">EXPLORE</string>
     <string name="btn_mms_open_monitoring">MONITOR</string>
     <string name="btn_mms_refresh">REFRESH</string>
+    <string name="btn_mms_get_definition">DEFINISI</string>
+    <string name="btn_mms_open_definitions">TABEL</string>
+    <string name="ttl_mms_definitions">Definisi Node</string>
+    <string name="lbl_mms_definitions_empty">Belum ada definisi tersimpan. Gunakan "Get Definition" di MMS Explorer untuk mengambil semua node \'d\' dari device yang terhubung.</string>
+    <string name="msg_mms_definitions_saved">%1$d node \'d\' disimpan ke tabel Definisi</string>
+    <string name="msg_mms_definitions_none_found">Tidak ada node \'d\' ditemukan di device ini</string>
+    <string name="lbl_mms_def_col_name">Nama</string>
+    <string name="lbl_mms_def_col_address">Alamat Node</string>
+    <string name="lbl_mms_def_col_value">Nilai</string>
     <string name="btn_mon_add">TAMBAH</string>
     <string name="btn_mon_save">SIMPAN</string>
     <string name="btn_mon_remove">HAPUS</string>

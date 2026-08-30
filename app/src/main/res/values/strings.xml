@@ -43,6 +43,15 @@
     <string name="btn_mms_explore">EXPLORE</string>
     <string name="btn_mms_open_monitoring">MONITOR</string>
     <string name="btn_mms_refresh">REFRESH</string>
+    <string name="btn_mms_get_definition">DEFINITION</string>
+    <string name="btn_mms_open_definitions">TABLE</string>
+    <string name="ttl_mms_definitions">Node Definitions</string>
+    <string name="lbl_mms_definitions_empty">No definitions saved yet. Use "Get Definition" in MMS Explorer to fetch every \'d\' node from a connected device.</string>
+    <string name="msg_mms_definitions_saved">%1$d \'d\' node(s) saved to the Definition table</string>
+    <string name="msg_mms_definitions_none_found">No \'d\' nodes found on this device</string>
+    <string name="lbl_mms_def_col_name">Name</string>
+    <string name="lbl_mms_def_col_address">Node Address</string>
+    <string name="lbl_mms_def_col_value">Value</string>
     <string name="btn_mon_add">ADD</string>
     <string name="btn_mon_save">SAVE</string>
     <string name="btn_mon_remove">REMOVE</string>
