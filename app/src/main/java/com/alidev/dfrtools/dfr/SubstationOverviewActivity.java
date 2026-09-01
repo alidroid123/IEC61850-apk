@@ -177,7 +177,7 @@ public class SubstationOverviewActivity extends BaseActivity {
                     .setText(getString(R.string.lbl_sld_gi_summary, giOnline, devices.size()));
 
             RecyclerView rv = section.findViewById(R.id.rvGiTiles);
-            rv.setLayoutManager(new GridLayoutManager(this, 3));
+            rv.setLayoutManager(new GridLayoutManager(this, 2));
             rv.setNestedScrollingEnabled(false);
             rv.setAdapter(new TileAdapter(devices, online, offline, this::showDeviceActionDialog));
 

@@ -41,7 +41,7 @@
                 android:textColor="@color/text_primary"
                 android:textSize="@dimen/text_size_body_small"
                 android:textStyle="bold"
-                android:maxLines="1"
+                android:maxLines="2"
                 android:ellipsize="end"
                 tools:text="Bay Trafo 1" />
         </LinearLayout>
