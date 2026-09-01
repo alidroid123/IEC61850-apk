@@ -226,6 +226,7 @@
     <string name="btn_set_export_config">Ekspor Konfigurasi</string>
     <string name="btn_set_import_config">Impor Konfigurasi</string>
     <string name="menu_home_edit_template">Edit Template</string>
+    <string name="menu_home_sld">PETA STATUS GARDU</string>
     <string name="ttl_backup_share_chooser">Bagikan File Backup</string>
     <string name="msg_backup_export_ok">Konfigurasi berhasil diekspor</string>
     <string name="msg_backup_export_fail">Ekspor gagal: %1$s</string>
@@ -413,6 +414,13 @@
     <string name="ttl_all_delete_data">HAPUS DATA?</string>
     <string name="ttl_base_theme_selection">Pilih Tema (%s)</string>
     <string name="ttl_dev_database">Database Device</string>
+    <string name="ttl_sld_title">Peta Status Gardu</string>
+    <string name="lbl_sld_stat_gi">Gardu Induk</string>
+    <string name="lbl_sld_stat_device">Device</string>
+    <string name="lbl_sld_stat_online">Online</string>
+    <string name="lbl_sld_stat_offline">Offline</string>
+    <string name="lbl_sld_empty">Belum ada device. Tambahkan lewat Database Device.</string>
+    <string name="lbl_sld_gi_summary">%1$d/%2$d online</string>
     <string name="ttl_dev_action_select">Pilih aksi %1$s - %2$s %3$s</string>
     <string name="ttl_dev_export_success">EKSPOR BERHASIL</string>
     <string name="ttl_dev_import_csv">Import Database CSV</string>

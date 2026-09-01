@@ -17,6 +17,11 @@
         android:title="@string/menu_home_monitoring" />
 
     <item
+        android:id="@+id/nav_sld"
+        android:icon="@drawable/ic_location"
+        android:title="@string/menu_home_sld" />
+
+    <item
         android:id="@+id/nav_edit_template"
         android:icon="@drawable/ic_template"
         android:title="@string/menu_home_edit_template" />

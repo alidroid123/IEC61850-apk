@@ -70,6 +70,10 @@ public class HomeActivity extends BaseActivity {
                 drawerLayout.closeDrawers();
                 startActivity(new Intent(this, RelayTemplateEditActivity.class));
                 return true;
+            } else if (id == R.id.nav_sld) {
+                drawerLayout.closeDrawers();
+                startActivity(new Intent(this, SubstationOverviewActivity.class));
+                return true;
             } else if (id == R.id.nav_about) {
                 drawerLayout.closeDrawers();
                 startActivity(new Intent(this, AboutActivity.class));

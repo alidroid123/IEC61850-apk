@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/bg_app">
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/bg_header_layered">
+
+        <View
+            android:layout_width="150dp"
+            android:layout_height="150dp"
+            android:layout_gravity="top|end"
+            android:layout_marginTop="-60dp"
+            android:layout_marginEnd="-40dp"
+            android:background="@drawable/shape_decor_blob_light" />
+
+        <View
+            android:layout_width="90dp"
+            android:layout_height="90dp"
+            android:layout_gravity="bottom|start"
+            android:layout_marginBottom="-30dp"
+            android:layout_marginStart="-20dp"
+            android:alpha="0.18"
+            android:background="@drawable/shape_decor_blob_accent" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingHorizontal="@dimen/spacing_l"
+            android:paddingVertical="@dimen/spacing_s">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                <ImageButton
+                    android:id="@+id/btnBack"
+                    android:layout_width="@dimen/icon_size_xl"
+                    android:layout_height="@dimen/icon_size_xl"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:src="@drawable/ic_arrow_back"
+                    android:contentDescription="Kembali"
+                    app:tint="@color/white" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginStart="@dimen/spacing_m"
+                    android:text="@string/ttl_sld_title"
+                    android:textColor="@color/white"
+                    android:textSize="@dimen/text_size_title_small"
+                    android:fontFamily="sans-serif-medium"
+                    android:textStyle="bold" />
+
+                <ImageButton
+                    android:id="@+id/btnRefresh"
+                    android:layout_width="@dimen/icon_size_xl"
+                    android:layout_height="@dimen/icon_size_xl"
+                    android:padding="@dimen/spacing_s"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:src="@drawable/ic_sync"
+                    android:contentDescription="@string/lbl_sld_stat_online"
+                    app:tint="@color/white" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="@dimen/spacing_m"
+                android:paddingBottom="@dimen/spacing_xs">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:gravity="center">
+                    <TextView
+                        android:id="@+id/tvStatGi"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="0"
+                        android:textColor="@color/white"
+                        android:textSize="@dimen/text_size_title"
+                        android:textStyle="bold" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/lbl_sld_stat_gi"
+                        android:textColor="@color/white"
+                        android:alpha="0.85"
+                        android:textSize="@dimen/text_size_tiny" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:gravity="center">
+                    <TextView
+                        android:id="@+id/tvStatDevice"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="0"
+                        android:textColor="@color/white"
+                        android:textSize="@dimen/text_size_title"
+                        android:textStyle="bold" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/lbl_sld_stat_device"
+                        android:textColor="@color/white"
+                        android:alpha="0.85"
+                        android:textSize="@dimen/text_size_tiny" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:gravity="center">
+                    <TextView
+                        android:id="@+id/tvStatOnline"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="0"
+                        android:textColor="@color/status_safe"
+                        android:textSize="@dimen/text_size_title"
+                        android:textStyle="bold" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/lbl_sld_stat_online"
+                        android:textColor="@color/white"
+                        android:alpha="0.85"
+                        android:textSize="@dimen/text_size_tiny" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:gravity="center">
+                    <TextView
+                        android:id="@+id/tvStatOffline"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="0"
+                        android:textColor="@color/status_danger"
+                        android:textSize="@dimen/text_size_title"
+                        android:textStyle="bold" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/lbl_sld_stat_offline"
+                        android:textColor="@color/white"
+                        android:alpha="0.85"
+                        android:textSize="@dimen/text_size_tiny" />
+                </LinearLayout>
+            </LinearLayout>
+        </LinearLayout>
+    </FrameLayout>
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <androidx.core.widget.NestedScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <LinearLayout
+                android:id="@+id/containerGi"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingVertical="@dimen/spacing_m" />
+
+        </androidx.core.widget.NestedScrollView>
+
+        <TextView
+            android:id="@+id/tvEmpty"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:padding="@dimen/spacing_xxl"
+            android:text="@string/lbl_sld_empty"
+            android:textColor="@color/text_hint"
+            android:textSize="@dimen/text_size_body"
+            android:visibility="gone" />
+
+    </FrameLayout>
+
+</LinearLayout>

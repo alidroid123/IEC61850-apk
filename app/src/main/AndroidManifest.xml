@@ -149,6 +149,11 @@
             android:label="Edit Relay Template" />
 
         <activity
+            android:name=".dfr.SubstationOverviewActivity"
+            android:exported="false"
+            android:label="Peta Status Gardu" />
+
+        <activity
             android:name=".dfr.HelpActivity"
             android:exported="false"
             android:label="Help" />

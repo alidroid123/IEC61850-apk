@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginHorizontal="@dimen/spacing_m"
+    android:layout_marginVertical="@dimen/spacing_xs"
+    app:cardCornerRadius="@dimen/card_corner_radius_medium"
+    app:cardBackgroundColor="@color/bg_card"
+    app:cardElevation="@dimen/card_elevation_small"
+    app:strokeWidth="1dp"
+    app:strokeColor="@color/divider">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingHorizontal="@dimen/spacing_m"
+            android:paddingVertical="@dimen/spacing_s">
+
+            <View
+                android:id="@+id/viewGiAccent"
+                android:layout_width="@dimen/spacing_xs"
+                android:layout_height="18dp"
+                android:background="?attr/colorPrimary" />
+
+            <TextView
+                android:id="@+id/tvGiName"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="@dimen/spacing_s"
+                android:textColor="@color/text_primary"
+                android:textSize="@dimen/text_size_body_large"
+                android:textStyle="bold"
+                tools:text="GI KEMBANGAN" />
+
+            <TextView
+                android:id="@+id/tvGiSummary"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/text_secondary"
+                android:textSize="@dimen/text_size_caption"
+                tools:text="4/6 online" />
+        </LinearLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/divider"
+            android:alpha="0.5" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvGiTiles"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingHorizontal="@dimen/spacing_s"
+            android:paddingVertical="@dimen/spacing_s"
+            android:overScrollMode="never"
+            tools:listitem="@layout/item_sld_device_tile" />
+
+    </LinearLayout>
+</com.google.android.material.card.MaterialCardView>
