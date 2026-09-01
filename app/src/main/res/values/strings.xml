@@ -451,6 +451,7 @@
     <string name="lbl_sld_stat_offline">Offline</string>
     <string name="lbl_sld_empty">No devices yet. Add them from Device Database.</string>
     <string name="lbl_sld_gi_summary">%1$d/%2$d online</string>
+    <string name="cd_sld_refresh">Refresh</string>
     <string name="ttl_dev_action_select">Choose action %1$s - %2$s %3$s</string>
     <string name="ttl_dev_export_success">EXPORT SUCCESSFUL</string>
     <string name="ttl_dev_import_csv">Import CSV Database</string>

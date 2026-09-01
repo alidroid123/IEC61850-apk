@@ -421,6 +421,7 @@
     <string name="lbl_sld_stat_offline">Offline</string>
     <string name="lbl_sld_empty">Belum ada device. Tambahkan lewat Database Device.</string>
     <string name="lbl_sld_gi_summary">%1$d/%2$d online</string>
+    <string name="cd_sld_refresh">Segarkan</string>
     <string name="ttl_dev_action_select">Pilih aksi %1$s - %2$s %3$s</string>
     <string name="ttl_dev_export_success">EKSPOR BERHASIL</string>
     <string name="ttl_dev_import_csv">Import Database CSV</string>

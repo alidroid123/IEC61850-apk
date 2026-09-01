@@ -67,6 +67,9 @@ public class SubstationOverviewActivity extends BaseActivity {
         findViewById(R.id.btnBack).setOnClickListener(v -> finish());
         findViewById(R.id.btnRefresh).setOnClickListener(v -> loadAndRender());
 
+        TextView tvTitle = findViewById(R.id.tvTitle);
+        tvTitle.setSelected(true);
+
         loadAndRender();
     }
 
