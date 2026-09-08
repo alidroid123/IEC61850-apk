@@ -15,7 +15,7 @@
 
     <!-- // DFR Viewer Settings -->
     <integer name="config_dfr_default_resolution_percent">10</integer>
-    <integer name="config_dfr_target_point_count">2000</integer>
+    <integer name="config_dfr_target_point_count">5000</integer>
     <integer name="config_dfr_min_visible_points">100</integer>
     <integer name="config_dfr_rv_cache_size">60</integer>
     <integer name="config_dfr_export_batch_size">2</integer>

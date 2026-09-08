@@ -63,6 +63,15 @@
         android:layout_weight="1.5"
         android:background="@drawable/bg_spinner" />
 
+    <Spinner
+        android:id="@+id/spRowChannel"
+        android:layout_width="0dp"
+        android:layout_height="36dp"
+        android:layout_weight="1"
+        android:layout_marginStart="@dimen/spacing_tiny"
+        android:background="@drawable/bg_spinner"
+        android:visibility="gone" />
+
     <EditText
         android:id="@+id/etRowValue"
         android:layout_width="0dp"

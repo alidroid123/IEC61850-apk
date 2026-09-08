@@ -139,6 +139,7 @@ public class DfrViewerActivity extends BaseActivity {
             }
         }
         updateCursorDeltaDisplay();
+        updateResultAssessment();
     }
 
     private void updateResultAssessment() {
@@ -177,6 +178,7 @@ public class DfrViewerActivity extends BaseActivity {
             boolean checked = false; // Default to unchecked
             int mapPos = 0, valPos = 0;
             String customParam = "", manualValue = "";
+            int channelPos = -1; // -1 = auto (phase-matched channel); set once user picks explicitly
         }
         RowState getRow(String key) {
             if (!rowStates.containsKey(key)) rowStates.put(key, new RowState());
@@ -1446,7 +1448,12 @@ public class DfrViewerActivity extends BaseActivity {
                 chart.setDragEnabled(!isZoomLocked); 
                 chart.setScaleXEnabled(!isZoomLocked); 
                 chart.setScaleYEnabled(false); // CRITICAL: Disable vertical zoom to use our Auto-Fit logic
-                chart.setPinchZoom(false); 
+                chart.setPinchZoom(false);
+                // Fling/deceleration only animates the touched chart's own matrix - it never fires
+                // onChartTranslate, so the manual per-row sync() below can't follow it and every
+                // other row (the trigger line included) freezes at the position from the moment the
+                // finger lifted. Disabling it keeps all rows stopping exactly together.
+                chart.setDragDecelerationEnabled(false);
                 chart.setHighlightPerTapEnabled(!isCursorLocked);
                 chart.getDescription().setEnabled(false); chart.getLegend().setEnabled(false);
                 chart.getAxisLeft().setEnabled(!isDigital); chart.getAxisRight().setEnabled(false);
@@ -1861,14 +1868,35 @@ public class DfrViewerActivity extends BaseActivity {
 
                 ((TextView)row.findViewById(R.id.txtRowNo)).setText(no + "."); ((TextView)row.findViewById(R.id.txtRowParameter)).setText(param);
                 Spinner sp = row.findViewById(R.id.spRowValue);
-                
-                String v1 = getSingleValue(phaseSuffix, currentHighlight1, isCurrent);
-                String v2 = getSingleValue(phaseSuffix, currentHighlight2, isCurrent);
-                
+                Spinner spCh = row.findViewById(R.id.spRowChannel);
+                spCh.setVisibility(View.VISIBLE);
+
+                List<ChartModel> candidates = getCandidateChannels(isCurrent);
+                List<String> chLabels = new ArrayList<>();
+                for (ChartModel m : candidates) chLabels.add(m.label);
+                if (state.channelPos < 0 || state.channelPos >= candidates.size()) {
+                    state.channelPos = findAutoChannelIndex(candidates, phaseSuffix);
+                }
+
+                ArrayAdapter<String> chAdapter = new ArrayAdapter<String>(DfrViewerActivity.this, R.layout.item_spinner_small, chLabels) {
+                    @NonNull @Override public View getView(int p, @Nullable View c, @NonNull ViewGroup pa) {
+                        TextView tv = (TextView) super.getView(p, c, pa); tv.setTextColor(ContextCompat.getColor(getContext(), R.color.dfr_text_primary)); return tv;
+                    }
+                    @Override public View getDropDownView(int p, @Nullable View c, @NonNull ViewGroup pa) {
+                        TextView tv = (TextView) super.getDropDownView(p, c, pa); tv.setTextColor(ContextCompat.getColor(getContext(), R.color.dfr_text_primary)); return tv;
+                    }
+                };
+                chAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                spCh.setAdapter(chAdapter);
+                if (state.channelPos >= 0) spCh.setSelection(state.channelPos);
+
+                String v1 = getSingleValueForRow(state, phaseSuffix, currentHighlight1, isCurrent);
+                String v2 = getSingleValueForRow(state, phaseSuffix, currentHighlight2, isCurrent);
+
                 List<String> opts = new ArrayList<>();
                 opts.add("C1 (" + v1 + ")");
                 opts.add("C2 (" + v2 + ")");
-                
+
                 ArrayAdapter<String> adapter = new ArrayAdapter<String>(DfrViewerActivity.this, R.layout.item_spinner_small, opts) {
                     @NonNull @Override public View getView(int p, @Nullable View c, @NonNull ViewGroup pa) {
                         TextView tv = (TextView) super.getView(p, c, pa);
@@ -1885,7 +1913,7 @@ public class DfrViewerActivity extends BaseActivity {
                 };
                 sp.setAdapter(adapter);
                 sp.setSelection(state.valPos < opts.size() ? state.valPos : 0);
-                
+
                 sp.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                     @Override public void onItemSelected(AdapterView<?> p, View v, int pos, long id) {
                         state.valPos = pos;
@@ -1894,6 +1922,14 @@ public class DfrViewerActivity extends BaseActivity {
                             sel = sel.substring(sel.indexOf("(") + 1, sel.lastIndexOf(")"));
                         }
                         assessmentState.lockedValues.put(stateKey, sel);
+                    }
+                    @Override public void onNothingSelected(AdapterView<?> p) {}
+                });
+
+                spCh.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                    @Override public void onItemSelected(AdapterView<?> p, View v, int pos, long id) {
+                        state.channelPos = pos;
+                        refreshLiveValues();
                     }
                     @Override public void onNothingSelected(AdapterView<?> p) {}
                 });
@@ -2001,18 +2037,18 @@ public class DfrViewerActivity extends BaseActivity {
                     String suffix = key.substring(6);
                     boolean isI = key.startsWith("val_i_");
                     String stateKey = isI ? "I" + suffix.toUpperCase() : "V" + suffix.toUpperCase();
-                    
-                    String v1 = getSingleValue(suffix, currentHighlight1, isI);
-                    String v2 = getSingleValue(suffix, currentHighlight2, isI);
-                    
+                    AssessmentState.RowState state = assessmentState.getRow(key);
+
+                    String v1 = getSingleValueForRow(state, suffix, currentHighlight1, isI);
+                    String v2 = getSingleValueForRow(state, suffix, currentHighlight2, isI);
+
                     List<String> opts = new ArrayList<>();
                     opts.add("C1 (" + v1 + ")");
                     opts.add("C2 (" + v2 + ")");
-                    
+
                     updateSpinnerSilently(sp, opts);
-                    
+
                     // Update the locked value as well for report generation
-                    AssessmentState.RowState state = assessmentState.getRow(key);
                     String selectedVal = (state.valPos == 1) ? v2 : v1;
                     assessmentState.lockedValues.put(stateKey, selectedVal);
                 }
@@ -2049,6 +2085,62 @@ public class DfrViewerActivity extends BaseActivity {
                 
                 if (mode == 1) return v2;
                 return v1;
+            }
+
+            private List<ChartModel> getCandidateChannels(boolean isCurrent) {
+                List<ChartModel> list = new ArrayList<>();
+                for (ChartModel m : models) {
+                    if (m.isDigital || m.isHeader) continue;
+                    String label = m.label.toUpperCase();
+                    boolean isI = label.contains("I") || label.contains("A") || label.contains("REF") || label.contains("DIFF");
+                    boolean isV = label.contains("V") || label.contains("U");
+                    if (isCurrent && !isI) continue;
+                    if (!isCurrent && !isV) continue;
+                    list.add(m);
+                }
+                return list;
+            }
+
+            // Index within getCandidateChannels(isCurrent) that the phase-matching heuristic
+            // (mirrored from getSingleValue below) would auto-pick - used as the channel spinner's
+            // default selection until the user explicitly overrides it.
+            private int findAutoChannelIndex(List<ChartModel> candidates, String phaseSuffix) {
+                String ps = phaseSuffix.toUpperCase();
+                String phaseChar = "";
+                if (ps.contains("R")) phaseChar = "R";
+                else if (ps.contains("S")) phaseChar = "S";
+                else if (ps.contains("T")) phaseChar = "T";
+                else if (ps.contains("A")) phaseChar = "A";
+                else if (ps.contains("B")) phaseChar = "B";
+                else if (ps.contains("C")) phaseChar = "C";
+                else if (ps.contains("N") || ps.contains("G")) phaseChar = "N";
+                boolean isHV = ps.contains("HV") || ps.contains("SIDE 1") || ps.contains("H_V");
+                boolean isLV = ps.contains("LV") || ps.contains("SIDE 2") || ps.contains("L_V");
+
+                for (int i = 0; i < candidates.size(); i++) {
+                    String label = candidates.get(i).label.toUpperCase();
+                    boolean phaseMatch = label.contains(phaseChar);
+                    if (phaseChar.equals("A") || phaseChar.equals("R")) phaseMatch = label.contains("R") || label.contains("A") || label.contains("L1");
+                    else if (phaseChar.equals("B") || phaseChar.equals("S")) phaseMatch = label.contains("S") || label.contains("B") || label.contains("L2");
+                    else if (phaseChar.equals("C") || phaseChar.equals("T")) phaseMatch = label.contains("T") || label.contains("C") || label.contains("L3");
+                    else if (phaseChar.equals("N")) phaseMatch = label.contains("N") || label.contains("G") || label.contains("RES");
+                    if (!phaseMatch && !phaseChar.isEmpty()) continue;
+                    if (isHV && !(label.contains("HV") || label.contains("H") || label.contains("1"))) continue;
+                    if (isLV && !(label.contains("LV") || label.contains("L") || label.contains("2"))) continue;
+                    return i;
+                }
+                return candidates.isEmpty() ? -1 : 0;
+            }
+
+            // Uses the row's explicitly picked channel (spRowChannel) when set, otherwise falls
+            // back to the phase-matching heuristic in getSingleValue.
+            private String getSingleValueForRow(AssessmentState.RowState state, String phaseSuffix, Highlight h, boolean lookForCurrent) {
+                if (h == null) return "---";
+                List<ChartModel> candidates = getCandidateChannels(lookForCurrent);
+                if (state.channelPos >= 0 && state.channelPos < candidates.size()) {
+                    return getValueString(candidates.get(state.channelPos), h.getX());
+                }
+                return getSingleValue(phaseSuffix, h, lookForCurrent);
             }
 
             private String getSingleValue(String phaseSuffix, Highlight h, boolean lookForCurrent) {
