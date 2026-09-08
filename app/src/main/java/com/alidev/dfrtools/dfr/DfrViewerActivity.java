@@ -1276,9 +1276,21 @@ public class DfrViewerActivity extends BaseActivity {
         return (Math.abs(entries.get(low).getX() - x) < Math.abs(entries.get(high).getX() - x)) ? entries.get(low).getY() : entries.get(high).getY();
     }
 
+    // One constant-state hold period on a digital channel, from when it settled into `state`
+    // until the next transition (or the end of the record). Backs both the dimension-line
+    // drawing under the digital block chart and the plain "xx,x ms" duration text/spinner.
+    public static class HoldSegment {
+        float startTime, endTime, durationMs; int state;
+        HoldSegment(float startTime, float endTime, int state) {
+            this.startTime = startTime; this.endTime = endTime; this.state = state;
+            this.durationMs = (endTime - startTime) * 1000f;
+        }
+    }
+
     public static class ChartModel {
         String label; int color; List<Entry> entries; float maxY; boolean isDigital; float startTime, totalTime; String digitalSummary = "";
         boolean hasTransition = false;
+        List<HoldSegment> holdSegments = new ArrayList<>();
         LineData cachedData;
         int analogIdx = -1; // To access original rawDataList
         int slotIdx = -1;   // Mapping slot (0-7 for IR-VN)
@@ -1315,43 +1327,49 @@ public class DfrViewerActivity extends BaseActivity {
 
         void calculateDigitalSummary() {
             if (!isDigital || entries.isEmpty()) return;
-            
+
             // Find first entry >= 0.0s (Trigger)
             int startIndex = 0;
             while (startIndex < entries.size() && entries.get(startIndex).getX() < 0) startIndex++;
             if (startIndex >= entries.size()) return;
 
-            StringBuilder sb = new StringBuilder();
+            holdSegments.clear();
             float lastX = 0.0f; // Force start at 0.0ms (trigger)
             float lastY = entries.get(startIndex).getY();
             hasTransition = false;
-            
+
             for (int i = startIndex; i < entries.size(); i++) {
                 float currX = entries.get(i).getX();
                 float currY = entries.get(i).getY();
-                
+
                 if (Math.abs(currY - lastY) > 0.1f) {
                     float durationMs = (currX - lastX) * 1000f;
                     // Aturan: Perubahan 1-0 atau 0-1 di atas 1ms
                     if (durationMs >= 1.0f) {
-                        sb.append(String.format(java.util.Locale.US, "[%.1fms-%.1fms][%d-%d]{%.1fms}, ",
-                                lastX * 1000, currX * 1000, (int)lastY, (int)currY, durationMs));
+                        holdSegments.add(new HoldSegment(lastX, currX, (int) lastY));
                         lastX = currX;
                         lastY = currY;
                         hasTransition = true;
                     }
                 }
             }
-            
+
             float finalX = entries.get(entries.size() - 1).getX();
             float finalDur = (finalX - lastX) * 1000f;
             if (finalDur >= 1.0f) {
-                sb.append(String.format(java.util.Locale.US, "[%.1fms-%.1fms][%d]{%.1fms}",
-                        lastX * 1000, finalX * 1000, (int)lastY, finalDur));
+                holdSegments.add(new HoldSegment(lastX, finalX, (int) lastY));
             }
-            
-            digitalSummary = sb.toString().trim();
-            if (digitalSummary.endsWith(",")) digitalSummary = digitalSummary.substring(0, digitalSummary.length() - 1);
+
+            StringBuilder sb = new StringBuilder();
+            for (HoldSegment seg : holdSegments) {
+                if (sb.length() > 0) sb.append(", ");
+                sb.append(formatDurationMs(seg.durationMs));
+            }
+            digitalSummary = sb.toString();
+        }
+
+        static String formatDurationMs(float ms) {
+            return String.format(java.util.Locale.US, "%.1f ms", ms).replace('.', ',');
         }
     }
 
@@ -1435,12 +1453,13 @@ public class DfrViewerActivity extends BaseActivity {
         }
 
         class ChartViewHolder extends RecyclerView.ViewHolder {
-            TextView tvInfo, tvSummary; DfrLineChart chart; DfrDigitalView digitalView;
+            TextView tvInfo, tvSummary; DfrLineChart chart; DfrDigitalView digitalView; DfrDigitalDimensionView dimensionLine;
             ImageView ivEditIcon; View layoutHeader;
             ChartViewHolder(View v) {
-                super(v); tvInfo = v.findViewById(R.id.txtChannelInfo); tvSummary = v.findViewById(R.id.txtDigitalSummary); 
+                super(v); tvInfo = v.findViewById(R.id.txtChannelInfo); tvSummary = v.findViewById(R.id.txtDigitalSummary);
                 chart = v.findViewById(R.id.rowChart);
                 digitalView = v.findViewById(R.id.rowDigitalView);
+                dimensionLine = v.findViewById(R.id.rowDimensionLine);
                 ivEditIcon = v.findViewById(R.id.ivEditIcon);
                 layoutHeader = v.findViewById(R.id.layoutChannelHeader);
             }
@@ -1516,9 +1535,9 @@ public class DfrViewerActivity extends BaseActivity {
                             // once the gesture ends (via triggerGlobalYCalibration), lagging behind
                             // during the drag.
                             int pos = vh.getAdapterPosition();
-                            if (pos != RecyclerView.NO_POSITION && pos < models.size()
-                                    && models.get(pos).isDigital && vh.digitalView != null) {
-                                vh.digitalView.setSyncState(sharedMatrix, getActiveCursors());
+                            if (pos != RecyclerView.NO_POSITION && pos < models.size() && models.get(pos).isDigital) {
+                                if (vh.digitalView != null) vh.digitalView.setSyncState(sharedMatrix, getActiveCursors());
+                                if (vh.dimensionLine != null) vh.dimensionLine.setSyncMatrix(sharedMatrix);
                             }
                         }
                     }
@@ -1535,6 +1554,7 @@ public class DfrViewerActivity extends BaseActivity {
             void updateYScaleOnly(ChartModel m) {
                 if (m.isDigital) {
                     if (digitalView != null) digitalView.setSyncState(sharedMatrix, getActiveCursors());
+                    if (dimensionLine != null) dimensionLine.setSyncMatrix(sharedMatrix);
                     return;
                 }
                 if (chart == null) return;
@@ -1584,23 +1604,16 @@ public class DfrViewerActivity extends BaseActivity {
                     digitalView.setData(m.entries, m.startTime, m.totalTime);
                     digitalView.setSyncState(sharedMatrix, getActiveCursors());
 
+                    dimensionLine.setVisibility(View.VISIBLE);
+                    dimensionLine.setData(m.holdSegments, m.startTime, m.totalTime);
+                    dimensionLine.setSyncMatrix(sharedMatrix);
+
                     tvSummary.setVisibility(View.VISIBLE);
-                    String summary = m.digitalSummary.replace("{", "(").replace("}", ")");
-                    android.text.SpannableStringBuilder span = new android.text.SpannableStringBuilder(summary);
-                    int start = summary.indexOf("(");
-                    int colorGold = ContextCompat.getColor(itemView.getContext(), R.color.dfr_chart_cursor_time);
-                    while (start != -1) {
-                        int end = summary.indexOf(")", start);
-                        if (end != -1) {
-                            span.setSpan(new android.text.style.ForegroundColorSpan(colorGold),
-                                    start, end + 1, android.text.Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-                            start = summary.indexOf("(", end);
-                        } else break;
-                    }
-                    tvSummary.setText(span);
+                    tvSummary.setText(m.digitalSummary);
                 } else {
                     chart.setVisibility(View.VISIBLE);
                     digitalView.setVisibility(View.GONE);
+                    dimensionLine.setVisibility(View.GONE);
                     tvSummary.setVisibility(View.GONE);
                     
                     chart.setTag(m.label); setupChart(m.isDigital);
@@ -2278,7 +2291,12 @@ public class DfrViewerActivity extends BaseActivity {
                     float ratio = (screenWidth > (45f*density)) ? (float)(exportWidth - leftOffset) / (screenWidth - (45f*density)) : 1f;
                     vh.digitalView.setSyncState(sharedMatrix, DfrViewerActivity.this.getActiveCursors());
                     vh.digitalView.setExportScaleRatio(ratio);
-                    
+
+                    vh.dimensionLine.setVisibility(View.VISIBLE);
+                    vh.dimensionLine.setData(m.holdSegments, m.startTime, m.totalTime);
+                    vh.dimensionLine.setSyncMatrix(sharedMatrix);
+                    vh.dimensionLine.setExportScaleRatio(ratio);
+
                     vh.tvSummary.setVisibility(View.VISIBLE);
                     vh.tvSummary.setText(m.digitalSummary);
                     vh.tvSummary.setTextColor(ContextCompat.getColor(DfrViewerActivity.this, R.color.dfr_text_secondary));

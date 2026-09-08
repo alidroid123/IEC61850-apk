@@ -61,6 +61,12 @@
             android:visibility="gone" />
     </FrameLayout>
 
+    <com.alidev.dfrtools.dfr.DfrDigitalDimensionView
+        android:id="@+id/rowDimensionLine"
+        android:layout_width="match_parent"
+        android:layout_height="20dp"
+        android:visibility="gone" />
+
     <TextView
         android:id="@+id/txtDigitalSummary"
         android:layout_width="match_parent"
