@@ -43,7 +43,7 @@
                 android:id="@+id/spinner_template"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/standard_button_height"
-                android:background="@drawable/bg_spinner"
+                android:background="@drawable/bg_spinner_template"
                 android:layout_marginBottom="@dimen/spacing_l" />
 
             <!-- Dynamic MAPPING Container -->

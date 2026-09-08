@@ -36,7 +36,7 @@ public class DfrDigitalDimensionView extends View {
     public DfrDigitalDimensionView(Context context, AttributeSet attrs) { super(context, attrs); init(); }
 
     private void init() {
-        int color = ContextCompat.getColor(getContext(), R.color.dfr_digital_1);
+        int color = ContextCompat.getColor(getContext(), R.color.dfr_dimension_line);
         linePaint.setStyle(Paint.Style.STROKE);
         linePaint.setStrokeWidth(2.0f);
         linePaint.setColor(color);
@@ -52,12 +52,6 @@ public class DfrDigitalDimensionView extends View {
         tickHalfHeight = 5f * density;
         labelPadding = 3f * density;
         textPaint.setTextSize(getResources().getDimension(R.dimen.text_size_micro));
-    }
-
-    public void setColor(int color) {
-        linePaint.setColor(color);
-        textPaint.setColor(color);
-        invalidate();
     }
 
     public void setData(List<DfrViewerActivity.HoldSegment> segments, float startTime, float totalTime) {

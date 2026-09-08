@@ -92,7 +92,7 @@ public class DfrViewerActivity extends BaseActivity {
         MappingItem(String l, boolean c) { this.label = l; this.isCurrent = c; }
     }
     
-    private String currentTemplate = "DISTANCE";
+    private String currentTemplate = "NONE";
     private final List<MappingItem> mainMappings = new ArrayList<>();
     private final List<Integer> extraAnalogIndices = new ArrayList<>();
 
@@ -856,17 +856,24 @@ public class DfrViewerActivity extends BaseActivity {
         LinearLayout extraContainer = dialogView.findViewById(R.id.containerExtraChannels);
         
         final List<MappingItem> tempMappings = new ArrayList<>();
-        for (MappingItem m : mainMappings) {
-            MappingItem copy = new MappingItem(m.label, m.isCurrent);
-            copy.analogIdx = (m.analogIdx >= 0 && m.analogIdx < availableChannels.length) ? m.analogIdx : 0;
-            tempMappings.add(copy);
+        if (mainMappings.isEmpty()) {
+            populateMappingsForTemplate(currentTemplate, tempMappings, availableChannels);
+        } else {
+            for (MappingItem m : mainMappings) {
+                MappingItem copy = new MappingItem(m.label, m.isCurrent);
+                copy.analogIdx = (m.analogIdx >= 0 && m.analogIdx < availableChannels.length) ? m.analogIdx : 0;
+                tempMappings.add(copy);
+            }
         }
         final List<Integer> currentExtras = new ArrayList<>(extraAnalogIndices);
 
-        String[] templates = {"DISTANCE", "LINE DIFF", "T DIFF", "OCR"};
+        String[] templates = {"NONE", "DISTANCE", "LINE DIFF", "T DIFF", "OCR"};
         ArrayAdapter<String> tAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, templates) {
             @NonNull @Override public View getView(int p, @Nullable View c, @NonNull ViewGroup pa) {
-                TextView tv = (TextView) super.getView(p, c, pa); tv.setTextColor(ContextCompat.getColor(getContext(), R.color.dfr_text_primary)); return tv;
+                TextView tv = (TextView) super.getView(p, c, pa);
+                tv.setTextColor(ContextCompat.getColor(getContext(), R.color.brand_primary));
+                tv.setTypeface(tv.getTypeface(), android.graphics.Typeface.BOLD);
+                return tv;
             }
             @Override public View getDropDownView(int p, @Nullable View c, @NonNull ViewGroup pa) {
                 TextView tv = (TextView) super.getDropDownView(p, c, pa); tv.setTextColor(ContextCompat.getColor(getContext(), R.color.dfr_text_primary)); return tv;
@@ -934,9 +941,7 @@ public class DfrViewerActivity extends BaseActivity {
             @Override public void onItemSelected(AdapterView<?> p, View v, int pos, long id) {
                 if (isInitializing[0]) { isInitializing[0] = false; refreshUI.run(); return; }
                 currentTemplate = templates[pos];
-                initMappingsForTemplate(currentTemplate);
-                tempMappings.clear();
-                applyTemplateLogic(tempMappings, availableChannels);
+                populateMappingsForTemplate(currentTemplate, tempMappings, availableChannels);
                 refreshUI.run();
             }
             @Override public void onNothingSelected(AdapterView<?> p) {}
@@ -989,6 +994,24 @@ public class DfrViewerActivity extends BaseActivity {
         }
     }
 
+    // Rebuilds mainMappings for `template` and fills targetList with the rows to display.
+    // NONE already carries the correct 1:1 analogIdx per channel (see initMappingsForTemplate),
+    // so it's copied as-is; the other templates only have labels and need applyTemplateLogic's
+    // fuzzy keyword match against the actual channel names to resolve an analogIdx.
+    private void populateMappingsForTemplate(String template, List<MappingItem> targetList, String[] availableChannels) {
+        initMappingsForTemplate(template);
+        if (template.equals("NONE")) {
+            targetList.clear();
+            for (MappingItem item : mainMappings) {
+                MappingItem copy = new MappingItem(item.label, item.isCurrent);
+                copy.analogIdx = item.analogIdx;
+                targetList.add(copy);
+            }
+        } else {
+            applyTemplateLogic(targetList, availableChannels);
+        }
+    }
+
     private void processAndPlot() {
         if (datLines.isEmpty() && !rawDataList.isEmpty()) { plotData(); return; }
         if (isFinishing()) return;
@@ -1008,24 +1031,8 @@ public class DfrViewerActivity extends BaseActivity {
                     else {
                         updateResolutionDisplay(); controlsLayout.setVisibility(View.VISIBLE); setupToggles();
                         if (mainMappings.isEmpty()) {
-                            // Default: Show all analog channels from CFG, grouping Current then Voltage
-                            List<MappingItem> currents = new ArrayList<>();
-                            List<MappingItem> voltages = new ArrayList<>();
-                            List<MappingItem> others = new ArrayList<>();
-                            for (int i = 0; i < parser.analogCount; i++) {
-                                String label = parser.channelNames[i];
-                                String lu = label.toUpperCase();
-                                boolean isI = lu.contains("I") || lu.contains("A") || lu.contains("CURR");
-                                boolean isV = lu.contains("V") || lu.contains("U") || lu.contains("VOLT");
-                                MappingItem item = new MappingItem(label, isI);
-                                item.analogIdx = i;
-                                if (isI) currents.add(item);
-                                else if (isV) voltages.add(item);
-                                else others.add(item);
-                            }
-                            mainMappings.addAll(currents);
-                            mainMappings.addAll(voltages);
-                            mainMappings.addAll(others);
+                            currentTemplate = "NONE";
+                            initMappingsForTemplate("NONE");
                         }
                         plotData();
                     }
@@ -1093,7 +1100,7 @@ public class DfrViewerActivity extends BaseActivity {
                 float startTime = timeDataList.isEmpty() ? 0 : timeDataList.get(0);
                 float endTime = timeDataList.isEmpty() ? 0 : timeDataList.get(timeDataList.size() - 1);
                 String dName = (parser.digitalNames != null && d < parser.digitalNames.length) ? parser.digitalNames[d] : "D" + (d + 1);
-                ChartModel cm = new ChartModel(dName, getDigitalChannelColor(d), dEntries, 1.1f, true, startTime, endTime, -1, -1);
+                ChartModel cm = new ChartModel(dName, ContextCompat.getColor(this, R.color.dfr_digital_block), dEntries, 1.1f, true, startTime, endTime, -1, -1);
                 cm.prepareData();
                 if (cm.hasTransition) models.add(cm);
             }
@@ -1106,11 +1113,6 @@ public class DfrViewerActivity extends BaseActivity {
         int[] currentColors = { R.color.dfr_analog_r, R.color.dfr_analog_s, R.color.dfr_analog_t, R.color.dfr_analog_n };
         int[] voltageColors = { R.color.brand_primary, R.color.status_warning, R.color.status_safe, R.color.status_info };
         int[] colors = isCurrent ? currentColors : voltageColors;
-        return ContextCompat.getColor(this, colors[index % colors.length]);
-    }
-
-    private int getDigitalChannelColor(int index) {
-        int[] colors = { R.color.dfr_digital_1, R.color.dfr_digital_2, R.color.dfr_digital_3, R.color.dfr_digital_4, R.color.dfr_digital_5, R.color.dfr_digital_6 };
         return ContextCompat.getColor(this, colors[index % colors.length]);
     }
 
@@ -1207,7 +1209,26 @@ public class DfrViewerActivity extends BaseActivity {
 
     private void initMappingsForTemplate(String template) {
         mainMappings.clear();
-        if (template.equals("DISTANCE")) {
+        if (template.equals("NONE")) {
+            // No template: one row per analog channel, labeled exactly as in the Comtrade file,
+            // grouped Current then Voltage. analogIdx is set directly (1:1 with the file) since
+            // there is no template label to fuzzy-match against the channel list.
+            List<MappingItem> currents = new ArrayList<>();
+            List<MappingItem> voltages = new ArrayList<>();
+            List<MappingItem> others = new ArrayList<>();
+            for (int i = 0; i < parser.analogCount; i++) {
+                String label = (parser.channelNames != null && i < parser.channelNames.length) ? parser.channelNames[i] : ("CH" + (i + 1));
+                String lu = label.toUpperCase();
+                boolean isI = lu.contains("I") || lu.contains("A") || lu.contains("CURR");
+                boolean isV = lu.contains("V") || lu.contains("U") || lu.contains("VOLT");
+                MappingItem item = new MappingItem(label, isI);
+                item.analogIdx = i;
+                if (isI) currents.add(item); else if (isV) voltages.add(item); else others.add(item);
+            }
+            mainMappings.addAll(currents);
+            mainMappings.addAll(voltages);
+            mainMappings.addAll(others);
+        } else if (template.equals("DISTANCE")) {
             mainMappings.add(new MappingItem("IA", true)); mainMappings.add(new MappingItem("IB", true));
             mainMappings.add(new MappingItem("IC", true)); mainMappings.add(new MappingItem("IN", true));
             mainMappings.add(new MappingItem("VA", false)); mainMappings.add(new MappingItem("VB", false));
@@ -1518,7 +1539,15 @@ public class DfrViewerActivity extends BaseActivity {
                     @Override public void onChartScale(android.view.MotionEvent me, float sx, float sy) { sync(); }
                     @Override public void onChartTranslate(android.view.MotionEvent me, float dx, float dy) { sync(); }
                     private void sync() {
-                        sharedMatrix.set(chart.getViewPortHandler().getMatrixTouch()); float[] sharedVals = new float[9]; sharedMatrix.getValues(sharedVals);
+                        // Force this chart's own matrix through its ViewPortHandler's clamp right
+                        // now, before broadcasting: at the pan/zoom boundary, onChartTranslate can
+                        // fire with a matrix that hasn't been re-clamped yet, which would otherwise
+                        // push an out-of-bounds transX into sharedMatrix and let every other row
+                        // (digital channels especially, which draw straight from sharedMatrix with
+                        // no bounds check of their own) keep sliding past where this chart stopped.
+                        Matrix touchMatrix = chart.getViewPortHandler().getMatrixTouch();
+                        chart.getViewPortHandler().refresh(touchMatrix, chart, false);
+                        sharedMatrix.set(touchMatrix); float[] sharedVals = new float[9]; sharedMatrix.getValues(sharedVals);
                         float scaleX = sharedVals[Matrix.MSCALE_X];
                         txtFloatingZoom.setText(String.format(java.util.Locale.US, "%.2f X", scaleX));
                         layoutFloatingZoom.setVisibility(scaleX > 1.01f ? View.VISIBLE : View.GONE);
@@ -1606,12 +1635,10 @@ public class DfrViewerActivity extends BaseActivity {
                     chart.getViewPortHandler().refresh(current, chart, false);
 
                     digitalView.setVisibility(View.VISIBLE);
-                    digitalView.setColor(m.color);
                     digitalView.setData(m.entries, m.startTime, m.totalTime);
                     digitalView.setSyncState(sharedMatrix, getActiveCursors());
 
                     dimensionLine.setVisibility(View.VISIBLE);
-                    dimensionLine.setColor(m.color);
                     dimensionLine.setData(m.holdSegments, m.startTime, m.totalTime);
                     dimensionLine.setSyncMatrix(sharedMatrix);
 
@@ -2293,7 +2320,6 @@ public class DfrViewerActivity extends BaseActivity {
                 if (m.isDigital) {
                     vh.chart.setVisibility(View.GONE);
                     vh.digitalView.setVisibility(View.VISIBLE);
-                    vh.digitalView.setColor(m.color);
                     vh.digitalView.setData(m.entries, m.startTime, m.totalTime);
 
                     float ratio = (screenWidth > (45f*density)) ? (float)(exportWidth - leftOffset) / (screenWidth - (45f*density)) : 1f;
@@ -2301,7 +2327,6 @@ public class DfrViewerActivity extends BaseActivity {
                     vh.digitalView.setExportScaleRatio(ratio);
 
                     vh.dimensionLine.setVisibility(View.VISIBLE);
-                    vh.dimensionLine.setColor(m.color);
                     vh.dimensionLine.setData(m.holdSegments, m.startTime, m.totalTime);
                     vh.dimensionLine.setSyncMatrix(sharedMatrix);
                     vh.dimensionLine.setExportScaleRatio(ratio);

@@ -35,7 +35,7 @@ public class DfrDigitalView extends View {
     private void init() {
         blockPaint.setStyle(Paint.Style.FILL);
         blockPaint.setColor(ContextCompat.getColor(getContext(), R.color.dfr_digital_block));
-        blockPaint.setAlpha(220);
+        blockPaint.setAlpha(180);
 
         cursorPaint.setStyle(Paint.Style.STROKE);
         cursorPaint.setStrokeWidth(3.0f);
@@ -53,12 +53,6 @@ public class DfrDigitalView extends View {
         // analog and digital rows even though both use the same time value.
         float density = getResources().getDisplayMetrics().density;
         leftOffset = 40f * density;
-    }
-
-    public void setColor(int color) {
-        blockPaint.setColor(color);
-        blockPaint.setAlpha(220);
-        invalidate();
     }
 
     public void setData(List<Entry> entries, float startTime, float totalTime) {
