@@ -637,6 +637,11 @@ public class DfrViewerActivity extends BaseActivity {
                 while ((line = reader.readLine()) != null) cfgLines.add(line);
                 reader.close();
                 parser.parseCfg(cfgLines);
+                // A newly loaded file may have fewer/different analog channels than whatever was
+                // previously mapped in this session - stale analogIdx values left over from the
+                // last file would otherwise be out of bounds for this one's channel list.
+                mainMappings.clear();
+                extraAnalogIndices.clear();
                 getSharedPreferences("dfr_prefs", MODE_PRIVATE).edit().putString("last_cfg_uri", uri.toString()).apply();
                 
                 // Try to find matching .dat if not already pending, and pick up any companion
@@ -796,7 +801,7 @@ public class DfrViewerActivity extends BaseActivity {
             }
         };
         spinner.setAdapter(mapAdapter);
-        spinner.setSelection(m.analogIdx);
+        spinner.setSelection((m.analogIdx >= 0 && m.analogIdx < parser.channelNames.length) ? m.analogIdx : 0);
         
         LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, (int)(44 * getResources().getDisplayMetrics().density));
         lp.setMargins(0, (int)(16 * getResources().getDisplayMetrics().density), 0, (int)(24 * getResources().getDisplayMetrics().density));
@@ -851,7 +856,7 @@ public class DfrViewerActivity extends BaseActivity {
         final List<MappingItem> tempMappings = new ArrayList<>();
         for (MappingItem m : mainMappings) {
             MappingItem copy = new MappingItem(m.label, m.isCurrent);
-            copy.analogIdx = m.analogIdx;
+            copy.analogIdx = (m.analogIdx >= 0 && m.analogIdx < availableChannels.length) ? m.analogIdx : 0;
             tempMappings.add(copy);
         }
         final List<Integer> currentExtras = new ArrayList<>(extraAnalogIndices);
@@ -892,7 +897,7 @@ public class DfrViewerActivity extends BaseActivity {
                         }
                     };
                     spinner.setAdapter(mapAdp);
-                    spinner.setSelection(item.analogIdx >= 0 ? item.analogIdx : 0);
+                    spinner.setSelection((item.analogIdx >= 0 && item.analogIdx < availableChannels.length) ? item.analogIdx : 0);
                     spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                         @Override public void onItemSelected(AdapterView<?> p, View v, int pos, long id) { item.analogIdx = pos; }
                         @Override public void onNothingSelected(AdapterView<?> p) {}
@@ -1016,8 +1021,8 @@ public class DfrViewerActivity extends BaseActivity {
                                 else if (isV) voltages.add(item);
                                 else others.add(item);
                             }
-                            mainMappings.addAll(voltages);
                             mainMappings.addAll(currents);
+                            mainMappings.addAll(voltages);
                             mainMappings.addAll(others);
                         }
                         plotData();
@@ -1196,14 +1201,14 @@ public class DfrViewerActivity extends BaseActivity {
     private void initMappingsForTemplate(String template) {
         mainMappings.clear();
         if (template.equals("DISTANCE")) {
-            mainMappings.add(new MappingItem("VA", false)); mainMappings.add(new MappingItem("VB", false));
-            mainMappings.add(new MappingItem("VC", false)); mainMappings.add(new MappingItem("VN", false));
             mainMappings.add(new MappingItem("IA", true)); mainMappings.add(new MappingItem("IB", true));
             mainMappings.add(new MappingItem("IC", true)); mainMappings.add(new MappingItem("IN", true));
+            mainMappings.add(new MappingItem("VA", false)); mainMappings.add(new MappingItem("VB", false));
+            mainMappings.add(new MappingItem("VC", false)); mainMappings.add(new MappingItem("VN", false));
         } else if (template.equals("LINE DIFF")) {
             mainMappings.add(new MappingItem("I DIFF A", true)); mainMappings.add(new MappingItem("I DIFF B", true)); mainMappings.add(new MappingItem("I DIFF C", true));
-            mainMappings.add(new MappingItem("VA", false)); mainMappings.add(new MappingItem("VB", false)); mainMappings.add(new MappingItem("VC", false)); mainMappings.add(new MappingItem("VN", false));
             mainMappings.add(new MappingItem("IA", true)); mainMappings.add(new MappingItem("IB", true)); mainMappings.add(new MappingItem("IC", true)); mainMappings.add(new MappingItem("IN", true));
+            mainMappings.add(new MappingItem("VA", false)); mainMappings.add(new MappingItem("VB", false)); mainMappings.add(new MappingItem("VC", false)); mainMappings.add(new MappingItem("VN", false));
         } else if (template.equals("T DIFF")) {
             mainMappings.add(new MappingItem("I DIFF A", true)); mainMappings.add(new MappingItem("I DIFF B", true)); mainMappings.add(new MappingItem("I DIFF C", true));
             mainMappings.add(new MappingItem("IREF HV", true)); mainMappings.add(new MappingItem("IREF LV", true));
@@ -1489,19 +1494,24 @@ public class DfrViewerActivity extends BaseActivity {
 
                         for (int i = 0; i < rvCharts.getChildCount(); i++) {
                             RecyclerView.ViewHolder holder = rvCharts.getChildViewHolder(rvCharts.getChildAt(i));
-                            if (holder instanceof ChartViewHolder && holder != ChartViewHolder.this) {
-                                ChartViewHolder vh = (ChartViewHolder) holder; Matrix m = vh.chart.getViewPortHandler().getMatrixTouch(); float[] target = new float[9]; m.getValues(target);
-                                target[Matrix.MSCALE_X] = sharedVals[Matrix.MSCALE_X]; target[Matrix.MTRANS_X] = sharedVals[Matrix.MTRANS_X]; m.setValues(target); vh.chart.getViewPortHandler().refresh(m, vh.chart, true);
+                            if (!(holder instanceof ChartViewHolder)) continue;
+                            ChartViewHolder vh = (ChartViewHolder) holder;
 
-                                // Digital (boolean) rows are drawn by a separate DfrDigitalView, not
-                                // this hidden vh.chart, so the matrix update above has no visible
-                                // effect for them - without this they only catch up once the gesture
-                                // ends (via triggerGlobalYCalibration), lagging behind during the drag.
-                                int pos = vh.getAdapterPosition();
-                                if (pos != RecyclerView.NO_POSITION && pos < models.size()
-                                        && models.get(pos).isDigital && vh.digitalView != null) {
-                                    vh.digitalView.setSyncState(sharedMatrix, getActiveCursors());
-                                }
+                            if (vh != ChartViewHolder.this) {
+                                Matrix m = vh.chart.getViewPortHandler().getMatrixTouch(); float[] target = new float[9]; m.getValues(target);
+                                target[Matrix.MSCALE_X] = sharedVals[Matrix.MSCALE_X]; target[Matrix.MTRANS_X] = sharedVals[Matrix.MTRANS_X]; m.setValues(target); vh.chart.getViewPortHandler().refresh(m, vh.chart, true);
+                            }
+
+                            // Digital (boolean) rows are drawn by a separate DfrDigitalView layered
+                            // on top of the (transparent) chart - including this gesture's own row,
+                            // since its chart moving its own matrix natively doesn't repaint the
+                            // DfrDigitalView sitting on top of it. Without this they only catch up
+                            // once the gesture ends (via triggerGlobalYCalibration), lagging behind
+                            // during the drag.
+                            int pos = vh.getAdapterPosition();
+                            if (pos != RecyclerView.NO_POSITION && pos < models.size()
+                                    && models.get(pos).isDigital && vh.digitalView != null) {
+                                vh.digitalView.setSyncState(sharedMatrix, getActiveCursors());
                             }
                         }
                     }
@@ -1533,12 +1543,41 @@ public class DfrViewerActivity extends BaseActivity {
                 tvInfo.setTextColor(m.color); 
                 
                 if (m.isDigital) {
-                    chart.setVisibility(View.GONE);
+                    // The chart stays present (transparent, hidden behind the opaque digitalView)
+                    // purely so this row gets the exact same drag/pinch-zoom gesture handling as
+                    // analog rows - DfrDigitalView itself has no touch handling of its own.
+                    chart.setTag(m.label); setupChart(true);
+                    chart.setVisibility(View.VISIBLE);
+                    chart.setBackgroundColor(Color.TRANSPARENT);
+                    float density = getResources().getDisplayMetrics().density;
+                    float sharedLeftOffset = 40f * density;
+                    chart.setViewPortOffsets(sharedLeftOffset, 0f, 4f * density, 0f);
+                    chart.getAxisLeft().setAxisMinimum(-1.1f);
+                    chart.getAxisLeft().setAxisMaximum(1.1f);
+                    chart.getXAxis().setAxisMinimum(m.startTime);
+                    chart.getXAxis().setAxisMaximum(m.totalTime);
+                    chart.setData(m.cachedData);
+
+                    ViewGroup.LayoutParams lp = chart.getLayoutParams();
+                    lp.height = digitalView.getLayoutParams().height;
+                    chart.setLayoutParams(lp);
+
+                    Matrix current = chart.getViewPortHandler().getMatrixTouch();
+                    float[] sVals = new float[9], cVals = new float[9];
+                    sharedMatrix.getValues(sVals);
+                    current.getValues(cVals);
+                    cVals[Matrix.MSCALE_X] = sVals[Matrix.MSCALE_X];
+                    cVals[Matrix.MTRANS_X] = sVals[Matrix.MTRANS_X];
+                    cVals[Matrix.MSCALE_Y] = 1.0f;
+                    cVals[Matrix.MTRANS_Y] = 0f;
+                    current.setValues(cVals);
+                    chart.getViewPortHandler().refresh(current, chart, false);
+
                     digitalView.setVisibility(View.VISIBLE);
                     digitalView.setData(m.entries, m.startTime, m.totalTime);
                     digitalView.setSyncState(sharedMatrix, getActiveCursors());
-                    
-                    tvSummary.setVisibility(View.VISIBLE); 
+
+                    tvSummary.setVisibility(View.VISIBLE);
                     String summary = m.digitalSummary.replace("{", "(").replace("}", ")");
                     android.text.SpannableStringBuilder span = new android.text.SpannableStringBuilder(summary);
                     int start = summary.indexOf("(");

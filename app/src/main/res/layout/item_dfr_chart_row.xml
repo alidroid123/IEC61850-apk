@@ -40,18 +40,26 @@
             android:visibility="gone" />
     </LinearLayout>
 
-    <com.alidev.dfrtools.dfr.DfrLineChart
-        android:id="@+id/rowChart"
+    <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="130dp"
-        android:layout_marginTop="0dp" />
+        android:layout_height="wrap_content">
 
-    <com.alidev.dfrtools.dfr.DfrDigitalView
-        android:id="@+id/rowDigitalView"
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/spacing_ms"
-        android:paddingBottom="@dimen/spacing_xs"
-        android:visibility="gone" />
+        <com.alidev.dfrtools.dfr.DfrLineChart
+            android:id="@+id/rowChart"
+            android:layout_width="match_parent"
+            android:layout_height="130dp"
+            android:layout_marginTop="0dp" />
+
+        <!-- Opaque background so the transparent DfrLineChart underneath (kept alive purely to
+             drive drag/pinch-zoom gestures for digital rows) never shows through. -->
+        <com.alidev.dfrtools.dfr.DfrDigitalView
+            android:id="@+id/rowDigitalView"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/spacing_ms"
+            android:background="@color/dfr_background"
+            android:paddingBottom="@dimen/spacing_xs"
+            android:visibility="gone" />
+    </FrameLayout>
 
     <TextView
         android:id="@+id/txtDigitalSummary"
