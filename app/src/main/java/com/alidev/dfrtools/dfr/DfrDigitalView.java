@@ -35,7 +35,7 @@ public class DfrDigitalView extends View {
     private void init() {
         blockPaint.setStyle(Paint.Style.FILL);
         blockPaint.setColor(ContextCompat.getColor(getContext(), R.color.dfr_digital_block));
-        blockPaint.setAlpha(180);
+        blockPaint.setAlpha(220);
 
         cursorPaint.setStyle(Paint.Style.STROKE);
         cursorPaint.setStrokeWidth(3.0f);
@@ -47,9 +47,18 @@ public class DfrDigitalView extends View {
         triggerPaint.setStrokeWidth(1.5f);
         triggerPaint.setColor(ContextCompat.getColor(getContext(), R.color.dfr_chart_trigger));
         triggerPaint.setPathEffect(new DashPathEffect(new float[]{10, 10}, 0));
-        
+
+        // Must match the analog DfrLineChart's own left viewport offset (see DfrViewerActivity's
+        // "sharedLeftOffset") exactly, or the trigger/cursor lines land a few pixels apart between
+        // analog and digital rows even though both use the same time value.
         float density = getResources().getDisplayMetrics().density;
-        leftOffset = 45f * density;
+        leftOffset = 40f * density;
+    }
+
+    public void setColor(int color) {
+        blockPaint.setColor(color);
+        blockPaint.setAlpha(220);
+        invalidate();
     }
 
     public void setData(List<Entry> entries, float startTime, float totalTime) {

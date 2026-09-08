@@ -69,4 +69,12 @@
     <color name="dfr_analog_s">#FFD600</color>
     <color name="dfr_analog_t">#00E676</color>
     <color name="dfr_analog_n">#E0E0E0</color>
+
+    <!-- Per-channel bright palette for digital signals (block + dimension line) -->
+    <color name="dfr_digital_1">#BB86FC</color>
+    <color name="dfr_digital_2">#FF4081</color>
+    <color name="dfr_digital_3">#FFC107</color>
+    <color name="dfr_digital_4">#69F0AE</color>
+    <color name="dfr_digital_5">#40C4FF</color>
+    <color name="dfr_digital_6">#FF6E40</color>
 </resources>

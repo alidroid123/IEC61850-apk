@@ -1093,7 +1093,7 @@ public class DfrViewerActivity extends BaseActivity {
                 float startTime = timeDataList.isEmpty() ? 0 : timeDataList.get(0);
                 float endTime = timeDataList.isEmpty() ? 0 : timeDataList.get(timeDataList.size() - 1);
                 String dName = (parser.digitalNames != null && d < parser.digitalNames.length) ? parser.digitalNames[d] : "D" + (d + 1);
-                ChartModel cm = new ChartModel(dName, ContextCompat.getColor(this, R.color.dfr_digital_block), dEntries, 1.1f, true, startTime, endTime, -1, -1);
+                ChartModel cm = new ChartModel(dName, getDigitalChannelColor(d), dEntries, 1.1f, true, startTime, endTime, -1, -1);
                 cm.prepareData();
                 if (cm.hasTransition) models.add(cm);
             }
@@ -1106,6 +1106,11 @@ public class DfrViewerActivity extends BaseActivity {
         int[] currentColors = { R.color.dfr_analog_r, R.color.dfr_analog_s, R.color.dfr_analog_t, R.color.dfr_analog_n };
         int[] voltageColors = { R.color.brand_primary, R.color.status_warning, R.color.status_safe, R.color.status_info };
         int[] colors = isCurrent ? currentColors : voltageColors;
+        return ContextCompat.getColor(this, colors[index % colors.length]);
+    }
+
+    private int getDigitalChannelColor(int index) {
+        int[] colors = { R.color.dfr_digital_1, R.color.dfr_digital_2, R.color.dfr_digital_3, R.color.dfr_digital_4, R.color.dfr_digital_5, R.color.dfr_digital_6 };
         return ContextCompat.getColor(this, colors[index % colors.length]);
     }
 
@@ -1601,10 +1606,12 @@ public class DfrViewerActivity extends BaseActivity {
                     chart.getViewPortHandler().refresh(current, chart, false);
 
                     digitalView.setVisibility(View.VISIBLE);
+                    digitalView.setColor(m.color);
                     digitalView.setData(m.entries, m.startTime, m.totalTime);
                     digitalView.setSyncState(sharedMatrix, getActiveCursors());
 
                     dimensionLine.setVisibility(View.VISIBLE);
+                    dimensionLine.setColor(m.color);
                     dimensionLine.setData(m.holdSegments, m.startTime, m.totalTime);
                     dimensionLine.setSyncMatrix(sharedMatrix);
 
@@ -2286,13 +2293,15 @@ public class DfrViewerActivity extends BaseActivity {
                 if (m.isDigital) {
                     vh.chart.setVisibility(View.GONE);
                     vh.digitalView.setVisibility(View.VISIBLE);
+                    vh.digitalView.setColor(m.color);
                     vh.digitalView.setData(m.entries, m.startTime, m.totalTime);
-                    
+
                     float ratio = (screenWidth > (45f*density)) ? (float)(exportWidth - leftOffset) / (screenWidth - (45f*density)) : 1f;
                     vh.digitalView.setSyncState(sharedMatrix, DfrViewerActivity.this.getActiveCursors());
                     vh.digitalView.setExportScaleRatio(ratio);
 
                     vh.dimensionLine.setVisibility(View.VISIBLE);
+                    vh.dimensionLine.setColor(m.color);
                     vh.dimensionLine.setData(m.holdSegments, m.startTime, m.totalTime);
                     vh.dimensionLine.setSyncMatrix(sharedMatrix);
                     vh.dimensionLine.setExportScaleRatio(ratio);
