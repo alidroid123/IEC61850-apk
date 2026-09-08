@@ -1016,8 +1016,8 @@ public class DfrViewerActivity extends BaseActivity {
                                 else if (isV) voltages.add(item);
                                 else others.add(item);
                             }
-                            mainMappings.addAll(currents);
                             mainMappings.addAll(voltages);
+                            mainMappings.addAll(currents);
                             mainMappings.addAll(others);
                         }
                         plotData();
@@ -1054,10 +1054,12 @@ public class DfrViewerActivity extends BaseActivity {
 
             models.add(new ChartModel(getString(R.string.lbl_view_analog_channel_header), true));
 
+            int currentTypeIdx = 0, voltageTypeIdx = 0;
             for (int i = 0; i < mainMappings.size(); i++) {
                 MappingItem m = mainMappings.get(i);
                 if (m.analogIdx < 0 || m.analogIdx >= parser.analogCount) continue;
-                models.add(buildAnalogModel(m.analogIdx, m.label, getChannelColor(i, m.isCurrent), isRms, isPrimary, samples, timeStep, i));
+                int typeIdx = m.isCurrent ? currentTypeIdx++ : voltageTypeIdx++;
+                models.add(buildAnalogModel(m.analogIdx, m.label, getChannelColor(typeIdx, m.isCurrent), isRms, isPrimary, samples, timeStep, i));
             }
             
             for (int extraIdx : extraAnalogIndices) {
@@ -1094,10 +1096,9 @@ public class DfrViewerActivity extends BaseActivity {
     }
 
     private int getChannelColor(int index, boolean isCurrent) {
-        int[] colors = {
-                R.color.dfr_analog_r, R.color.dfr_analog_s, R.color.dfr_analog_t, R.color.dfr_analog_n,
-                R.color.brand_primary, R.color.status_warning, R.color.status_safe, R.color.status_info
-        };
+        int[] currentColors = { R.color.dfr_analog_r, R.color.dfr_analog_s, R.color.dfr_analog_t, R.color.dfr_analog_n };
+        int[] voltageColors = { R.color.brand_primary, R.color.status_warning, R.color.status_safe, R.color.status_info };
+        int[] colors = isCurrent ? currentColors : voltageColors;
         return ContextCompat.getColor(this, colors[index % colors.length]);
     }
 
@@ -1195,14 +1196,14 @@ public class DfrViewerActivity extends BaseActivity {
     private void initMappingsForTemplate(String template) {
         mainMappings.clear();
         if (template.equals("DISTANCE")) {
-            mainMappings.add(new MappingItem("IA", true)); mainMappings.add(new MappingItem("IB", true));
-            mainMappings.add(new MappingItem("IC", true)); mainMappings.add(new MappingItem("IN", true));
             mainMappings.add(new MappingItem("VA", false)); mainMappings.add(new MappingItem("VB", false));
             mainMappings.add(new MappingItem("VC", false)); mainMappings.add(new MappingItem("VN", false));
+            mainMappings.add(new MappingItem("IA", true)); mainMappings.add(new MappingItem("IB", true));
+            mainMappings.add(new MappingItem("IC", true)); mainMappings.add(new MappingItem("IN", true));
         } else if (template.equals("LINE DIFF")) {
             mainMappings.add(new MappingItem("I DIFF A", true)); mainMappings.add(new MappingItem("I DIFF B", true)); mainMappings.add(new MappingItem("I DIFF C", true));
-            mainMappings.add(new MappingItem("IA", true)); mainMappings.add(new MappingItem("IB", true)); mainMappings.add(new MappingItem("IC", true)); mainMappings.add(new MappingItem("IN", true));
             mainMappings.add(new MappingItem("VA", false)); mainMappings.add(new MappingItem("VB", false)); mainMappings.add(new MappingItem("VC", false)); mainMappings.add(new MappingItem("VN", false));
+            mainMappings.add(new MappingItem("IA", true)); mainMappings.add(new MappingItem("IB", true)); mainMappings.add(new MappingItem("IC", true)); mainMappings.add(new MappingItem("IN", true));
         } else if (template.equals("T DIFF")) {
             mainMappings.add(new MappingItem("I DIFF A", true)); mainMappings.add(new MappingItem("I DIFF B", true)); mainMappings.add(new MappingItem("I DIFF C", true));
             mainMappings.add(new MappingItem("IREF HV", true)); mainMappings.add(new MappingItem("IREF LV", true));
@@ -1617,32 +1618,31 @@ public class DfrViewerActivity extends BaseActivity {
                 String c1Val = currentHighlight1 == null ? "---" : getValueString(m, currentHighlight1.getX());
                 String c2Val = currentHighlight2 == null ? "---" : getValueString(m, currentHighlight2.getX());
                 
-                String extraInfo = "";
-                if (!m.isDigital && !m.isHeader && m.analogIdx >= 0 && parser.channelNames != null && m.analogIdx < parser.channelNames.length) {
-                    extraInfo = " (" + parser.channelNames[m.analogIdx] + ")";
-                }
+                boolean hasDefaultName = !m.isDigital && !m.isHeader && m.analogIdx >= 0 && parser.channelNames != null && m.analogIdx < parser.channelNames.length;
+                String baseLabel = hasDefaultName ? parser.channelNames[m.analogIdx] : m.label;
+                String labelSuffix = hasDefaultName ? " | Label : " + m.label : "";
 
-                String raw = String.format(java.util.Locale.US, "%s | C1 = %s | C2 = %s%s", m.label, c1Val, c2Val, extraInfo);
+                String raw = String.format(java.util.Locale.US, "%s | C1 = %s | C2 = %s%s", baseLabel, c1Val, c2Val, labelSuffix);
                 android.text.SpannableString span = new android.text.SpannableString(raw);
-                
+
                 int c1Start = raw.indexOf("C1 = ");
                 if (c1Start != -1) {
                     int c1End = raw.indexOf(" |", c1Start);
                     if (c1End == -1 || c1End < c1Start) c1End = raw.length();
                     span.setSpan(new android.text.style.ForegroundColorSpan(ContextCompat.getColor(DfrViewerActivity.this, R.color.dfr_chart_cursor_c1)), c1Start, c1End, android.text.Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
                 }
-                
+
                 int c2Start = raw.indexOf("C2 = ");
                 if (c2Start != -1) {
-                    int extraStart = raw.indexOf(" (", c2Start);
-                    int c2End = (extraStart != -1) ? extraStart : raw.length();
+                    int suffixStart = hasDefaultName ? raw.indexOf(" | Label : ", c2Start) : -1;
+                    int c2End = (suffixStart != -1) ? suffixStart : raw.length();
                     span.setSpan(new android.text.style.ForegroundColorSpan(ContextCompat.getColor(DfrViewerActivity.this, R.color.dfr_chart_cursor_c2)), c2Start, c2End, android.text.Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-                    
-                    if (extraStart != -1) {
-                        span.setSpan(new android.text.style.ForegroundColorSpan(m.color), extraStart, raw.length(), android.text.Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+
+                    if (suffixStart != -1) {
+                        span.setSpan(new android.text.style.ForegroundColorSpan(m.color), suffixStart, raw.length(), android.text.Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
                     }
                 }
-                
+
                 tvInfo.setText(span);
             }
         }

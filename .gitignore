@@ -21,3 +21,7 @@ firebase-service-account.json
 # Per-release changelog scratch file, consumed and deleted by publishReleaseToGit - never
 # committed, so a leftover/forgotten one never pollutes `git status` between releases.
 RELEASE_NOTES.md
+
+# Google Drive desktop sync writes its upload staging files here (unrelated to this repo) -
+# a release build once swept thousands of these into a commit before this exclusion existed.
+.tmp.driveupload/
