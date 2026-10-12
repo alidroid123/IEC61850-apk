@@ -560,22 +560,12 @@
                             android:textColor="@color/text_secondary"
                             android:textSize="@dimen/text_size_small" />
 
-                        <com.alidev.dfrtools.dfr.PhasorDiagramView
-                            android:id="@+id/phasorDiagram"
+                        <!-- Both relays' phasors side by side, common angle reference (VR of GI A) -->
+                        <com.alidev.dfrtools.dfr.RelayPhasorView
+                            android:id="@+id/relayPhasors"
                             android:layout_width="match_parent"
-                            android:layout_height="190dp"
+                            android:layout_height="220dp"
                             android:layout_marginTop="@dimen/spacing_s" />
-
-                        <TextView
-                            android:id="@+id/tvFlSyncInfo"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="@dimen/spacing_xs"
-                            android:background="@color/bg_navy_dim"
-                            android:lineSpacingExtra="@dimen/spacing_tiny"
-                            android:padding="@dimen/spacing_s"
-                            android:textColor="@color/text_primary"
-                            android:textSize="@dimen/text_size_body_small" />
 
                         <LinearLayout
                             android:id="@+id/layoutFlSyncControls"
@@ -625,6 +615,39 @@
                                     android:textSize="@dimen/text_size_small" />
                             </LinearLayout>
                         </LinearLayout>
+
+                        <HorizontalScrollView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="@dimen/spacing_xs">
+
+                            <TextView
+                                android:id="@+id/tvFlAngleTable"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:background="@color/bg_navy_dim"
+                                android:fontFamily="monospace"
+                                android:padding="@dimen/spacing_s"
+                                android:textColor="@color/text_primary"
+                                android:textSize="@dimen/text_size_small" />
+                        </HorizontalScrollView>
+
+                        <com.alidev.dfrtools.dfr.PhasorDiagramView
+                            android:id="@+id/phasorDiagram"
+                            android:layout_width="match_parent"
+                            android:layout_height="190dp"
+                            android:layout_marginTop="@dimen/spacing_s" />
+
+                        <TextView
+                            android:id="@+id/tvFlSyncInfo"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="@dimen/spacing_xs"
+                            android:background="@color/bg_navy_dim"
+                            android:lineSpacingExtra="@dimen/spacing_tiny"
+                            android:padding="@dimen/spacing_s"
+                            android:textColor="@color/text_primary"
+                            android:textSize="@dimen/text_size_body_small" />
 
                         <androidx.appcompat.widget.SwitchCompat
                             android:id="@+id/swFlSyncMain"

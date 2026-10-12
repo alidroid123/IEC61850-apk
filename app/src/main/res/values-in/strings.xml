@@ -893,8 +893,8 @@
     <string name="hint_fl_vmult">Pengali tegangan</string>
     <string name="hint_fl_imult">Pengali arus</string>
     <string name="btn_fl_auto">Auto</string>
-    <string name="msg_fl_scaling_primary">Nilai di record ini sudah PRIMER – biarkan kedua pengali = 1.</string>
-    <string name="msg_fl_scaling_secondary">Nilai SEKUNDER dan dikonversi dengan rasio dari cfg (VT %1$s, CT %2$s). Biarkan pengali = 1.</string>
+    <string name="msg_fl_scaling_primary">Nilai diambil dari DFR sebagai sampel sesaat (instantaneous) bernilai PRIMER (cfg sudah primer).</string>
+    <string name="msg_fl_scaling_secondary">Nilai diambil dari DFR sebagai sampel sesaat (instantaneous) lalu dikonversi ke PRIMER dengan rasio dari cfg (VT %1$s, CT %2$s).</string>
     <string name="msg_fl_scaling_no_ratio">Nilai SEKUNDER dan cfg tidak punya rasio – isi rasio VT (mis. 1500 untuk 150 kV/100 V) dan rasio CT (mis. 2000 untuk 2000/1 A) sebagai pengali.</string>
     <string name="msg_fl_need_both">Muat record untuk kedua ujung terlebih dulu.</string>
     <string name="msg_fl_invalid_line">Isi panjang saluran, R1 dan X1 (lebih dari 0).</string>
@@ -1008,7 +1008,7 @@
 
     <!-- FL Double Ended: voltage-only vector synchronisation, saving -->
     <string name="lbl_fl_sync_header">Sinkronisasi vektor (voltage only)</string>
-    <string name="msg_fl_sync_hint">GI A dikunci di titik arus gangguan tertinggi; rekaman GI B digeser waktunya sampai vektor V1 dan V0-nya berimpit dengan GI A (voltage only). Auto mencari dalam setengah siklus dari awal gangguan, sehingga kedua rekaman menunjukkan momen gangguan yang sama. Geser slider untuk menyesuaikan GI B secara manual.</string>
+    <string name="msg_fl_sync_hint">GI A dikunci di titik arus gangguan tertinggi; rekaman GI B digeser waktunya sampai vektor V1 dan V0-nya berimpit dengan GI A (voltage only). Auto mencari dalam setengah siklus dari awal gangguan, sehingga kedua rekaman menunjukkan momen gangguan yang sama. Geser slider untuk menggeser GI B secara manual - phasor kedua relay digambar berjajar dengan referensi sudut yang sama (VR GI A), sehingga sudut antar kedua relay terlihat.</string>
     <string name="val_fl_sync_ref">Referensi %1$s: t = %2$s ms, arus gangguan %3$s A</string>
     <string name="val_fl_sync_shift_ts">Geser %1$s: %2$s ms dari timestamp DFR (auto %3$s ms)</string>
     <string name="val_fl_sync_shift_inc">Geser %1$s: %2$s ms dari awal gangguan (auto %3$s ms)</string>
@@ -1033,4 +1033,7 @@
     <string name="msg_fl_delete_saved">Hapus hasil analisa %s? Laporan PDF tetap ada di Download/DFR/FL_Reports.</string>
     <string name="help_feat_fl_4_title">Sinkronisasi Vektor &amp; Menyimpan Hasil</string>
     <string name="help_feat_fl_4_steps">1. Di bagian Sinkronisasi vektor, GI A dikunci di titik arus gangguan tertinggi dan GI B digeser otomatis sampai sudut V1/V0 sama.\n2. Geser slider atau ketuk B -0,1 / +0,1 ms untuk menyesuaikan GI B secara manual - vektor dan lokasi tersinkron langsung ter-update.\n3. Aktifkan "Jadikan lokasi tersinkron sebagai hasil utama" bila lebih dipercaya.\n4. Ketuk {ic:save} Simpan hasil untuk menyimpan analisa dan membuat laporan PDF; buka lagi lewat ikon {ic:history} di atas.</string>
+
+    <string name="lbl_fl_values_primary">Nilai: primer, sesaat (instantaneous) dari DFR</string>
+    <string name="lbl_fl_values_no_ratio">Nilai: SEKUNDER - cfg tidak punya rasio VT/CT, isi di Mapping kanal</string>
 </resources>

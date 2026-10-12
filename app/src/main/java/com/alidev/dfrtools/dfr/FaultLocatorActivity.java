@@ -646,7 +646,9 @@ public class FaultLocatorActivity extends BaseActivity {
                 chName(r, st.map.ia), chName(r, st.map.ib), chName(r, st.map.ic))
                 : getString(R.string.msg_fl_mapping_incomplete);
         if (complete && st.map.invertCurrent) mapping += "  " + getString(R.string.lbl_fl_inverted_tag);
-        st.tvRecord.setText(info + "\n" + mapping);
+        String values = complete && missingRatio(r, st.map) && st.map.vMult == 1 && st.map.iMult == 1
+                ? getString(R.string.lbl_fl_values_no_ratio) : getString(R.string.lbl_fl_values_primary);
+        st.tvRecord.setText(info + "\n" + mapping + "\n" + values);
         st.actions.setVisibility(View.VISIBLE);
         st.btnOpenViewer.setVisibility(r.fileType.startsWith("ASCII") ? View.VISIBLE : View.GONE);
         st.tvStatus.setVisibility(View.VISIBLE);
@@ -749,6 +751,10 @@ public class FaultLocatorActivity extends BaseActivity {
             etI.setText(fmtPlain(working.iMult));
         };
         fill.run();
+        // Values always come from the DFR as primary: the manual multipliers are only offered
+        // when the cfg has secondary values without a VT/CT ratio (or were already used).
+        v.findViewById(R.id.layoutFlMult).setVisibility(
+                missingRatio(rec, working) || working.vMult != 1 || working.iMult != 1 ? View.VISIBLE : View.GONE);
 
         v.findViewById(R.id.btnFlMapAuto).setOnClickListener(view -> {
             ChannelMap auto = DoubleEndedFaultLocator.autoMap(rec);
@@ -771,6 +777,13 @@ public class FaultLocatorActivity extends BaseActivity {
             dialog.dismiss();
         });
         dialog.show();
+    }
+
+    private static boolean missingRatio(ComtradeRecord rec, ChannelMap map) {
+        for (int idx : new int[]{map.va, map.vb, map.vc, map.ia, map.ib, map.ic}) {
+            if (idx >= 0 && idx < rec.analogCount() && rec.analogs.get(idx).isSecondaryWithoutRatio()) return true;
+        }
+        return false;
     }
 
     private String scalingDescription(ComtradeRecord rec, ChannelMap map) {
@@ -1148,12 +1161,18 @@ public class FaultLocatorActivity extends BaseActivity {
         PhasorDiagramView diagram = findViewById(R.id.phasorDiagram);
         diagram.setLegend(resultNameA, resultNameB);
         TextView info = findViewById(R.id.tvFlSyncInfo);
+        RelayPhasorView relays = findViewById(R.id.relayPhasors);
+        TextView table = findViewById(R.id.tvFlAngleTable);
         DoubleEndedFaultLocator.Alignment al = currentAlignment;
         if (al == null || !al.valid || al.a == null || al.b == null) {
             diagram.setVectors(null, null, null, null, false);
+            relays.setRelays(null, null, resultNameA, resultNameB);
+            table.setText("");
             info.setText(R.string.msg_fl_sync_out);
             return;
         }
+        relays.setRelays(al.a, al.b, resultNameA, resultNameB);
+        table.setText(angleTable(al));
         diagram.setVectors(al.a.v1, al.b.v1, al.a.v0, al.b.v0, al.v0Used);
         StringBuilder sb = new StringBuilder();
         sb.append(getString(R.string.val_fl_sync_ref, resultNameA, fmt(r.alignRefTimeA * 1000, 1), fmt(r.alignRefCurrentA, 0)));
@@ -1166,6 +1185,45 @@ public class FaultLocatorActivity extends BaseActivity {
                 : getString(R.string.val_fl_sync_angles_nov0, signed(al.dV1Deg, 1)));
         sb.append('\n').append(getString(R.string.val_fl_sync_loc, fmt(al.m * r.lengthKm, 2), resultNameA));
         info.setText(sb.toString());
+    }
+
+    /**
+     * Magnitude and angle of every phase at both relays at the aligned instant, angles from VR of
+     * GI A, plus the B-minus-A angle - the numbers behind the side-by-side diagram.
+     */
+    private String angleTable(DoubleEndedFaultLocator.Alignment al) {
+        double ref = al.a.v[0].arg();
+        StringBuilder sb = new StringBuilder();
+        sb.append(String.format(Locale.US, "%-3s %-19s %-19s %7s%n", "", clip(resultNameA, 19), clip(resultNameB, 19), "B-A"));
+        String[] names = {"VR", "VS", "VT", "IR", "IS", "IT", "V1", "V0"};
+        for (int k = 0; k < names.length; k++) {
+            Cx x = angleRow(al.a, k), y = angleRow(al.b, k);
+            boolean isV = names[k].startsWith("V");
+            sb.append(String.format(Locale.US, "%-3s %-19s %-19s %6.1f°%n", names[k],
+                    magAngle(x, ref, isV), magAngle(y, ref, isV), wrap180(Math.toDegrees(y.arg() - x.arg()))));
+        }
+        return sb.toString().trim();
+    }
+
+    private static Cx angleRow(Phasors p, int k) {
+        if (k < 3) return p.v[k];
+        if (k < 6) return p.i[k - 3];
+        return k == 6 ? p.v1 : p.v0;
+    }
+
+    private static String magAngle(Cx x, double ref, boolean isV) {
+        String mag = isV ? String.format(Locale.US, "%.2fkV", x.abs() / 1000) : String.format(Locale.US, "%.0fA", x.abs());
+        return String.format(Locale.US, "%9s %6.1f°", mag, wrap180(Math.toDegrees(x.arg() - ref)));
+    }
+
+    private static double wrap180(double d) {
+        while (d > 180) d -= 360;
+        while (d <= -180) d += 360;
+        return d;
+    }
+
+    private static String clip(String s, int max) {
+        return s.length() <= max ? s : s.substring(0, max - 1) + ".";
     }
 
     private static String signed(double v, int decimals) {
@@ -1640,7 +1698,8 @@ public class FaultLocatorActivity extends BaseActivity {
             for (int i = 0; i < warn.getChildCount(); i++) sb.append(((TextView) warn.getChildAt(i)).getText()).append('\n');
         }
         sb.append('\n').append(getString(R.string.lbl_fl_sync_header)).append('\n')
-                .append(((TextView) findViewById(R.id.tvFlSyncInfo)).getText()).append('\n');
+                .append(((TextView) findViewById(R.id.tvFlSyncInfo)).getText()).append('\n')
+                .append(((TextView) findViewById(R.id.tvFlAngleTable)).getText()).append('\n');
         String recA = viewingSaved != null ? viewingSaved.recordA : endA.cfg != null ? endA.cfg.getName() : "-";
         String recB = viewingSaved != null ? viewingSaved.recordB : endB.cfg != null ? endB.cfg.getName() : "-";
         sb.append('\n').append(getString(R.string.lbl_fl_record_files)).append('\n');

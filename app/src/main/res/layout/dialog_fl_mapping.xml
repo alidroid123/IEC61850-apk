@@ -63,7 +63,9 @@
                     android:textColor="@color/text_primary"
                     android:textSize="@dimen/text_size_body_small" />
 
+                <!-- Only shown when the DFR cfg has no VT/CT ratio for secondary values. -->
                 <LinearLayout
+                    android:id="@+id/layoutFlMult"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/spacing_s"

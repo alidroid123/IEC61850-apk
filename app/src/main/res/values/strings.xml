@@ -927,8 +927,8 @@
     <string name="hint_fl_vmult">Voltage multiplier</string>
     <string name="hint_fl_imult">Current multiplier</string>
     <string name="btn_fl_auto">Auto</string>
-    <string name="msg_fl_scaling_primary">Values in this record are PRIMARY – leave both multipliers at 1.</string>
-    <string name="msg_fl_scaling_secondary">Values are SECONDARY and converted with the ratios in the cfg (VT %1$s, CT %2$s). Leave the multipliers at 1.</string>
+    <string name="msg_fl_scaling_primary">Values are taken from the DFR as PRIMARY instantaneous samples (the cfg is already primary).</string>
+    <string name="msg_fl_scaling_secondary">Values are taken from the DFR as instantaneous samples and converted to PRIMARY with the ratios in the cfg (VT %1$s, CT %2$s).</string>
     <string name="msg_fl_scaling_no_ratio">Values are SECONDARY and the cfg has no ratio – enter the VT ratio (e.g. 1500 for 150 kV/100 V) and CT ratio (e.g. 2000 for 2000/1 A) as multipliers.</string>
     <string name="msg_fl_need_both">Load a record for both ends first.</string>
     <string name="msg_fl_invalid_line">Fill in the line length, R1 and X1 (greater than 0).</string>
@@ -1042,7 +1042,7 @@
 
     <!-- FL Double Ended: voltage-only vector synchronisation, saving -->
     <string name="lbl_fl_sync_header">Vector synchronisation (voltage only)</string>
-    <string name="msg_fl_sync_hint">Substation A is fixed at its highest fault current; record B is shifted in time until its V1 and V0 vectors line up with A (voltage only). Auto searches within half a cycle of the fault inception, so both records show the same moment of the fault. Drag the slider to adjust B by hand.</string>
+    <string name="msg_fl_sync_hint">Substation A is fixed at its highest fault current; record B is shifted in time until its V1 and V0 vectors line up with A (voltage only). Auto searches within half a cycle of the fault inception, so both records show the same moment of the fault. Drag the slider to shift B by hand - both relays\' phasors are drawn side by side on the same angle reference (VR of A), so the angle between them is visible.</string>
     <string name="val_fl_sync_ref">Reference %1$s: t = %2$s ms, fault current %3$s A</string>
     <string name="val_fl_sync_shift_ts">Shift %1$s: %2$s ms vs DFR timestamps (auto %3$s ms)</string>
     <string name="val_fl_sync_shift_inc">Shift %1$s: %2$s ms vs fault inception (auto %3$s ms)</string>
@@ -1067,4 +1067,7 @@
     <string name="msg_fl_delete_saved">Delete the saved analysis %s? The PDF report stays in Download/DFR/FL_Reports.</string>
     <string name="help_feat_fl_4_title">Vector Synchronisation &amp; Saving</string>
     <string name="help_feat_fl_4_steps">1. Under Vector synchronisation, substation A is fixed at its highest fault current and B is shifted automatically until the V1/V0 angles agree.\n2. Drag the slider or tap B -0.1 / +0.1 ms to adjust B by hand - the vectors and the synchronised location update immediately.\n3. Switch on "Use the synchronised location as the main result" if you prefer it.\n4. Tap {ic:save} Save result to keep the analysis and write a PDF report; reopen it later with the {ic:history} icon at the top.</string>
+
+    <string name="lbl_fl_values_primary">Values: primary, instantaneous (from the DFR)</string>
+    <string name="lbl_fl_values_no_ratio">Values: SECONDARY - the cfg has no VT/CT ratio, set it in Channel mapping</string>
 </resources>

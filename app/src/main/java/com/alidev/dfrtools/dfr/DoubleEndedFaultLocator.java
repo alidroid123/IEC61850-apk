@@ -361,8 +361,25 @@ public class DoubleEndedFaultLocator {
     // e.g. IA, Ia, IL1, I_L1, IR, UL1E, U L1-E, VAN, Va, VR. Trailing N/E/G = to-neutral/earth.
     private static final Pattern PHASE_NAME = Pattern.compile("^(I|U|V)(?:PH)?(A|B|C|R|S|T|L1|L2|L3|1|2|3)(?:N|E|G)?$");
 
+    // Derived channels some recorders add next to the sampled waveforms (RMS, magnitude, angle,
+    // frequency, power, sequence values) - the locator only ever uses instantaneous samples.
+    // No bare "...ANG" suffix rule: plenty of substation names end in it (Pemalang, Batang).
+    private static final Pattern DERIVED_NAME = Pattern.compile(
+            "(^|[^A-Z])(RMS|TRMS|MAG|MAGN|ABS|AMPL|ANG|ANGLE|PHI|ARG|FREQ|FRQ|HZ|PWR|POWER|SEQ|AVG|MEAN)([^A-Z]|$)|(RMS|MAG)$");
+
+    /** True for a sampled (instantaneous) voltage/current waveform channel. */
+    public static boolean isInstantaneous(ComtradeRecord.AnalogChannel ch) {
+        String u = ch.unit.trim().toUpperCase(Locale.ROOT);
+        if (u.contains("DEG") || u.contains("RAD") || u.equals("HZ") || u.equals("%") || u.endsWith("W")
+                || u.endsWith("VAR") || u.equals("VA") || u.equals("KVA") || u.equals("MVA") || u.contains("OHM")) {
+            return false;
+        }
+        return !DERIVED_NAME.matcher(ch.id.toUpperCase(Locale.ROOT)).find();
+    }
+
     /** Rank 0 = A/B/C or L1/L2/L3 naming, 1 = R/S/T naming, 2 = cfg "ph" field only, 3 = bare digits. */
     private static int[] classifyChannel(ComtradeRecord.AnalogChannel ch) {
+        if (!isInstantaneous(ch)) return null;
         boolean isV = ch.looksLikeVoltage(), isI = ch.looksLikeCurrent();
         String name = ch.id.toUpperCase(Locale.ROOT);
         String[] tokens = name.split("[^A-Z0-9]+");
