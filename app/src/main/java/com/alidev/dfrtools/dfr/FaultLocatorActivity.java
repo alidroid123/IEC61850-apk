@@ -58,6 +58,7 @@ import java.util.Locale;
 import java.util.TreeSet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.RejectedExecutionException;
 
 /**
  * "FL Double Ended": locates a line fault from the DFR (COMTRADE) records of the line relays at
@@ -336,8 +337,8 @@ public class FaultLocatorActivity extends BaseActivity {
             ComtradeSmartSearch.ScanResult scan = ComtradeSmartSearch.scan(this, client, vendor.deepScan, logger);
             runOnUiThread(() -> {
                 hideProgress();
-                if (isFinishing() || scan.targetFiles.isEmpty()) {
-                    if (!isFinishing()) Toast.makeText(this, R.string.msg_fl_no_remote_files, Toast.LENGTH_LONG).show();
+                if (isGone() || scan.targetFiles.isEmpty()) {
+                    if (!isGone()) Toast.makeText(this, R.string.msg_fl_no_remote_files, Toast.LENGTH_LONG).show();
                     disconnectLater(client);
                     return;
                 }
@@ -1729,10 +1730,24 @@ public class FaultLocatorActivity extends BaseActivity {
     // ------------------------------------------------------------------
 
     private void disconnectLater(Iec61850DfrClient client) {
-        executor.execute(() -> {
+        Runnable task = () -> {
             client.disconnect();
             if (openClient == client) openClient = null;
-        });
+        };
+        // onDestroy shuts the executor down, but a relay scan still running then finishes later
+        // and lands here (as does the picker's dismiss listener) - queueing onto the dead
+        // executor crashed the app. disconnect() is synchronized and idempotent, so a throwaway
+        // thread racing onDestroy's own disconnect is fine.
+        try {
+            executor.execute(task);
+        } catch (RejectedExecutionException e) {
+            new Thread(task).start();
+        }
+    }
+
+    /** Closing or already gone - a background relay task may still be finishing after that. */
+    private boolean isGone() {
+        return isFinishing() || isDestroyed();
     }
 
     private void showInfoDialog(String title, String body) {
