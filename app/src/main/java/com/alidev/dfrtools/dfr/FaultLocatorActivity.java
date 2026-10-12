@@ -68,7 +68,7 @@ import java.util.concurrent.RejectedExecutionException;
 public class FaultLocatorActivity extends BaseActivity {
 
     private static final String PREFS = "fl_prefs";
-    private static final int REQ_STORAGE_A = 401, REQ_STORAGE_B = 402, REQ_PICK_LINE = 403;
+    private static final int REQ_STORAGE_A = 401, REQ_STORAGE_B = 402, REQ_PICK_LINE = 403, REQ_PAIR_A = 404, REQ_PAIR_B = 405;
     private static final String[] ROLE_LABELS = {"Va", "Vb", "Vc", "Ia", "Ib", "Ic"};
 
     /** Everything known about one line end. */
@@ -121,6 +121,8 @@ public class FaultLocatorActivity extends BaseActivity {
     private boolean selectedLineAuto, selectedLineEdited, fillingLineFields;
     /** Lone .cfg/.dat files opened with this screen, kept until their partner arrives too. */
     private File inboxDir;
+    /** Copy folder of a lone .cfg/.dat whose partner the user is now picking by hand. */
+    private File pendingPairDir;
     /** When the result on screen was computed (PDF footer); 0 = none yet. */
     private long lastAnalyzedAt;
     /** sessionInputs() at the time of the last analysis - restore re-runs it only if unchanged. */
@@ -707,30 +709,88 @@ public class FaultLocatorActivity extends BaseActivity {
             if (d != null) applyLineData(d, false);
             return;
         }
-        if ((requestCode != REQ_STORAGE_A && requestCode != REQ_STORAGE_B) || resultCode != RESULT_OK || data == null) return;
-        EndState st = requestCode == REQ_STORAGE_A ? endA : endB;
+        boolean pair = requestCode == REQ_PAIR_A || requestCode == REQ_PAIR_B;
+        if ((requestCode != REQ_STORAGE_A && requestCode != REQ_STORAGE_B && !pair) || resultCode != RESULT_OK || data == null) return;
+        EndState st = requestCode == REQ_STORAGE_A || requestCode == REQ_PAIR_A ? endA : endB;
         List<Uri> uris = new ArrayList<>();
         ClipData clip = data.getClipData();
         if (clip != null) for (int i = 0; i < clip.getItemCount(); i++) uris.add(clip.getItemAt(i).getUri());
         else if (data.getData() != null) uris.add(data.getData());
         if (uris.isEmpty()) return;
+        // The partner picked after "pick its .dat" joins the files already copied for this end.
+        File pairDir = pair ? pendingPairDir : null;
         showProgress(getString(R.string.msg_fl_reading, ""));
         executor.execute(() -> {
             // Copied into private storage so the .cfg/.dat pairing can use plain File lookups no
             // matter which document provider the files came from.
-            File dir = new File(getCacheDir(), "fl_import_" + (st.isA ? "a" : "b") + "_" + System.currentTimeMillis());
+            File dir = pairDir != null ? pairDir
+                    : new File(getCacheDir(), "fl_import_" + (st.isA ? "a" : "b") + "_" + System.currentTimeMillis());
             dir.mkdirs();
             List<File> copied = new ArrayList<>();
+            Uri lone = null;
+            String loneName = null;
             for (Uri uri : uris) {
-                File out = new File(dir, ComtradeImport.safeName(ComtradeImport.displayName(this, uri)));
+                String name = ComtradeImport.displayName(this, uri);
+                File out = new File(dir, ComtradeImport.safeName(name));
                 try {
                     ComtradeImport.copy(this, uri, out);
                     copied.add(out);
-                } catch (Exception ignored) { }
+                } catch (Exception ignored) {
+                    continue;
+                }
+                // Pickers only hand over the files that were ticked: a .cfg picked alone still
+                // needs the .dat from its folder (and the other way round).
+                String lower = ComtradeImport.lower(name);
+                if ((lower.endsWith(".cfg") || lower.endsWith(".dat")) && ComtradeImport.pairFor(out) == null) {
+                    File partner = ComtradeImport.fetchPartner(this, uri, name, dir);
+                    if (partner != null) copied.add(partner);
+                    else if (lone == null) { lone = uri; loneName = name; }
+                }
+            }
+            if (pairDir != null) {
+                File[] all = dir.listFiles();
+                if (all != null) for (File f : all) if (!copied.contains(f)) copied.add(f);
             }
             Exception[] error = new Exception[1];
-            deliverRecords(st, resolveRecords(copied, error), error[0]);
+            List<ComtradeImport.Record> recs = resolveRecords(copied, error);
+            if (recs.isEmpty() && lone != null && error[0] == null) {
+                Uri missingFor = lone;
+                String missingName = loneName;
+                runOnUiThread(() -> {
+                    hideProgress();
+                    askForPartner(st, dir, missingFor, missingName);
+                });
+                return;
+            }
+            deliverRecords(st, recs, error[0]);
         });
+    }
+
+    /**
+     * The partner of a lone .cfg/.dat couldn't be read from its folder (no storage access to it):
+     * let the user pick it, starting the picker in that same folder.
+     */
+    private void askForPartner(EndState st, File dir, Uri lone, String loneName) {
+        if (isGone()) return;
+        String lower = ComtradeImport.lower(loneName);
+        String partner = ComtradeImport.baseName(loneName) + (lower.endsWith(".cfg") ? ".dat" : ".cfg");
+        new AlertDialog.Builder(this, R.style.Theme_Comtrade_Dialog)
+                .setTitle(R.string.ttl_fl_pick_partner)
+                .setMessage(getString(R.string.msg_fl_pick_partner, loneName, partner))
+                .setPositiveButton(R.string.btn_fl_pick_partner, (d, w) -> {
+                    pendingPairDir = dir;
+                    Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+                    intent.setType("*/*");
+                    intent.addCategory(Intent.CATEGORY_OPENABLE);
+                    if (android.os.Build.VERSION.SDK_INT >= 26) intent.putExtra(android.provider.DocumentsContract.EXTRA_INITIAL_URI, lone);
+                    try {
+                        startActivityForResult(intent, st.isA ? REQ_PAIR_A : REQ_PAIR_B);
+                    } catch (Exception e) {
+                        Toast.makeText(this, R.string.msg_view_picker_fail, Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .setNegativeButton(R.string.btn_all_cancel, null)
+                .show();
     }
 
     // ------------------------------------------------------------------
@@ -762,10 +822,15 @@ public class FaultLocatorActivity extends BaseActivity {
                     File out = new File(inboxDir, ComtradeImport.safeName(name));
                     ComtradeImport.copy(this, uri, out);
                     ComtradeImport.Record rec = ComtradeImport.pairFor(out);
+                    // Opened from a file manager: its partner usually sits in the same folder.
+                    if (rec == null && ComtradeImport.fetchPartner(this, uri, name, inboxDir) != null) {
+                        rec = ComtradeImport.pairFor(out);
+                    }
+                    ComtradeImport.Record found = rec;
                     runOnUiThread(() -> {
                         hideProgress();
-                        if (rec != null) {
-                            assignOpenedRecords(Collections.singletonList(rec));
+                        if (found != null) {
+                            assignOpenedRecords(Collections.singletonList(found));
                         } else {
                             String partner = ComtradeImport.baseName(name) + (lower.endsWith(".cfg") ? ".dat" : ".cfg");
                             showInfoDialog(getString(R.string.ttl_fl_open_with), getString(R.string.msg_fl_waiting_pair, name, partner));

@@ -911,7 +911,10 @@
     <string name="msg_fl_load_fail">Gagal membaca record: %s</string>
     <string name="ttl_fl_local_pick">Record lokal – %s</string>
     <string name="lbl_fl_pick_storage">Pilih dari penyimpanan…</string>
-    <string name="lbl_fl_pick_storage_sub">Pilih .cfg dan .dat sekaligus, atau satu file .zip/.rar</string>
+    <string name="lbl_fl_pick_storage_sub">Pilih file .cfg (pasangan .dat di folder yang sama diambil otomatis), atau satu file .zip/.rar</string>
+    <string name="ttl_fl_pick_partner">Pilih file pasangan</string>
+    <string name="msg_fl_pick_partner">File %2$s untuk %1$s tidak bisa dibaca otomatis dari foldernya (aplikasi belum punya izin akses ke folder itu).\n\nPilih file %2$s-nya - pemilih file langsung dibuka di folder yang sama.</string>
+    <string name="btn_fl_pick_partner">PILIH FILE</string>
     <string name="ttl_fl_open_with">File diterima</string>
     <string name="msg_fl_waiting_pair">%1$s sudah diterima.\n\nSekarang buka juga pasangannya, %2$s, dengan FL Double Ended – atau kirim keduanya dalam satu .zip/.rar.</string>
     <string name="ttl_fl_load_as">Muat %s sebagai</string>

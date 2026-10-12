@@ -3,7 +3,12 @@ package com.alidev.dfrtools.dfr;
 import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Environment;
+import android.provider.DocumentsContract;
+import android.provider.MediaStore;
 import android.provider.OpenableColumns;
+
+import androidx.annotation.Nullable;
 
 import com.alidev.dfrtools.R;
 
@@ -252,6 +257,139 @@ public final class ComtradeImport {
         String cfgName = baseName(file.getName()) + ".cfg";
         for (File f : siblings) if (f.getName().equalsIgnoreCase(cfgName)) return new Record(f, file);
         return null;
+    }
+
+    // ------------------------------------------------------------------
+    // Partner of a .cfg/.dat picked on its own
+    // ------------------------------------------------------------------
+
+    /**
+     * The .dat (for a .cfg) or .cfg (for a .dat) that sits next to the document `uri` names,
+     * copied into `intoDir` - pickers and "Open with" only hand over the one file that was
+     * tapped. Tries the real file behind the URI first (needs the app's storage access), then the
+     * provider's own document with the other extension. Null when it can't be reached.
+     */
+    @Nullable
+    static File fetchPartner(Context c, Uri uri, String name, File intoDir) {
+        String lower = lower(name);
+        String ext = lower.endsWith(".cfg") ? "dat" : lower.endsWith(".dat") ? "cfg" : null;
+        if (ext == null) return null;
+        String base = baseName(name);
+        File local = localFileFor(c, uri, name);
+        if (local != null) {
+            File partner = findSibling(local.getParentFile(), base, ext);
+            if (partner != null) {
+                File out = new File(intoDir, safeName(partner.getName()));
+                try {
+                    copyFile(partner, out);
+                    return out;
+                } catch (IOException ignored) { }
+            }
+        }
+        for (String e : new String[]{"." + ext, "." + ext.toUpperCase(Locale.ROOT)}) {
+            Uri candidate = siblingDocumentUri(c, uri, e);
+            if (candidate == null) continue;
+            File out = new File(intoDir, safeName(base + e));
+            try {
+                copy(c, candidate, out);
+                return out;
+            } catch (Exception ignored) {
+                //noinspection ResultOfMethodCallIgnored
+                out.delete(); // no grant for the sibling, or it doesn't exist
+            }
+        }
+        return null;
+    }
+
+    /** `base`.`ext` in `dir`, any extension case. */
+    @Nullable
+    static File findSibling(@Nullable File dir, String base, String ext) {
+        if (dir == null) return null;
+        File[] files = dir.listFiles();
+        if (files != null) {
+            for (File f : files) if (f.isFile() && f.getName().equalsIgnoreCase(base + "." + ext)) return f;
+            return null;
+        }
+        // Listing not allowed, but the file itself may still be readable.
+        for (String e : new String[]{ext.toLowerCase(Locale.ROOT), ext.toUpperCase(Locale.ROOT)}) {
+            File f = new File(dir, base + "." + e);
+            if (f.canRead()) return f;
+        }
+        return null;
+    }
+
+    /**
+     * The file behind a picker / file-manager URI, when its provider reveals the path: file://,
+     * the system storage and Downloads providers, MediaStore's _data column, or a path-shaped
+     * content URI (most file managers' FileProviders). Only returned if it exists and is named
+     * `name`.
+     */
+    @Nullable
+    static File localFileFor(Context c, Uri uri, String name) {
+        List<File> candidates = new ArrayList<>();
+        if ("file".equals(uri.getScheme()) && uri.getPath() != null) candidates.add(new File(uri.getPath()));
+        try {
+            if (DocumentsContract.isDocumentUri(c, uri)) {
+                String id = DocumentsContract.getDocumentId(uri);
+                String auth = uri.getAuthority();
+                if ("com.android.externalstorage.documents".equals(auth) && id.contains(":")) {
+                    String volume = id.substring(0, id.indexOf(':')), rel = id.substring(id.indexOf(':') + 1);
+                    File root = "primary".equalsIgnoreCase(volume) ? Environment.getExternalStorageDirectory() : new File("/storage/" + volume);
+                    candidates.add(new File(root, rel));
+                } else if ("com.android.providers.downloads.documents".equals(auth)) {
+                    if (id.startsWith("raw:")) candidates.add(new File(id.substring(4)));
+                    else if (id.startsWith("msf:")) addDataColumn(c, android.content.ContentUris.withAppendedId(
+                            MediaStore.Files.getContentUri("external"), Long.parseLong(id.substring(4))), candidates);
+                }
+            }
+        } catch (Exception ignored) { }
+        addDataColumn(c, uri, candidates);
+        // content://<file manager>/<root-name>/Download/DFR/x.cfg: try the path's tails under storage.
+        List<String> seg = uri.getPathSegments();
+        if ("content".equals(uri.getScheme()) && seg != null) {
+            for (int i = 0; i < seg.size(); i++) {
+                StringBuilder tail = new StringBuilder();
+                for (int k = i; k < seg.size(); k++) tail.append('/').append(seg.get(k));
+                candidates.add(new File(Environment.getExternalStorageDirectory(), tail.toString()));
+                candidates.add(new File(tail.toString()));
+            }
+        }
+        for (File f : candidates) {
+            if (f.getName().equalsIgnoreCase(name) && f.isFile()) return f;
+        }
+        return null;
+    }
+
+    private static void addDataColumn(Context c, Uri uri, List<File> out) {
+        try (Cursor cur = c.getContentResolver().query(uri, new String[]{MediaStore.MediaColumns.DATA}, null, null, null)) {
+            if (cur != null && cur.moveToFirst() && cur.getString(0) != null) out.add(new File(cur.getString(0)));
+        } catch (Exception ignored) { }
+    }
+
+    /** `uri` with its .cfg/.dat extension swapped for `ext` (document id or plain path), or null. */
+    @Nullable
+    private static Uri siblingDocumentUri(Context c, Uri uri, String ext) {
+        try {
+            if (DocumentsContract.isDocumentUri(c, uri)) {
+                String id = DocumentsContract.getDocumentId(uri);
+                String lower = lower(id);
+                if (lower.endsWith(".cfg") || lower.endsWith(".dat")) {
+                    return DocumentsContract.buildDocumentUri(uri.getAuthority(), id.substring(0, id.length() - 4) + ext);
+                }
+                return null;
+            }
+        } catch (Exception ignored) { }
+        String s = uri.toString();
+        String lower = lower(s);
+        return lower.endsWith(".cfg") || lower.endsWith(".dat") ? Uri.parse(s.substring(0, s.length() - 4) + ext) : null;
+    }
+
+    static void copyFile(File from, File to) throws IOException {
+        try (InputStream is = new FileInputStream(from); OutputStream os = new FileOutputStream(to)) {
+            byte[] buf = new byte[16384];
+            int n;
+            while ((n = is.read(buf)) > 0) os.write(buf, 0, n);
+        }
     }
 
     /** User-facing text for an import failure. */

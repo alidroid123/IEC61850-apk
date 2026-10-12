@@ -581,23 +581,35 @@ public class DfrViewerActivity extends BaseActivity {
         }
 
         String sourceUriString = sourceUri.toString();
-        if (!sourceUriString.toLowerCase().endsWith(sourceExtLower)) return null;
-        String targetUriString = sourceUriString.substring(0, sourceUriString.length() - sourceExtLower.length()) + targetExtLower;
-        try {
-            Uri candidate = Uri.parse(targetUriString);
-            try (InputStream test = getContentResolver().openInputStream(candidate)) {
-                if (test != null) return candidate;
-            } catch (Exception ignored) {
-                if ("file".equals(sourceUri.getScheme())) {
-                    File sourceFile = new File(sourceUri.getPath());
-                    String base = sourceFile.getName();
-                    int dot = base.lastIndexOf('.');
-                    if (dot != -1) base = base.substring(0, dot);
-                    File targetFile = new File(sourceFile.getParent(), base + targetExtLower);
-                    if (targetFile.exists()) return Uri.fromFile(targetFile);
-                    File targetFileUpper = new File(sourceFile.getParent(), base + targetExtLower.toUpperCase());
-                    if (targetFileUpper.exists()) return Uri.fromFile(targetFileUpper);
+        if (sourceUriString.toLowerCase().endsWith(sourceExtLower)) {
+            String targetUriString = sourceUriString.substring(0, sourceUriString.length() - sourceExtLower.length()) + targetExtLower;
+            try {
+                Uri candidate = Uri.parse(targetUriString);
+                try (InputStream test = getContentResolver().openInputStream(candidate)) {
+                    if (test != null) return candidate;
+                } catch (Exception ignored) {
+                    if ("file".equals(sourceUri.getScheme())) {
+                        File sourceFile = new File(sourceUri.getPath());
+                        String base = sourceFile.getName();
+                        int dot = base.lastIndexOf('.');
+                        if (dot != -1) base = base.substring(0, dot);
+                        File targetFile = new File(sourceFile.getParent(), base + targetExtLower);
+                        if (targetFile.exists()) return Uri.fromFile(targetFile);
+                        File targetFileUpper = new File(sourceFile.getParent(), base + targetExtLower.toUpperCase());
+                        if (targetFileUpper.exists()) return Uri.fromFile(targetFileUpper);
+                    }
                 }
+            } catch (Exception ignored) {}
+        }
+        // Picker/file-manager URI whose real path is known: look in that folder directly (any
+        // extension case), which the app's storage access allows even without a URI grant.
+        try {
+            String name = getFileName(sourceUri);
+            File local = name != null ? ComtradeImport.localFileFor(this, sourceUri, name) : null;
+            if (local != null) {
+                File sibling = ComtradeImport.findSibling(local.getParentFile(),
+                        ComtradeImport.baseName(local.getName()), targetExtLower.substring(1));
+                if (sibling != null && sibling.canRead()) return Uri.fromFile(sibling);
             }
         } catch (Exception ignored) {}
         return null;

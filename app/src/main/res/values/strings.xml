@@ -945,7 +945,10 @@
     <string name="msg_fl_load_fail">Failed to read the record: %s</string>
     <string name="ttl_fl_local_pick">Local record – %s</string>
     <string name="lbl_fl_pick_storage">Browse storage…</string>
-    <string name="lbl_fl_pick_storage_sub">Select the .cfg and .dat together, or one .zip/.rar</string>
+    <string name="lbl_fl_pick_storage_sub">Select a .cfg (its .dat in the same folder is taken automatically), or one .zip/.rar</string>
+    <string name="ttl_fl_pick_partner">Pick the partner file</string>
+    <string name="msg_fl_pick_partner">%2$s for %1$s couldn\'t be read from its folder automatically (the app has no access to that folder yet).\n\nPick %2$s - the file picker opens in the same folder.</string>
+    <string name="btn_fl_pick_partner">PICK FILE</string>
     <string name="ttl_fl_open_with">File received</string>
     <string name="msg_fl_waiting_pair">%1$s has been received.\n\nNow open its partner %2$s with FL Double Ended as well – or send both in one .zip/.rar.</string>
     <string name="ttl_fl_load_as">Load %s as</string>
