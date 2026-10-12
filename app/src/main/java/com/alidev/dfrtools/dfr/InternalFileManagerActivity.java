@@ -68,7 +68,7 @@ public class InternalFileManagerActivity extends BaseActivity {
                     } else {
                         // A Toast here got clipped/dismissed before the full folder path could be
                         // read - a dialog stays on screen until the user dismisses it themselves.
-                        new AlertDialog.Builder(this, R.style.Theme_Comtrade_Dialog)
+                        new AlertDialog.Builder(this, R.style.Theme_Comtrade_AlertDialog)
                                 .setTitle(R.string.ttl_file_open_chooser)
                                 .setMessage(getString(R.string.msg_file_open_folder_unsupported, baseDir.getAbsolutePath()))
                                 .setPositiveButton(android.R.string.ok, null)
@@ -97,7 +97,7 @@ public class InternalFileManagerActivity extends BaseActivity {
     }
 
     private void showPermissionDialog() {
-        new AlertDialog.Builder(this, R.style.Theme_DFRtools)
+        new AlertDialog.Builder(this, R.style.Theme_Comtrade_AlertDialog)
                 .setTitle(R.string.ttl_file_permission)
                 .setMessage(R.string.msg_file_permission_body)
                 .setPositiveButton(R.string.btn_all_grant_permission, (d, w) -> {
@@ -166,7 +166,7 @@ public class InternalFileManagerActivity extends BaseActivity {
 
     private void showDeleteConfirm(String title, String message, Runnable onConfirm) {
         View dialogView = getLayoutInflater().inflate(R.layout.dialog_confirm_delete, null);
-        AlertDialog dialog = new AlertDialog.Builder(this, R.style.Theme_DFRtools)
+        AlertDialog dialog = new AlertDialog.Builder(this, R.style.Theme_Comtrade_AlertDialog)
                 .setView(dialogView)
                 .create();
 

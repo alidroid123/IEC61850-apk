@@ -796,7 +796,7 @@ public class DfrDownloadActivity extends BaseActivity {
             etType.setText(existingType);
         }
 
-        new AlertDialog.Builder(this, R.style.Theme_DFRtools)
+        new AlertDialog.Builder(this, R.style.Theme_Comtrade_AlertDialog)
                 .setTitle(isUpdate ? R.string.ttl_dev_update : R.string.ttl_dev_save)
                 .setView(dialogView)
                 .setPositiveButton(isUpdate ? R.string.btn_all_update : R.string.btn_all_save_small, (dialog, which) -> {

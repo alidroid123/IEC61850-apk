@@ -30,7 +30,7 @@ public abstract class BaseActivity extends AppCompatActivity {
     protected void showThemeSelectionDialog() {
         boolean isDark = ThemeManager.isDarkMode(this);
         String modeName = isDark ? "Gelap" : "Terang";
-        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.Theme_DFRtools);
+        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.Theme_Comtrade_AlertDialog);
         builder.setTitle(getString(R.string.ttl_base_theme_selection, modeName));
         
         ThemeAdapter adapter = new ThemeAdapter(isDark);

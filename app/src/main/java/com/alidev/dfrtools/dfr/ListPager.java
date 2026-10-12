@@ -110,7 +110,7 @@ final class ListPager {
         for (int p = 0; p < pages; p++) {
             labels[p] = c.getString(R.string.lbl_pager_jump_item, p + 1, from(p) + 1, to(p, total));
         }
-        new AlertDialog.Builder(c, R.style.Theme_Comtrade_Dialog)
+        new AlertDialog.Builder(c, R.style.Theme_Comtrade_AlertDialog)
                 .setTitle(R.string.ttl_pager_jump)
                 .setSingleChoiceItems(labels, page, (d, which) -> {
                     d.dismiss();

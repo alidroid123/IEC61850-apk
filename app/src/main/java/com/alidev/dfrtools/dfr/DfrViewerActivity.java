@@ -629,7 +629,7 @@ public class DfrViewerActivity extends BaseActivity {
             uris[i] = entry.getValue();
             i++;
         }
-        new AlertDialog.Builder(this, R.style.Theme_Comtrade_Dialog)
+        new AlertDialog.Builder(this, R.style.Theme_Comtrade_AlertDialog)
                 .setTitle(R.string.ttl_view_companion_files)
                 .setItems(labels, (d, which) -> openCompanionFile(uris[which]))
                 .setNegativeButton(R.string.btn_all_cancel, null)
@@ -697,7 +697,7 @@ public class DfrViewerActivity extends BaseActivity {
             String rel = root != null ? r.relativeName(root) : r.cfg.getName();
             labels[i] = r.station.isEmpty() ? rel : rel + "\n" + r.station;
         }
-        new AlertDialog.Builder(this, R.style.Theme_Comtrade_Dialog)
+        new AlertDialog.Builder(this, R.style.Theme_Comtrade_AlertDialog)
                 .setTitle(getString(R.string.ttl_import_pick_record, archiveName))
                 .setItems(labels, (d, which) -> openRecord(recs.get(which), archiveName))
                 .setNegativeButton(R.string.btn_all_cancel, null)

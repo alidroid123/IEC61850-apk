@@ -391,7 +391,7 @@ public class FaultLocatorActivity extends BaseActivity {
         } else if (st.rec != null && !st.rec.stationName.isEmpty()) {
             etGi.setText(st.rec.stationName);
         }
-        AlertDialog.Builder b = new AlertDialog.Builder(this, R.style.Theme_Comtrade_Dialog)
+        AlertDialog.Builder b = new AlertDialog.Builder(this, R.style.Theme_Comtrade_AlertDialog)
                 .setTitle(getString(R.string.ttl_fl_manual, getString(st.isA ? R.string.lbl_fl_gi_a_short : R.string.lbl_fl_gi_b_short)))
                 .setView(v)
                 .setPositiveButton(R.string.btn_all_save_small, null)
@@ -929,7 +929,7 @@ public class FaultLocatorActivity extends BaseActivity {
         if (isGone()) return;
         String lower = ComtradeImport.lower(loneName);
         String partner = ComtradeImport.baseName(loneName) + (lower.endsWith(".cfg") ? ".dat" : ".cfg");
-        new AlertDialog.Builder(this, R.style.Theme_Comtrade_Dialog)
+        new AlertDialog.Builder(this, R.style.Theme_Comtrade_AlertDialog)
                 .setTitle(R.string.ttl_fl_pick_partner)
                 .setMessage(getString(R.string.msg_fl_pick_partner, loneName, partner))
                 .setPositiveButton(R.string.btn_fl_pick_partner, (d, w) -> {

@@ -4,7 +4,7 @@
         <item name="android:statusBarColor">?attr/colorPrimary</item>
         <item name="android:windowBackground">?attr/customBackgroundColor</item>
         <item name="textInputStyle">@style/Widget.App.TextInputLayout</item>
-        <item name="alertDialogTheme">@style/Theme.Comtrade.Dialog</item>
+        <item name="alertDialogTheme">@style/Theme.Comtrade.AlertDialog</item>
     </style>
 
     <!-- Dark Variants of the 4 Themes -->

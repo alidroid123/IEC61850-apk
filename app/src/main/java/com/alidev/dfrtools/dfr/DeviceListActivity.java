@@ -120,7 +120,7 @@ public class DeviceListActivity extends BaseActivity {
         android.widget.EditText etMerk = dialogView.findViewById(R.id.etDialogMerk);
         android.widget.EditText etType = dialogView.findViewById(R.id.etDialogType);
 
-        new AlertDialog.Builder(this, R.style.Theme_DFRtools)
+        new AlertDialog.Builder(this, R.style.Theme_Comtrade_AlertDialog)
                 .setTitle(R.string.ttl_dev_save)
                 .setView(dialogView)
                 .setPositiveButton(R.string.btn_all_save_small, (dialog, which) -> {
@@ -209,7 +209,7 @@ public class DeviceListActivity extends BaseActivity {
             Toast.makeText(this, R.string.msg_dl_save_device_ok, Toast.LENGTH_SHORT).show();
             return;
         }
-        new AlertDialog.Builder(this, R.style.Theme_Comtrade_Dialog)
+        new AlertDialog.Builder(this, R.style.Theme_Comtrade_AlertDialog)
                 .setTitle(R.string.ttl_dev_ip_exists)
                 .setMessage(getString(R.string.msg_dev_ip_exists, item.ip, existing.label(), item.label()))
                 .setPositiveButton(R.string.btn_dev_overwrite, (d, w) -> {
@@ -749,7 +749,7 @@ public class DeviceListActivity extends BaseActivity {
         if (changedExisting.size() > shown) {
             msg.append("\n\n").append(getString(R.string.msg_dev_import_more, changedExisting.size() - shown));
         }
-        new AlertDialog.Builder(this, R.style.Theme_Comtrade_Dialog)
+        new AlertDialog.Builder(this, R.style.Theme_Comtrade_AlertDialog)
                 .setTitle(R.string.ttl_dev_import_duplicate)
                 .setMessage(msg.toString())
                 .setPositiveButton(R.string.btn_dev_overwrite, (d, w) -> finishImport(added, changedExisting, changedRows, true, kept))
@@ -943,7 +943,7 @@ public class DeviceListActivity extends BaseActivity {
         etMerk.setText(item.merk);
         etType.setText(item.type);
 
-        new AlertDialog.Builder(this, R.style.Theme_DFRtools)
+        new AlertDialog.Builder(this, R.style.Theme_Comtrade_AlertDialog)
                 .setTitle(R.string.ttl_dev_update)
                 .setView(dialogView)
                 .setPositiveButton(R.string.btn_all_update, (dialog, which) -> {

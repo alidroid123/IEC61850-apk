@@ -4,7 +4,7 @@
         <item name="android:statusBarColor">?attr/colorPrimary</item>
         <item name="android:windowBackground">?attr/customBackgroundColor</item>
         <item name="textInputStyle">@style/Widget.App.TextInputLayout</item>
-        <item name="alertDialogTheme">@style/Theme.Comtrade.Dialog</item>
+        <item name="alertDialogTheme">@style/Theme.Comtrade.AlertDialog</item>
     </style>
 
     <!-- Theme 1 - MODERN BLUE -->
@@ -122,6 +122,17 @@
         <item name="customBackgroundColor">#FAFAFA</item>
         <item name="customSurfaceColor">#FFFFFF</item>
         <item name="customTextPrimaryColor">#111827</item>
+    </style>
+
+    <!-- Standard AlertDialogs (title / message / list / buttons, or a plain setView form): an
+         opaque rounded card. Theme.Comtrade.Dialog below is transparent on purpose - only for
+         dialogs whose layout is its own card - and showed title/message dialogs as bare text
+         over the dimmed screen. -->
+    <style name="Theme.Comtrade.AlertDialog" parent="Theme.MaterialComponents.DayNight.Dialog.Alert">
+        <item name="android:windowBackground">@drawable/bg_alert_dialog</item>
+        <item name="android:windowMinWidthMajor">320dp</item>
+        <item name="android:windowMinWidthMinor">320dp</item>
+        <item name="colorAccent">?attr/colorPrimary</item>
     </style>
 
     <style name="Theme.Comtrade.Dialog" parent="Theme.MaterialComponents.DayNight.Dialog.Alert">
