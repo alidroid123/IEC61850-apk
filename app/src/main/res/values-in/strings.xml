@@ -361,6 +361,11 @@
     <string name="msg_dl_mode_normal_label">Normal</string>
     <string name="msg_dl_no_files_found">Tidak ditemukan file COMTRADE di folder yang umum dipakai relay.\nKemungkinan relay memakai struktur folder non-standar.</string>
     <string name="msg_dl_files_found_count">File COMTRADE Ditemukan (%1$d, terbaru di atas)</string>
+    <string name="btn_pager_prev">‹ Kembali</string>
+    <string name="btn_pager_next">Lanjut ›</string>
+    <string name="lbl_pager_info">Hal. %1$d/%2$d\n%3$d–%4$d dari %5$d</string>
+    <string name="ttl_pager_jump">Lompat ke halaman</string>
+    <string name="lbl_pager_jump_item">Halaman %1$d  (%2$d–%3$d)</string>
     <string name="msg_dl_btn_redl">RE-DL</string>
     <string name="msg_dl_btn_unduh">UNDUH</string>
     <string name="msg_dl_download_failed_with_errors">Gagal mengunduh file (%1$d error)</string>

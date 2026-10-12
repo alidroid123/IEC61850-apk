@@ -390,6 +390,11 @@
     <string name="msg_dl_mode_normal_label">Normal</string>
     <string name="msg_dl_no_files_found">No COMTRADE files found in common relay folders.\nRelay might use non-standard folder structure.</string>
     <string name="msg_dl_files_found_count">COMTRADE Files Found (%1$d, latest on top)</string>
+    <string name="btn_pager_prev">‹ Prev</string>
+    <string name="btn_pager_next">Next ›</string>
+    <string name="lbl_pager_info">Page %1$d/%2$d\n%3$d–%4$d of %5$d</string>
+    <string name="ttl_pager_jump">Go to page</string>
+    <string name="lbl_pager_jump_item">Page %1$d  (%2$d–%3$d)</string>
     <string name="msg_dl_btn_redl">RE-DL</string>
     <string name="msg_dl_btn_unduh">DOWNLOAD</string>
     <string name="msg_dl_download_failed_with_errors">Failed to download file (%1$d errors)</string>

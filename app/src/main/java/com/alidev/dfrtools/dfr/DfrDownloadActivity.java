@@ -65,7 +65,9 @@ public class DfrDownloadActivity extends BaseActivity {
     private View layoutProgressOnly;
     private Button btnOpenDownloaded, btnCloseOverlay, btnOpenFolder, btnShareDownloaded;
     private Spinner spDownloadMode, spDownloadN;
-    private static final int MAX_DOWNLOAD_N = 50;
+    private android.widget.ScrollView scrollDownload;
+    /** Page of the scan-result list on screen (ListPager.PAGE_SIZE records per page). */
+    private int currentPage = 0;
     private DrawerLayout drawerLayout;
     private NavigationView navigationView;
     private String currentGi = "", currentBay = "";
@@ -156,6 +158,7 @@ public class DfrDownloadActivity extends BaseActivity {
         tvEmptyState = findViewById(R.id.tvEmptyState);
         tvFileListLabel = findViewById(R.id.tvFileListLabel);
         containerFiles = findViewById(R.id.containerFiles);
+        scrollDownload = findViewById(R.id.scrollDownload);
         cardDownloadMode = findViewById(R.id.cardDownloadMode);
         swIntranetCheck = findViewById(R.id.swIntranetCheck);
         spProfile = findViewById(R.id.spProfile);
@@ -293,6 +296,7 @@ public class DfrDownloadActivity extends BaseActivity {
         tvFileListLabel.setVisibility(View.GONE);
         containerFiles.removeAllViews();
         lastScan = null;
+        currentPage = 0;
         tvEmptyState.setText(R.string.msg_dl_connect_to_search);
         tvEmptyState.setVisibility(View.VISIBLE);
         this.currentGi = "";
@@ -315,7 +319,7 @@ public class DfrDownloadActivity extends BaseActivity {
             hideProgress();
             lastScan = scan;
             renderVendorInfo(vendor);
-            renderScanResult(scan);
+            renderScanResult(scan, false);
         });
     }
 
@@ -328,7 +332,8 @@ public class DfrDownloadActivity extends BaseActivity {
         }
     }
 
-    private void renderScanResult(ComtradeSmartSearch.ScanResult scan) {
+    /** A fresh scan starts on page 1; a refresh after downloading stays on the page in view. */
+    private void renderScanResult(ComtradeSmartSearch.ScanResult scan, boolean keepPage) {
         containerFiles.removeAllViews();
 
         if (scan.targetFiles.isEmpty()) {
@@ -343,12 +348,26 @@ public class DfrDownloadActivity extends BaseActivity {
         cardDownloadMode.setVisibility(View.VISIBLE);
         tvFileListLabel.setVisibility(View.VISIBLE);
         tvFileListLabel.setText(getString(R.string.msg_dl_files_found_count, scan.targetFiles.size()));
+        if (!keepPage) updateDownloadNOptions(scan.targetFiles.size());
+        showPage(keepPage ? currentPage : 0, false);
+    }
 
-        int number = 1;
-        for (DfrFileEntry entry : scan.targetFiles) {
-            containerFiles.addView(buildTargetRow(entry, number, scan.allFiles));
-            number++;
+    /** Builds only this page's rows (#51-#100 on page 2), with a pager above and below. */
+    private void showPage(int page, boolean scrollToList) {
+        if (lastScan == null) return;
+        List<DfrFileEntry> targets = lastScan.targetFiles;
+        currentPage = ListPager.clamp(page, targets.size());
+        containerFiles.removeAllViews();
+
+        View topPager = ListPager.build(this, currentPage, targets.size(), p -> showPage(p, true));
+        if (topPager != null) containerFiles.addView(topPager);
+        for (int i = ListPager.from(currentPage); i < ListPager.to(currentPage, targets.size()); i++) {
+            containerFiles.addView(buildTargetRow(targets.get(i), i + 1, lastScan.allFiles));
         }
+        View bottomPager = ListPager.build(this, currentPage, targets.size(), p -> showPage(p, true));
+        if (bottomPager != null) containerFiles.addView(bottomPager);
+
+        if (scrollToList) scrollDownload.post(() -> scrollDownload.smoothScrollTo(0, tvFileListLabel.getTop()));
     }
 
     private View buildTargetRow(DfrFileEntry entry, int number, List<DfrFileEntry> allFiles) {
@@ -564,7 +583,7 @@ public class DfrDownloadActivity extends BaseActivity {
                         btnOpenDownloaded.setVisibility(View.GONE);
                     }
                     
-                    renderScanResult(lastScan);
+                    renderScanResult(lastScan, true);
                 } else {
                     hideProgress();
                     String msg = (finalFail > 0) ? getString(R.string.msg_dl_download_failed_with_errors, finalFail) : getString(R.string.msg_dl_download_fail);
@@ -646,11 +665,18 @@ public class DfrDownloadActivity extends BaseActivity {
         String[] modes = { getString(R.string.lbl_dl_mode_bulk), getString(R.string.lbl_dl_mode_single) };
         spDownloadMode.setAdapter(createStyledSpinnerAdapter(modes));
         spDownloadMode.setSelection(0);
+        updateDownloadNOptions(ListPager.PAGE_SIZE);
+    }
 
-        Integer[] nOptions = new Integer[MAX_DOWNLOAD_N];
-        for (int i = 0; i < MAX_DOWNLOAD_N; i++) nOptions[i] = i + 1;
+    /** N runs 1..number of records found, so Single mode can reach every record, not just #1-#50. */
+    private void updateDownloadNOptions(int count) {
+        Object selected = spDownloadN.getSelectedItem();
+        int keep = selected instanceof Integer ? (Integer) selected : 1;
+        int n = Math.max(1, count);
+        Integer[] nOptions = new Integer[n];
+        for (int i = 0; i < n; i++) nOptions[i] = i + 1;
         spDownloadN.setAdapter(createStyledSpinnerAdapter(nOptions));
-        spDownloadN.setSelection(0);
+        spDownloadN.setSelection(Math.min(keep, n) - 1);
     }
 
     private void setupIpWatcher() {

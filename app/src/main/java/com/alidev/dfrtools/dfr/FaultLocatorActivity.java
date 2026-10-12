@@ -366,11 +366,12 @@ public class FaultLocatorActivity extends BaseActivity {
 
         DfrFileEntry closest = closestToOtherEnd(st, scan.targetFiles);
         final boolean[] picked = {false};
-        int shown = 0;
-        for (DfrFileEntry entry : scan.targetFiles) {
-            if (shown++ >= 60) break;
+        // Opens on the page holding the record closest in time to the other end's, if any.
+        int startPage = closest != null ? ListPager.pageOf(scan.targetFiles.indexOf(closest)) : 0;
+        showPaged(container, null, scan.targetFiles.size(), startPage, i -> {
+            DfrFileEntry entry = scan.targetFiles.get(i);
             View row = getLayoutInflater().inflate(R.layout.item_dialog_pick_row, container, false);
-            ((TextView) row.findViewById(R.id.tvPickRowTitle)).setText(entry.cleanName());
+            ((TextView) row.findViewById(R.id.tvPickRowTitle)).setText("#" + (i + 1) + "  " + entry.cleanName());
             String sub = entry.formattedDate() + "  •  " + entry.formattedSize();
             if (entry == closest) sub += "\n" + getString(R.string.lbl_fl_closest_match);
             ((TextView) row.findViewById(R.id.tvPickRowSubtitle)).setText(sub);
@@ -379,11 +380,29 @@ public class FaultLocatorActivity extends BaseActivity {
                 dialog.dismiss();
                 downloadRemote(st, d, client, entry, scan.allFiles);
             });
-            container.addView(row);
-        }
+            return row;
+        });
         v.findViewById(R.id.btnPickListCancel).setOnClickListener(view -> dialog.dismiss());
         dialog.setOnDismissListener(di -> { if (!picked[0]) disconnectLater(client); });
         dialog.show();
+    }
+
+    private interface RowFactory {
+        View row(int index);
+    }
+
+    /**
+     * Fills a pick-list dialog's `container` one ListPager page at a time: `header` (if any) stays
+     * on top, then the pager, then only that page's rows.
+     */
+    private void showPaged(LinearLayout container, @Nullable View header, int total, int page, RowFactory rows) {
+        int p = ListPager.clamp(page, total);
+        container.removeAllViews();
+        if (header != null) container.addView(header);
+        View pager = ListPager.build(this, p, total, next -> showPaged(container, header, total, next, rows));
+        if (pager != null) container.addView(pager);
+        for (int i = ListPager.from(p); i < ListPager.to(p, total); i++) container.addView(rows.row(i));
+        if (container.getParent() instanceof View) ((View) container.getParent()).scrollTo(0, 0);
     }
 
     /**
@@ -521,7 +540,8 @@ public class FaultLocatorActivity extends BaseActivity {
         LinearLayout container = v.findViewById(R.id.llPickListItems);
         File root = commonParent(recs);
         final boolean[] picked = {false};
-        for (ComtradeImport.Record rec : recs) {
+        showPaged(container, null, recs.size(), 0, i -> {
+            ComtradeImport.Record rec = recs.get(i);
             View row = getLayoutInflater().inflate(R.layout.item_dialog_pick_row, container, false);
             ((TextView) row.findViewById(R.id.tvPickRowTitle)).setText(rec.relativeName(root));
             ((TextView) row.findViewById(R.id.tvPickRowSubtitle)).setText(rec.station.isEmpty() ? "-" : rec.station);
@@ -530,8 +550,8 @@ public class FaultLocatorActivity extends BaseActivity {
                 dialog.dismiss();
                 choice.onChosen(rec);
             });
-            container.addView(row);
-        }
+            return row;
+        });
         v.findViewById(R.id.btnPickListCancel).setOnClickListener(view -> dialog.dismiss());
         if (onSkip != null) dialog.setOnDismissListener(di -> { if (!picked[0]) onSkip.run(); });
         dialog.show();
@@ -620,32 +640,31 @@ public class FaultLocatorActivity extends BaseActivity {
                 Toast.makeText(this, R.string.msg_view_picker_fail, Toast.LENGTH_SHORT).show();
             }
         });
-        container.addView(browse);
-
         if (records.isEmpty()) {
+            container.addView(browse);
             TextView empty = new TextView(this);
             empty.setText(R.string.msg_fl_no_local);
             empty.setTextColor(ContextCompat.getColor(this, R.color.text_secondary));
             empty.setPadding(dp(8), dp(12), dp(8), dp(12));
             container.addView(empty);
-        }
-        SimpleDateFormat fmt = new SimpleDateFormat("dd MMM yyyy HH:mm", Locale.getDefault());
-        int shown = 0;
-        for (File f : records) {
-            if (shown++ >= 100) break;
-            View row = getLayoutInflater().inflate(R.layout.item_dialog_pick_row, container, false);
-            ((TextView) row.findViewById(R.id.tvPickRowTitle)).setText(f.getName());
-            String folder = f.getParentFile() != null ? f.getParentFile().getName() : "";
-            ((TextView) row.findViewById(R.id.tvPickRowSubtitle)).setText(folder + "  •  " + fmt.format(new Date(f.lastModified())));
-            row.setOnClickListener(view -> {
-                dialog.dismiss();
-                showProgress(getString(R.string.msg_fl_reading, f.getName()));
-                executor.execute(() -> {
-                    Exception[] error = new Exception[1];
-                    deliverRecords(st, resolveRecords(Collections.singletonList(f), error), error[0]);
+        } else {
+            SimpleDateFormat fmt = new SimpleDateFormat("dd MMM yyyy HH:mm", Locale.getDefault());
+            showPaged(container, browse, records.size(), 0, i -> {
+                File f = records.get(i);
+                View row = getLayoutInflater().inflate(R.layout.item_dialog_pick_row, container, false);
+                ((TextView) row.findViewById(R.id.tvPickRowTitle)).setText(f.getName());
+                String folder = f.getParentFile() != null ? f.getParentFile().getName() : "";
+                ((TextView) row.findViewById(R.id.tvPickRowSubtitle)).setText(folder + "  •  " + fmt.format(new Date(f.lastModified())));
+                row.setOnClickListener(view -> {
+                    dialog.dismiss();
+                    showProgress(getString(R.string.msg_fl_reading, f.getName()));
+                    executor.execute(() -> {
+                        Exception[] error = new Exception[1];
+                        deliverRecords(st, resolveRecords(Collections.singletonList(f), error), error[0]);
+                    });
                 });
+                return row;
             });
-            container.addView(row);
         }
         v.findViewById(R.id.btnPickListCancel).setOnClickListener(view -> dialog.dismiss());
         dialog.show();
