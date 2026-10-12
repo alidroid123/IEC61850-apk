@@ -15,6 +15,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.SeekBar;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -107,6 +108,15 @@ public class FaultLocatorActivity extends BaseActivity {
     /** Relay connection kept open while the user picks a record, so it can be closed on exit. */
     private volatile Iec61850DfrClient openClient;
     private TextView tvLineConfig;
+    /** Vectors of both ends at the shift currently chosen with the slider (or auto). */
+    private DoubleEndedFaultLocator.Alignment currentAlignment;
+    /** Main result = voltage-only synchronised location instead of the unsynchronised one. */
+    private boolean syncAsMain, bindingSync;
+    private double shiftLo;
+    private static final double SHIFT_STEP = 0.00005; // 0.05 ms per slider step (0.9 deg at 50 Hz)
+    private String resultNameA = "", resultNameB = "";
+    /** Non-null while a saved analysis (not a live one) is on screen. */
+    @Nullable private FlResultStore.Saved viewingSaved;
     /** Line Database row the line fields were filled from (null = typed by hand). */
     private LineData selectedLine;
     private boolean selectedLineAuto, selectedLineEdited, fillingLineFields;
@@ -158,6 +168,9 @@ public class FaultLocatorActivity extends BaseActivity {
 
         findViewById(R.id.btnFlAnalyze).setOnClickListener(v -> runAnalysis());
         findViewById(R.id.btnFlShare).setOnClickListener(v -> shareReport());
+        findViewById(R.id.btnFlSave).setOnClickListener(v -> saveResult());
+        findViewById(R.id.btnFlHistory).setOnClickListener(v -> showHistory());
+        setupSyncControls();
     }
 
     @Override
@@ -977,7 +990,10 @@ public class FaultLocatorActivity extends BaseActivity {
                     return;
                 }
                 lastResult = finalRes;
-                renderResult(finalRes);
+                viewingSaved = null;
+                currentAlignment = finalRes.alignment;
+                syncAsMain = false;
+                renderResult(finalRes, endName(endA), endName(endB));
             });
         });
     }
@@ -997,32 +1013,350 @@ public class FaultLocatorActivity extends BaseActivity {
         }
     }
 
-    private void renderResult(Result r) {
-        String nameA = endName(endA), nameB = endName(endB);
+    private void renderResult(Result r, String nameA, String nameB) {
+        resultNameA = nameA;
+        resultNameB = nameB;
         cardResult.setVisibility(View.VISIBLE);
+        TextView banner = findViewById(R.id.tvFlSavedBanner);
+        if (viewingSaved != null) {
+            banner.setVisibility(View.VISIBLE);
+            banner.setText(getString(R.string.lbl_fl_saved_banner, dateText(viewingSaved.savedAt)));
+        } else {
+            banner.setVisibility(View.GONE);
+        }
+        findViewById(R.id.btnFlSave).setVisibility(viewingSaved == null ? View.VISIBLE : View.GONE);
 
-        FaultLineView line = findViewById(R.id.faultLineView);
-        line.setEnds(nameA, nameB);
-        line.setFault(r.distA / r.lengthKm, Double.isNaN(r.spreadKm) ? Double.NaN : r.spreadKm / r.lengthKm,
-                fmt(r.distA, 2) + " km");
-
-        ((TextView) findViewById(R.id.tvFlFromALabel)).setText(getString(R.string.lbl_fl_from, nameA));
-        ((TextView) findViewById(R.id.tvFlFromBLabel)).setText(getString(R.string.lbl_fl_from, nameB));
-        ((TextView) findViewById(R.id.tvFlFromA)).setText(fmt(r.distA, 2) + " km");
-        ((TextView) findViewById(R.id.tvFlFromB)).setText(fmt(r.distB, 2) + " km");
-        String summary = getString(R.string.msg_fl_pct, fmt(r.distA / r.lengthKm * 100, 1), fmt(r.lengthKm, 2));
-        if (!Double.isNaN(r.spreadKm)) summary = getString(R.string.msg_fl_spread, fmt(r.spreadKm, 2), r.windowsUsed) + "  •  " + summary;
-        ((TextView) findViewById(R.id.tvFlSummary)).setText(summary);
-        ((TextView) findViewById(R.id.tvFlFaultType)).setText(getString(R.string.lbl_fl_fault_type, rstName(r.faultType), r.faultType));
-
+        renderMain(r);
         renderWarnings(r, nameA, nameB);
         renderMethods(r, nameA, nameB);
+        renderSync(r);
         renderChart(r, nameA, nameB);
         renderDetails(r, nameA, nameB);
         ((TextView) findViewById(R.id.tvFlPhasors)).setText(phasorTable(r, nameA, nameB));
 
         View scroll = findViewById(R.id.scrollFl);
         scroll.post(() -> ((androidx.core.widget.NestedScrollView) scroll).smoothScrollTo(0, cardResult.getTop()));
+    }
+
+    /** Fraction from A of whichever result the user made the main one. */
+    private double mainFraction(Result r) {
+        double m = syncAsMain && currentAlignment != null && currentAlignment.valid ? currentAlignment.m : r.m;
+        return Math.min(1, Math.max(0, m));
+    }
+
+    private double mainKmA(Result r) {
+        return mainFraction(r) * r.lengthKm;
+    }
+
+    private void renderMain(Result r) {
+        double kmA = mainKmA(r), kmB = r.lengthKm - kmA;
+        boolean useSpread = !syncAsMain && !Double.isNaN(r.spreadKm);
+        FaultLineView line = findViewById(R.id.faultLineView);
+        line.setEnds(resultNameA, resultNameB);
+        line.setFault(kmA / r.lengthKm, useSpread ? r.spreadKm / r.lengthKm : Double.NaN, fmt(kmA, 2) + " km");
+        ((TextView) findViewById(R.id.tvFlFromALabel)).setText(getString(R.string.lbl_fl_from, resultNameA));
+        ((TextView) findViewById(R.id.tvFlFromBLabel)).setText(getString(R.string.lbl_fl_from, resultNameB));
+        ((TextView) findViewById(R.id.tvFlFromA)).setText(fmt(kmA, 2) + " km");
+        ((TextView) findViewById(R.id.tvFlFromB)).setText(fmt(kmB, 2) + " km");
+        String summary = getString(R.string.msg_fl_pct, fmt(kmA / r.lengthKm * 100, 1), fmt(r.lengthKm, 2));
+        if (useSpread) summary = getString(R.string.msg_fl_spread, fmt(r.spreadKm, 2), r.windowsUsed) + "  •  " + summary;
+        if (syncAsMain) summary = getString(R.string.lbl_fl_method_sync_v) + "  •  " + summary;
+        ((TextView) findViewById(R.id.tvFlSummary)).setText(summary);
+        ((TextView) findViewById(R.id.tvFlFaultType)).setText(getString(R.string.lbl_fl_fault_type, rstName(r.faultType), r.faultType));
+    }
+
+    // ------------------------------------------------------------------
+    // Voltage-only vector synchronisation (A fixed, B shifted)
+    // ------------------------------------------------------------------
+
+    private void setupSyncControls() {
+        SeekBar seek = findViewById(R.id.seekFlShift);
+        seek.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar sb, int progress, boolean fromUser) {
+                if (fromUser) applyShift(shiftLo + progress * SHIFT_STEP, false);
+            }
+
+            @Override public void onStartTrackingTouch(SeekBar sb) { }
+
+            @Override public void onStopTrackingTouch(SeekBar sb) { refreshAfterShift(); }
+        });
+        findViewById(R.id.btnFlShiftMinus).setOnClickListener(v -> nudgeShift(-0.0001));
+        findViewById(R.id.btnFlShiftPlus).setOnClickListener(v -> nudgeShift(0.0001));
+        findViewById(R.id.btnFlShiftAuto).setOnClickListener(v -> {
+            if (lastResult == null || Double.isNaN(lastResult.tauAuto)) return;
+            applyShift(lastResult.tauAuto, true);
+            refreshAfterShift();
+        });
+        SwitchCompat sw = findViewById(R.id.swFlSyncMain);
+        sw.setOnCheckedChangeListener((b, checked) -> {
+            if (bindingSync || lastResult == null) return;
+            syncAsMain = checked;
+            renderMain(lastResult);
+            renderMethods(lastResult, resultNameA, resultNameB);
+            renderChart(lastResult, resultNameA, resultNameB);
+        });
+    }
+
+    private void nudgeShift(double deltaSeconds) {
+        if (currentAlignment == null) return;
+        applyShift(currentAlignment.tau + deltaSeconds, true);
+        refreshAfterShift();
+    }
+
+    /** Re-aligns record B at shift tau - cheap enough to run on every slider movement. */
+    private void applyShift(double tau, boolean moveSlider) {
+        Result r = lastResult;
+        if (r == null || r.session == null) return;
+        SeekBar seek = findViewById(R.id.seekFlShift);
+        tau = Math.max(shiftLo, Math.min(shiftLo + seek.getMax() * SHIFT_STEP, tau));
+        currentAlignment = r.session.alignAt(tau);
+        if (moveSlider) seek.setProgress((int) Math.round((tau - shiftLo) / SHIFT_STEP));
+        updateSyncViews(r);
+    }
+
+    /** What depends on the shift but is too heavy to redo on every slider pixel. */
+    private void refreshAfterShift() {
+        if (lastResult == null) return;
+        renderMethods(lastResult, resultNameA, resultNameB);
+        if (syncAsMain) {
+            renderMain(lastResult);
+            renderChart(lastResult, resultNameA, resultNameB);
+        }
+    }
+
+    private void renderSync(Result r) {
+        boolean live = r.session != null && viewingSaved == null;
+        findViewById(R.id.layoutFlSyncControls).setVisibility(live ? View.VISIBLE : View.GONE);
+        bindingSync = true;
+        ((SwitchCompat) findViewById(R.id.swFlSyncMain)).setChecked(syncAsMain);
+        bindingSync = false;
+        if (live) {
+            double centre = !Double.isNaN(r.tauAuto) ? r.tauAuto : currentAlignment != null ? currentAlignment.tau : 0;
+            double span = 1.5 * r.session.period;
+            double lo = Math.max(r.session.tauMin, centre - span), hi = Math.min(r.session.tauMax, centre + span);
+            shiftLo = lo;
+            SeekBar seek = findViewById(R.id.seekFlShift);
+            seek.setMax(Math.max(1, (int) Math.round((hi - lo) / SHIFT_STEP)));
+            double tau = currentAlignment != null ? currentAlignment.tau : centre;
+            seek.setProgress((int) Math.round((tau - lo) / SHIFT_STEP));
+        }
+        updateSyncViews(r);
+    }
+
+    private void updateSyncViews(Result r) {
+        PhasorDiagramView diagram = findViewById(R.id.phasorDiagram);
+        diagram.setLegend(resultNameA, resultNameB);
+        TextView info = findViewById(R.id.tvFlSyncInfo);
+        DoubleEndedFaultLocator.Alignment al = currentAlignment;
+        if (al == null || !al.valid || al.a == null || al.b == null) {
+            diagram.setVectors(null, null, null, null, false);
+            info.setText(R.string.msg_fl_sync_out);
+            return;
+        }
+        diagram.setVectors(al.a.v1, al.b.v1, al.a.v0, al.b.v0, al.v0Used);
+        StringBuilder sb = new StringBuilder();
+        sb.append(getString(R.string.val_fl_sync_ref, resultNameA, fmt(r.alignRefTimeA * 1000, 1), fmt(r.alignRefCurrentA, 0)));
+        boolean ts = !Double.isNaN(r.tauTimestamp);
+        double base = ts ? r.tauTimestamp : r.tauInception;
+        sb.append('\n').append(getString(ts ? R.string.val_fl_sync_shift_ts : R.string.val_fl_sync_shift_inc, resultNameB,
+                signed((al.tau - base) * 1000, 2), signed((r.tauAuto - base) * 1000, 2)));
+        sb.append('\n').append(al.v0Used
+                ? getString(R.string.val_fl_sync_angles, signed(al.dV1Deg, 1), signed(al.dV0Deg, 1))
+                : getString(R.string.val_fl_sync_angles_nov0, signed(al.dV1Deg, 1)));
+        sb.append('\n').append(getString(R.string.val_fl_sync_loc, fmt(al.m * r.lengthKm, 2), resultNameA));
+        info.setText(sb.toString());
+    }
+
+    private static String signed(double v, int decimals) {
+        return (v >= 0 ? "+" : "") + fmt(v, decimals);
+    }
+
+    // ------------------------------------------------------------------
+    // Saving / reopening results
+    // ------------------------------------------------------------------
+
+    private void saveResult() {
+        Result r = lastResult;
+        if (r == null) return;
+        FlResultStore.Saved saved = new FlResultStore.Saved();
+        saved.savedAt = System.currentTimeMillis();
+        saved.id = new SimpleDateFormat("yyyyMMdd_HHmmss_SSS", Locale.US).format(new Date(saved.savedAt));
+        saved.nameA = resultNameA;
+        saved.nameB = resultNameB;
+        saved.lineConfig = selectedLine != null ? selectedLine.routeLabel() + " (" + selectedLine.bay + ")" : "";
+        saved.recordA = endA.cfg != null ? endA.cfg.getName() : "";
+        saved.recordB = endB.cfg != null ? endB.cfg.getName() : "";
+        saved.tauUsed = currentAlignment != null ? currentAlignment.tau : Double.NaN;
+        saved.syncAsMain = syncAsMain;
+        DoubleEndedFaultLocator.Alignment auto = r.alignment;
+        r.alignment = currentAlignment; // the vectors as the user left them
+        try {
+            File pdf = writePdf(saved);
+            saved.pdfPath = pdf.getAbsolutePath();
+            saved.result = r;
+            new FlResultStore(this).save(saved);
+            showSavedDialog(pdf);
+        } catch (Exception e) {
+            showInfoDialog(getString(R.string.ttl_fl_error), getString(R.string.msg_fl_save_fail, String.valueOf(e.getMessage())));
+        } finally {
+            r.alignment = auto;
+        }
+    }
+
+    /** The result card as a one-page PDF report, without the on-screen-only controls. */
+    private File writePdf(FlResultStore.Saved saved) throws Exception {
+        View card = cardResult;
+        TextView banner = findViewById(R.id.tvFlSavedBanner);
+        View[] hide = {findViewById(R.id.layoutFlResultActions), findViewById(R.id.layoutFlSyncControls),
+                findViewById(R.id.btnFlFixPolarity), findViewById(R.id.tvFlSyncHint), findViewById(R.id.swFlSyncMain)};
+        int[] vis = new int[hide.length];
+        for (int i = 0; i < hide.length; i++) { vis[i] = hide[i].getVisibility(); hide[i].setVisibility(View.GONE); }
+        int bannerVis = banner.getVisibility();
+        CharSequence bannerText = banner.getText();
+        banner.setVisibility(View.VISIBLE);
+        banner.setText(getString(R.string.ttl_fl_report) + "\n" + saved.nameA + " – " + saved.nameB + "  •  " + dateText(saved.savedAt)
+                + (saved.lineConfig.isEmpty() ? "" : "\n" + getString(R.string.lbl_fl_line_config) + ": " + saved.lineConfig)
+                + "\n" + getString(R.string.lbl_fl_record_files) + " " + saved.recordA + " / " + saved.recordB);
+        android.graphics.pdf.PdfDocument doc = new android.graphics.pdf.PdfDocument();
+        try {
+            int w = card.getWidth();
+            card.measure(View.MeasureSpec.makeMeasureSpec(w, View.MeasureSpec.EXACTLY),
+                    View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED));
+            int h = card.getMeasuredHeight();
+            card.layout(card.getLeft(), card.getTop(), card.getLeft() + w, card.getTop() + h);
+            float scale = 595f / w;
+            android.graphics.pdf.PdfDocument.PageInfo info =
+                    new android.graphics.pdf.PdfDocument.PageInfo.Builder(595, (int) Math.ceil(h * scale) + 1, 1).create();
+            android.graphics.pdf.PdfDocument.Page page = doc.startPage(info);
+            android.graphics.Canvas c = page.getCanvas();
+            c.drawColor(ContextCompat.getColor(this, R.color.bg_card));
+            c.scale(scale, scale);
+            card.draw(c);
+            doc.finishPage(page);
+            File dir = new File(new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), "DFR"), "FL_Reports");
+            if (!dir.exists() && !dir.mkdirs()) dir = new File(new File(getExternalFilesDir(null), "DFR"), "FL_Reports");
+            if (!dir.exists()) dir.mkdirs();
+            String name = ("FL_" + saved.nameA + "_" + saved.nameB + "_" + saved.id).replaceAll("[^a-zA-Z0-9_]+", "_") + ".pdf";
+            File out = new File(dir, name);
+            try (FileOutputStream fos = new FileOutputStream(out)) {
+                doc.writeTo(fos);
+            }
+            return out;
+        } finally {
+            doc.close();
+            for (int i = 0; i < hide.length; i++) hide[i].setVisibility(vis[i]);
+            banner.setText(bannerText);
+            banner.setVisibility(bannerVis);
+            card.requestLayout();
+        }
+    }
+
+    private void showSavedDialog(File pdf) {
+        View v = getLayoutInflater().inflate(R.layout.dialog_export_success, null);
+        AlertDialog dialog = cardDialog(v);
+        ((TextView) v.findViewById(R.id.tvExportMessage)).setText(getString(R.string.msg_fl_saved, pdf.getAbsolutePath()));
+        Button open = v.findViewById(R.id.btnSaveAs);
+        open.setVisibility(View.VISIBLE);
+        open.setText(R.string.btn_fl_open_pdf);
+        open.setOnClickListener(x -> {
+            dialog.dismiss();
+            openPdf(pdf);
+        });
+        v.findViewById(R.id.btnOpenFolder).setOnClickListener(x -> {
+            dialog.dismiss();
+            startActivity(new Intent(this, InternalFileManagerActivity.class));
+        });
+        v.findViewById(R.id.btnShare).setOnClickListener(x -> {
+            dialog.dismiss();
+            try {
+                Intent intent = new Intent(Intent.ACTION_SEND);
+                intent.setType("application/pdf");
+                intent.putExtra(Intent.EXTRA_STREAM, FileProvider.getUriForFile(this, getPackageName() + ".fileprovider", pdf));
+                intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                startActivity(Intent.createChooser(intent, getString(R.string.btn_fl_share)));
+            } catch (Exception e) {
+                Toast.makeText(this, R.string.msg_all_share_fail, Toast.LENGTH_SHORT).show();
+            }
+        });
+        dialog.show();
+    }
+
+    private void openPdf(File pdf) {
+        try {
+            Intent intent = new Intent(Intent.ACTION_VIEW);
+            intent.setDataAndType(FileProvider.getUriForFile(this, getPackageName() + ".fileprovider", pdf), "application/pdf");
+            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            startActivity(intent);
+        } catch (Exception e) {
+            Toast.makeText(this, getString(R.string.msg_view_general_error, e.getMessage()), Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void showHistory() {
+        FlResultStore store = new FlResultStore(this);
+        List<FlResultStore.Saved> items = store.list();
+        View v = getLayoutInflater().inflate(R.layout.dialog_pick_list, null);
+        AlertDialog dialog = cardDialog(v);
+        ((TextView) v.findViewById(R.id.tvPickListTitle)).setText(R.string.ttl_fl_history);
+        LinearLayout container = v.findViewById(R.id.llPickListItems);
+        if (items.isEmpty()) {
+            TextView empty = new TextView(this);
+            empty.setText(R.string.msg_fl_history_empty);
+            empty.setTextColor(ContextCompat.getColor(this, R.color.text_secondary));
+            empty.setPadding(dp(8), dp(12), dp(8), dp(12));
+            container.addView(empty);
+        }
+        for (FlResultStore.Saved it : items) {
+            View row = getLayoutInflater().inflate(R.layout.item_dialog_pick_row, container, false);
+            ((TextView) row.findViewById(R.id.tvPickRowTitle)).setText(it.nameA + " – " + it.nameB);
+            Result r = it.result;
+            double m = it.syncAsMain && r.alignment != null && r.alignment.valid ? r.alignment.m : r.m;
+            ((TextView) row.findViewById(R.id.tvPickRowSubtitle)).setText(dateText(it.savedAt) + "  •  "
+                    + fmt(Math.min(1, Math.max(0, m)) * r.lengthKm, 2) + " km " + getString(R.string.lbl_fl_from, it.nameA).toLowerCase(Locale.getDefault())
+                    + "  •  " + rstName(r.faultType));
+            row.setOnClickListener(x -> {
+                dialog.dismiss();
+                openSaved(it);
+            });
+            row.setOnLongClickListener(x -> {
+                confirmDeleteSaved(store, it, dialog);
+                return true;
+            });
+            container.addView(row);
+        }
+        v.findViewById(R.id.btnPickListCancel).setOnClickListener(x -> dialog.dismiss());
+        dialog.show();
+    }
+
+    private void openSaved(FlResultStore.Saved saved) {
+        viewingSaved = saved;
+        lastResult = saved.result;
+        currentAlignment = saved.result.alignment;
+        syncAsMain = saved.syncAsMain;
+        renderResult(saved.result, saved.nameA, saved.nameB);
+    }
+
+    private void confirmDeleteSaved(FlResultStore store, FlResultStore.Saved saved, AlertDialog listDialog) {
+        View v = getLayoutInflater().inflate(R.layout.dialog_fl_info, null);
+        AlertDialog dialog = cardDialog(v);
+        ((TextView) v.findViewById(R.id.tvFlInfoTitle)).setText(R.string.ttl_fl_delete_saved);
+        ((TextView) v.findViewById(R.id.tvFlInfoBody)).setText(getString(R.string.msg_fl_delete_saved,
+                saved.nameA + " – " + saved.nameB + " (" + dateText(saved.savedAt) + ")"));
+        TextView btn = v.findViewById(R.id.btnFlInfoClose);
+        btn.setText(R.string.btn_all_delete);
+        btn.setTextColor(ContextCompat.getColor(this, R.color.status_danger));
+        btn.setOnClickListener(x -> {
+            store.delete(saved.id);
+            dialog.dismiss();
+            listDialog.dismiss();
+            showHistory();
+        });
+        dialog.show();
+    }
+
+    private static String dateText(long millis) {
+        return new SimpleDateFormat("dd MMM yyyy HH:mm", Locale.getDefault()).format(new Date(millis));
     }
 
     private void renderWarnings(Result r, String nameA, String nameB) {
@@ -1043,7 +1377,7 @@ public class FaultLocatorActivity extends BaseActivity {
         // setting in that relay's DFR - offer the one-tap retry instead of making the user dig
         // into the mapping dialog.
         EndState suspect = r.dirA < 0 && r.dirB >= 0 ? endA : r.dirB < 0 && r.dirA >= 0 ? endB : null;
-        if (suspect == null) {
+        if (suspect == null || viewingSaved != null || suspect.map == null) {
             fix.setVisibility(View.GONE);
             return;
         }
@@ -1093,7 +1427,11 @@ public class FaultLocatorActivity extends BaseActivity {
         if (r.sequenceUsed == 2) main = getString(R.string.lbl_fl_method_de_neg);
         else if (r.superimposed) main = getString(R.string.lbl_fl_method_de_pos_sup);
         else main = getString(R.string.lbl_fl_method_de_pos_total);
-        addRow(box, main, fmt(r.distA, 2) + " km", true);
+        addRow(box, main, syncAsMain ? methodValue(r, r.distA) : fmt(r.distA, 2) + " km", !syncAsMain);
+        if (currentAlignment != null && currentAlignment.valid) {
+            double km = currentAlignment.m * r.lengthKm;
+            addRow(box, getString(R.string.lbl_fl_method_sync_v), syncAsMain ? fmt(km, 2) + " km" : methodValue(r, km), syncAsMain);
+        }
         if (!Double.isNaN(r.mPos)) addRow(box, getString(R.string.lbl_fl_method_de_pos), methodValue(r, r.mPos * r.lengthKm), false);
         if (!Double.isNaN(r.mSync)) {
             String v = methodValue(r, r.mSync * r.lengthKm);
@@ -1109,7 +1447,7 @@ public class FaultLocatorActivity extends BaseActivity {
 
     /** A cross-check result, always expressed as km from end A so the column is comparable. */
     private String methodValue(Result r, double kmFromA) {
-        double delta = kmFromA - r.distA;
+        double delta = kmFromA - mainKmA(r);
         return getString(R.string.val_fl_method, fmt(kmFromA, 2), (delta >= 0 ? "+" : "") + fmt(delta, 2));
     }
 
@@ -1195,7 +1533,7 @@ public class FaultLocatorActivity extends BaseActivity {
         x.setPosition(XAxis.XAxisPosition.BOTTOM);
         x.setTextColor(textColor);
         x.removeAllLimitLines();
-        LimitLine ll = new LimitLine((float) r.distA, fmt(r.distA, 2) + " km");
+        LimitLine ll = new LimitLine((float) mainKmA(r), fmt(mainKmA(r), 2) + " km");
         ll.setLineColor(ContextCompat.getColor(this, R.color.status_danger));
         ll.setTextColor(ContextCompat.getColor(this, R.color.status_danger));
         ll.setLineWidth(1.5f);
@@ -1273,19 +1611,24 @@ public class FaultLocatorActivity extends BaseActivity {
     private void shareReport() {
         Result r = lastResult;
         if (r == null) return;
-        String nameA = endName(endA), nameB = endName(endB);
+        String nameA = resultNameA, nameB = resultNameB;
         StringBuilder sb = new StringBuilder();
         sb.append(getString(R.string.ttl_fl_report)).append('\n');
         sb.append(nameA).append(" – ").append(nameB).append(" (").append(fmt(r.lengthKm, 2)).append(" km)\n\n");
-        if (selectedLine != null) {
+        if (viewingSaved != null) {
+            if (!viewingSaved.lineConfig.isEmpty()) {
+                sb.append(getString(R.string.lbl_fl_line_config)).append(": ").append(viewingSaved.lineConfig).append('\n');
+            }
+        } else if (selectedLine != null) {
             sb.append(getString(R.string.lbl_fl_line_config)).append(": ").append(selectedLine.routeLabel())
                     .append(" (").append(selectedLine.bay).append(')');
             if (selectedLineEdited) sb.append(' ').append(getString(R.string.lbl_fl_line_config_edited));
             sb.append('\n');
         }
         sb.append(getString(R.string.lbl_fl_fault_type, rstName(r.faultType), r.faultType)).append('\n');
-        sb.append(getString(R.string.lbl_fl_from, nameA)).append(": ").append(fmt(r.distA, 2)).append(" km\n");
-        sb.append(getString(R.string.lbl_fl_from, nameB)).append(": ").append(fmt(r.distB, 2)).append(" km\n");
+        sb.append(getString(R.string.lbl_fl_from, nameA)).append(": ").append(fmt(mainKmA(r), 2)).append(" km\n");
+        sb.append(getString(R.string.lbl_fl_from, nameB)).append(": ").append(fmt(r.lengthKm - mainKmA(r), 2)).append(" km\n");
+        if (syncAsMain) sb.append("(").append(getString(R.string.lbl_fl_method_sync_v)).append(")\n");
         if (!Double.isNaN(r.spreadKm)) sb.append(getString(R.string.msg_fl_spread, fmt(r.spreadKm, 2), r.windowsUsed)).append('\n');
         sb.append('\n').append(getString(R.string.lbl_fl_methods_header)).append('\n');
         appendRows(sb, findViewById(R.id.containerFlMethods));
@@ -1296,9 +1639,13 @@ public class FaultLocatorActivity extends BaseActivity {
             sb.append('\n');
             for (int i = 0; i < warn.getChildCount(); i++) sb.append(((TextView) warn.getChildAt(i)).getText()).append('\n');
         }
+        sb.append('\n').append(getString(R.string.lbl_fl_sync_header)).append('\n')
+                .append(((TextView) findViewById(R.id.tvFlSyncInfo)).getText()).append('\n');
+        String recA = viewingSaved != null ? viewingSaved.recordA : endA.cfg != null ? endA.cfg.getName() : "-";
+        String recB = viewingSaved != null ? viewingSaved.recordB : endB.cfg != null ? endB.cfg.getName() : "-";
         sb.append('\n').append(getString(R.string.lbl_fl_record_files)).append('\n');
-        sb.append("A: ").append(endA.cfg != null ? endA.cfg.getName() : "-").append(" (").append(endA.rec.triggerText).append(")\n");
-        sb.append("B: ").append(endB.cfg != null ? endB.cfg.getName() : "-").append(" (").append(endB.rec.triggerText).append(")\n");
+        sb.append("A: ").append(recA).append(" (").append(r.endA.triggerText).append(")\n");
+        sb.append("B: ").append(recB).append(" (").append(r.endB.triggerText).append(")\n");
         sb.append('\n').append(phasorTable(r, nameA, nameB)).append('\n');
 
         Intent intent = new Intent(Intent.ACTION_SEND);

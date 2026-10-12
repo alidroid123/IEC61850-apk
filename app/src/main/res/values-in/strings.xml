@@ -924,7 +924,7 @@
     <string name="warn_fl_pre_polarity">Arus beban pra-gangguan masuk ke saluran di kedua ujung – salah satu polaritas CT kemungkinan terbalik.</string>
 
     <string name="ttl_fl_info">Metode</string>
-    <string name="msg_fl_info">Metode utama: lokasi gangguan dua ujung tak-tersinkron (IEEE C37.114-2014; Novosel dkk. 1996; Tziouvaras, Roberts &amp; Benmouyal 2001).\n\n1. Record COMTRADE relay saluran di GI A dan GI B dibaca (ASCII, BINARY, BINARY32, FLOAT32, zip) lalu dikonversi ke nilai primer.\n\n2. Awal gangguan (inception) dideteksi otomatis di tiap record dengan detektor superimposed siklus-ke-siklus.\n\n3. Phasor fundamental dihitung dengan least-squares satu siklus (fundamental + harmonisa 2–3 + tren DC), sehingga DC offset arus gangguan tidak membiaskan hasil.\n\n4. Komponen simetris dihitung. Gangguan tidak seimbang memakai urutan negatif (V2, I2); gangguan 3 fasa memakai urutan positif superimposed (gangguan − pra-gangguan).\n\n5. Tegangan titik gangguan dihitung menyusuri model saluran dari tiap ujung: |V2A − m·Z1·I2A| = |V2B − (1−m)·Z1·I2B|. Yang disamakan hanya magnitudo, jadi jam kedua relay TIDAK perlu sinkron, dan hasilnya tidak dipengaruhi tahanan gangguan, arus beban, maupun kopling mutual urutan nol. Saluran panjang bisa memakai model terdistribusi (hiperbolik).\n\n6. Persamaan diselesaikan di beberapa jendela berturut-turut; hasil akhir = median, sebarannya ditampilkan sebagai ± km.\n\n7. Pembanding: dua ujung urutan positif, dua ujung tersinkron waktu (valid hanya bila relay tersinkron GPS), dan Takagi satu ujung dari masing-masing GI. Selisih besar antar metode menandakan data perlu dicek.\n\nSyarat: kedua record dari kejadian yang sama, CT kedua ujung mengukur arus yang masuk ke saluran, dan impedansi saluran benar. Akurasi umumnya 1–2 persen panjang saluran, terutama ditentukan ketelitian Z1.\n\nMetode gelombang berjalan (travelling wave) tidak dipakai: DFR relay hanya sampling 1–4 kHz, jauh terlalu lambat untuk gelombang berjalan.</string>
+    <string name="msg_fl_info">Metode utama: lokasi gangguan dua ujung tak-tersinkron (IEEE C37.114-2014; Novosel dkk. 1996; Tziouvaras, Roberts &amp; Benmouyal 2001).\n\n1. Record COMTRADE relay saluran di GI A dan GI B dibaca (ASCII, BINARY, BINARY32, FLOAT32, zip) lalu dikonversi ke nilai primer.\n\n2. Awal gangguan (inception) dideteksi otomatis di tiap record dengan detektor superimposed siklus-ke-siklus.\n\n3. Phasor fundamental dihitung dengan least-squares satu siklus (fundamental + harmonisa 2–3 + tren DC), sehingga DC offset arus gangguan tidak membiaskan hasil.\n\n4. Komponen simetris dihitung. Gangguan tidak seimbang memakai urutan negatif (V2, I2); gangguan 3 fasa memakai urutan positif superimposed (gangguan − pra-gangguan).\n\n5. Tegangan titik gangguan dihitung menyusuri model saluran dari tiap ujung: |V2A − m·Z1·I2A| = |V2B − (1−m)·Z1·I2B|. Yang disamakan hanya magnitudo, jadi jam kedua relay TIDAK perlu sinkron, dan hasilnya tidak dipengaruhi tahanan gangguan, arus beban, maupun kopling mutual urutan nol. Saluran panjang bisa memakai model terdistribusi (hiperbolik).\n\n6. Persamaan diselesaikan di beberapa jendela berturut-turut; hasil akhir = median, sebarannya ditampilkan sebagai ± km.\n\n7. Pembanding: dua ujung urutan positif, dua ujung tersinkron waktu (valid hanya bila relay tersinkron GPS), dan Takagi satu ujung dari masing-masing GI. Selisih besar antar metode menandakan data perlu dicek.\n\n8. Sinkronisasi vektor (voltage only): GI A dikunci di titik arus gangguan tertinggi dan rekaman GI B digeser waktunya sampai sudut V1 dan V0 kedua ujung sama, dimulai dari awal gangguan yang terdeteksi agar kedua rekaman menunjukkan momen yang sama. Pergeseran bisa disesuaikan dengan slider; lokasi dua ujung tersinkron dihitung ulang dengan vektor yang sudah diselaraskan. Metode ini mengasumsikan sudut tegangan kedua ujung berdekatan saat gangguan, sehingga metode tak-tersinkron tetap menjadi hasil utama bawaan.\n\nSyarat: kedua record dari kejadian yang sama, CT kedua ujung mengukur arus yang masuk ke saluran, dan impedansi saluran benar. Akurasi umumnya 1–2 persen panjang saluran, terutama ditentukan ketelitian Z1.\n\nMetode gelombang berjalan (travelling wave) tidak dipakai: DFR relay hanya sampling 1–4 kHz, jauh terlalu lambat untuk gelombang berjalan.</string>
 
     <string name="help_ttl_fl">FL Double Ended</string>
     <string name="help_sum_fl">Tentukan lokasi gangguan saluran dari DFR kedua GI</string>
@@ -1005,4 +1005,32 @@
     <string name="abt_feat_12_desc">Panjang saluran dan impedansi urutan positif/nol per bay, sudah terisi data konduktor dan bisa diubah atau diimpor dari CSV. Dipilih otomatis oleh FL Double Ended.</string>
     <string name="btn_line_load_default">Muat data bawaan</string>
     <string name="msg_line_load_default_ok">%d saluran dimuat dari data bawaan</string>
+
+    <!-- FL Double Ended: voltage-only vector synchronisation, saving -->
+    <string name="lbl_fl_sync_header">Sinkronisasi vektor (voltage only)</string>
+    <string name="msg_fl_sync_hint">GI A dikunci di titik arus gangguan tertinggi; rekaman GI B digeser waktunya sampai vektor V1 dan V0-nya berimpit dengan GI A (voltage only). Auto mencari dalam setengah siklus dari awal gangguan, sehingga kedua rekaman menunjukkan momen gangguan yang sama. Geser slider untuk menyesuaikan GI B secara manual.</string>
+    <string name="val_fl_sync_ref">Referensi %1$s: t = %2$s ms, arus gangguan %3$s A</string>
+    <string name="val_fl_sync_shift_ts">Geser %1$s: %2$s ms dari timestamp DFR (auto %3$s ms)</string>
+    <string name="val_fl_sync_shift_inc">Geser %1$s: %2$s ms dari awal gangguan (auto %3$s ms)</string>
+    <string name="val_fl_sync_angles">Selisih sudut: V1 %1$s°, V0 %2$s°</string>
+    <string name="val_fl_sync_angles_nov0">Selisih sudut: V1 %1$s° (V0 ~ 0, bukan gangguan tanah)</string>
+    <string name="val_fl_sync_loc">Lokasi (sinkron voltage only): %1$s km dari %2$s</string>
+    <string name="msg_fl_sync_out">Pada pergeseran ini rekaman GI B tidak punya data - geser slider kembali.</string>
+    <string name="btn_fl_shift_minus">B -0,1 ms</string>
+    <string name="btn_fl_shift_plus">B +0,1 ms</string>
+    <string name="btn_fl_shift_auto">Auto</string>
+    <string name="lbl_fl_sync_main">Jadikan lokasi tersinkron sebagai hasil utama</string>
+    <string name="lbl_fl_method_sync_v">Dua ujung, sinkron vektor (voltage only)</string>
+    <string name="btn_fl_save">Simpan hasil</string>
+    <string name="btn_fl_open_pdf">Buka PDF</string>
+    <string name="cd_fl_history">Hasil tersimpan</string>
+    <string name="ttl_fl_history">Hasil Analisa Tersimpan</string>
+    <string name="msg_fl_history_empty">Belum ada hasil analisa tersimpan. Ketuk Simpan hasil setelah analisa.\n\nTekan lama hasil tersimpan untuk menghapusnya.</string>
+    <string name="msg_fl_saved">Hasil disimpan di riwayat (ikon jam di atas) dan sebagai laporan PDF:\n%s</string>
+    <string name="msg_fl_save_fail">Gagal menyimpan: %s</string>
+    <string name="lbl_fl_saved_banner">Hasil tersimpan • %1$s (rekaman tidak dimuat, pergeseran vektor sesuai saat disimpan)</string>
+    <string name="ttl_fl_delete_saved">Hapus Hasil Tersimpan</string>
+    <string name="msg_fl_delete_saved">Hapus hasil analisa %s? Laporan PDF tetap ada di Download/DFR/FL_Reports.</string>
+    <string name="help_feat_fl_4_title">Sinkronisasi Vektor &amp; Menyimpan Hasil</string>
+    <string name="help_feat_fl_4_steps">1. Di bagian Sinkronisasi vektor, GI A dikunci di titik arus gangguan tertinggi dan GI B digeser otomatis sampai sudut V1/V0 sama.\n2. Geser slider atau ketuk B -0,1 / +0,1 ms untuk menyesuaikan GI B secara manual - vektor dan lokasi tersinkron langsung ter-update.\n3. Aktifkan "Jadikan lokasi tersinkron sebagai hasil utama" bila lebih dipercaya.\n4. Ketuk {ic:save} Simpan hasil untuk menyimpan analisa dan membuat laporan PDF; buka lagi lewat ikon {ic:history} di atas.</string>
 </resources>

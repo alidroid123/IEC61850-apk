@@ -176,6 +176,176 @@ public class DoubleEndedFaultLocator {
         public EndSummary endA = new EndSummary(), endB = new EndSummary();
         public double[] profileKm, profileA, profileB; // |V_F| (kV) walked from each end
         public final List<Warning> warnings = new ArrayList<>();
+
+        /** Record time shift found by the voltage-only synchronisation (B time = A time + tau), s. */
+        public double tauAuto = Double.NaN;
+        /** Shift that lines up the detected inceptions / the cfg timestamps (NaN if unknown), s. */
+        public double tauInception = Double.NaN, tauTimestamp = Double.NaN;
+        /** Fixed reference instant at end A (record time, s) and A's fault current there (A rms). */
+        public double alignRefTimeA = Double.NaN, alignRefCurrentA = Double.NaN;
+        /** Vectors and synchronised location at tauAuto (the screen may move it with the slider). */
+        public Alignment alignment;
+        /** Live handle on both records for re-aligning at another tau; null for a reloaded result. */
+        public transient Session session;
+    }
+
+    /** Both ends' voltage/current vectors at one physical instant, given a record time shift. */
+    public static class Alignment {
+        public double tau = Double.NaN;
+        public boolean valid;
+        public Phasors a, b;
+        /** Angle of B minus angle of A, degrees. */
+        public double dV1Deg = Double.NaN, dV0Deg = Double.NaN, dV2Deg = Double.NaN;
+        /** V0 is large enough at both ends to take part in the match (earth faults). */
+        public boolean v0Used;
+        /** Two-ended location (fraction from A) solved with these time-aligned vectors. */
+        public double m = Double.NaN;
+    }
+
+    /**
+     * Keeps both prepared records after analyze() so the screen can re-align them at any time
+     * shift (the slider) without re-parsing or re-running the whole analysis.
+     */
+    public static class Session {
+        private final End a, b;
+        private final LineModel lm;
+        private final int s;
+        private final double off, L;
+        /** Same physical instant by detected inception / by the cfg timestamps (NaN if unknown). */
+        public final double tauInception, tauTimestamp;
+        /** Shift range for which B's window still fits inside its record. */
+        public final double tauMin, tauMax;
+        public final double period;
+        /** Fixed reference instant at end A (record time, s) and the fault current there (A rms). */
+        public final double refTimeA, refCurrentA;
+        private final int k0A;
+        private final Phasors pa;
+
+        Session(End a, End b, LineModel lm, int s, double off, double L) {
+            this.a = a;
+            this.b = b;
+            this.lm = lm;
+            this.s = s;
+            this.off = off;
+            this.L = L;
+            period = a.T;
+            tauInception = b.t[b.inc] - a.t[a.inc];
+            tauTimestamp = a.rec.startMicros != Long.MIN_VALUE && b.rec.startMicros != Long.MIN_VALUE
+                    ? (a.rec.startMicros - b.rec.startMicros) / 1e6 : Double.NaN;
+            k0A = peakCurrentWindow(a, Math.min(a.inc + (int) Math.round(off * a.N), a.n - a.N));
+            double tA0 = a.t[k0A];
+            pa = phasorsAt(a, k0A, tA0);
+            refTimeA = tA0;
+            refCurrentA = pa == null ? Double.NaN : maxI(pa);
+            tauMin = b.t[0] - tA0;
+            tauMax = b.t[Math.max(0, b.n - b.N - 1)] - tA0;
+        }
+
+        /**
+         * End A is the fixed reference and B is the record that gets shifted, so the reference
+         * instant is where A's fault current (fundamental, so the DC offset does not count) is
+         * highest - searched from inception until the current collapses at breaker opening.
+         */
+        private static int peakCurrentWindow(End e, int fallback) {
+            int step = Math.max(1, e.N / 8);
+            int last = Math.min(e.inc + 15 * e.N, e.n - e.N);
+            List<Integer> ks = new ArrayList<>();
+            List<Phasors> phs = new ArrayList<>();
+            double peak = 0;
+            for (int k = e.inc; k <= last; k += step) {
+                Phasors ph = phasorsAt(e, k, 0);
+                if (ph == null) break;
+                double mag = maxI(ph);
+                if (mag < 0.3 * peak) break; // breaker has opened
+                peak = Math.max(peak, mag);
+                ks.add(k);
+                phs.add(ph);
+            }
+            // Only a window that is steady a quarter cycle later counts: one straddling the
+            // inception or the breaker opening fits a cut waveform and can read falsely high.
+            int lag = Math.max(1, (e.N / 4 + step - 1) / step);
+            double bestStable = 0;
+            boolean[] stable = new boolean[ks.size()];
+            for (int i = 0; i + lag < ks.size(); i++) {
+                Phasors x = phs.get(i), y = phs.get(i + lag);
+                stable[i] = relChange(x, y) < 0.05 && maxI(y) >= 0.95 * maxI(x);
+                if (stable[i]) bestStable = Math.max(bestStable, maxI(x));
+            }
+            for (int i = 0; i < ks.size(); i++) {
+                if (stable[i] && maxI(phs.get(i)) >= 0.99 * bestStable) return ks.get(i);
+            }
+            return fallback;
+        }
+
+        private Phasors bAt(double tau) {
+            double tB0 = a.t[k0A] + tau;
+            if (tau < tauMin || tau > tauMax) return null;
+            int lo = 0, hi = b.n - 1;
+            while (lo < hi) { // first sample at or after tB0
+                int mid = (lo + hi) >>> 1;
+                if (b.t[mid] < tB0) lo = mid + 1; else hi = mid;
+            }
+            return phasorsAt(b, lo, tB0);
+        }
+
+        /** Voltage-only mismatch: 1 - cos of the V1 (and, when present, V0) angle differences. */
+        private double mismatch(Phasors pb) {
+            double j = 1 - Math.cos(pb.v1.arg() - pa.v1.arg());
+            if (v0Significant(pa, pb)) j += 1 - Math.cos(pb.v0.arg() - pa.v0.arg());
+            return j;
+        }
+
+        private static boolean v0Significant(Phasors pa, Phasors pb) {
+            double ref = Math.max(pa.v1.abs(), pb.v1.abs());
+            return Math.min(pa.v0.abs(), pb.v0.abs()) > 0.02 * ref;
+        }
+
+        /**
+         * "Voltage only" synchronisation: within half a cycle either side of the shift that lines
+         * the two detected fault inceptions up (so both windows really are the same moment of the
+         * fault), finds the shift whose V1 and V0 angles agree best between the two records.
+         */
+        public double autoAlignVoltage(boolean inceptionsFromSignals) {
+            double c = inceptionsFromSignals || Double.isNaN(tauTimestamp) ? tauInception : tauTimestamp;
+            double lo = Math.max(tauMin, c - period / 2), hi = Math.min(tauMax, c + period / 2);
+            if (!(hi > lo)) return Math.max(tauMin, Math.min(tauMax, c));
+            int steps = 240;
+            double best = c, bestJ = Double.MAX_VALUE;
+            for (int k = 0; k <= steps; k++) {
+                double tau = lo + (hi - lo) * k / steps;
+                Phasors pb = bAt(tau);
+                if (pb == null) continue;
+                double j = mismatch(pb);
+                if (j < bestJ) { bestJ = j; best = tau; }
+            }
+            double step = (hi - lo) / steps, x = Math.max(lo, best - step), y = Math.min(hi, best + step);
+            double gr = (Math.sqrt(5) - 1) / 2;
+            for (int it = 0; it < 50; it++) {
+                double p = y - gr * (y - x), q = x + gr * (y - x);
+                Phasors pp = bAt(p), pq = bAt(q);
+                double jp = pp == null ? Double.MAX_VALUE : mismatch(pp), jq = pq == null ? Double.MAX_VALUE : mismatch(pq);
+                if (jp < jq) y = q; else x = p;
+            }
+            return (x + y) / 2;
+        }
+
+        /** Vectors of both ends at shift tau, plus the time-synchronised two-ended location. */
+        public Alignment alignAt(double tau) {
+            Alignment al = new Alignment();
+            al.tau = tau;
+            Phasors pb = bAt(tau);
+            if (pa == null || pb == null) return al;
+            al.valid = true;
+            al.a = pa;
+            al.b = pb;
+            al.dV1Deg = wrapDeg(Math.toDegrees(pb.v1.arg() - pa.v1.arg()));
+            al.dV0Deg = wrapDeg(Math.toDegrees(pb.v0.arg() - pa.v0.arg()));
+            al.dV2Deg = wrapDeg(Math.toDegrees(pb.v2.arg() - pa.v2.arg()));
+            al.v0Used = v0Significant(pa, pb);
+            final Cx vA = pa.v(s), iA = pa.i(s), vB = pb.v(s), iB = pb.i(s);
+            al.m = argMin(m -> lm.walk(vA, iA, m * L).sub(lm.walk(vB, iB, (1 - m) * L)).abs(), -0.25, 1.25, 600);
+            return al;
+        }
     }
 
     public static final String ERR_MAPPING_A = "MAPPING_A", ERR_MAPPING_B = "MAPPING_B";
@@ -764,6 +934,17 @@ public class DoubleEndedFaultLocator {
             res.profileA[k] = lm.walk(vA, iA, m * L).abs() / 1000;
             res.profileB[k] = lm.walk(vB, iB, (1 - m) * L).abs() / 1000;
         }
+
+        // ---- voltage-only vector synchronisation (adjustable afterwards with the slider) ----
+        Session session = new Session(a, b, lm, s, off, L);
+        res.session = session;
+        boolean signals = !"T".equals(a.incSource) && !"T".equals(b.incSource);
+        res.tauAuto = session.autoAlignVoltage(signals);
+        res.alignment = session.alignAt(res.tauAuto);
+        res.tauInception = session.tauInception;
+        res.tauTimestamp = session.tauTimestamp;
+        res.alignRefTimeA = session.refTimeA;
+        res.alignRefCurrentA = session.refCurrentA;
         return res;
     }
 

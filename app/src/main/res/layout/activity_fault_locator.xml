@@ -81,6 +81,16 @@
                 </LinearLayout>
 
                 <ImageButton
+                    android:id="@+id/btnFlHistory"
+                    android:layout_width="@dimen/icon_size_xl"
+                    android:layout_height="@dimen/icon_size_xl"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="@string/cd_fl_history"
+                    android:padding="@dimen/spacing_s"
+                    android:src="@drawable/ic_history"
+                    app:tint="@color/white" />
+
+                <ImageButton
                     android:id="@+id/btnFlInfo"
                     android:layout_width="@dimen/icon_size_xl"
                     android:layout_height="@dimen/icon_size_xl"
@@ -388,6 +398,18 @@
                         android:padding="@dimen/spacing_l">
 
                         <TextView
+                            android:id="@+id/tvFlSavedBanner"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="@dimen/spacing_s"
+                            android:background="@color/bg_navy_dim"
+                            android:padding="@dimen/spacing_s"
+                            android:textColor="@color/text_primary"
+                            android:textSize="@dimen/text_size_small"
+                            android:textStyle="bold"
+                            android:visibility="gone" />
+
+                        <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:letterSpacing="0.1"
@@ -523,6 +545,96 @@
                             android:layout_marginTop="@dimen/spacing_xs"
                             android:orientation="vertical" />
 
+                        <!-- Voltage-only vector synchronisation: A fixed, B shifted in time -->
+                        <TextView
+                            style="@style/SectionLabel"
+                            android:layout_marginTop="@dimen/spacing_m"
+                            android:text="@string/lbl_fl_sync_header" />
+
+                        <TextView
+                            android:id="@+id/tvFlSyncHint"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="@dimen/spacing_xs"
+                            android:text="@string/msg_fl_sync_hint"
+                            android:textColor="@color/text_secondary"
+                            android:textSize="@dimen/text_size_small" />
+
+                        <com.alidev.dfrtools.dfr.PhasorDiagramView
+                            android:id="@+id/phasorDiagram"
+                            android:layout_width="match_parent"
+                            android:layout_height="190dp"
+                            android:layout_marginTop="@dimen/spacing_s" />
+
+                        <TextView
+                            android:id="@+id/tvFlSyncInfo"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="@dimen/spacing_xs"
+                            android:background="@color/bg_navy_dim"
+                            android:lineSpacingExtra="@dimen/spacing_tiny"
+                            android:padding="@dimen/spacing_s"
+                            android:textColor="@color/text_primary"
+                            android:textSize="@dimen/text_size_body_small" />
+
+                        <LinearLayout
+                            android:id="@+id/layoutFlSyncControls"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical">
+
+                            <SeekBar
+                                android:id="@+id/seekFlShift"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="@dimen/spacing_s"
+                                android:paddingVertical="@dimen/spacing_s" />
+
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:gravity="center"
+                                android:orientation="horizontal">
+
+                                <Button
+                                    android:id="@+id/btnFlShiftMinus"
+                                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                                    android:layout_width="0dp"
+                                    android:layout_height="wrap_content"
+                                    android:layout_weight="1"
+                                    android:text="@string/btn_fl_shift_minus"
+                                    android:textSize="@dimen/text_size_small" />
+
+                                <Button
+                                    android:id="@+id/btnFlShiftAuto"
+                                    style="@style/Widget.MaterialComponents.Button.TextButton"
+                                    android:layout_width="0dp"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginHorizontal="@dimen/spacing_xs"
+                                    android:layout_weight="1"
+                                    android:text="@string/btn_fl_shift_auto"
+                                    android:textSize="@dimen/text_size_small" />
+
+                                <Button
+                                    android:id="@+id/btnFlShiftPlus"
+                                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                                    android:layout_width="0dp"
+                                    android:layout_height="wrap_content"
+                                    android:layout_weight="1"
+                                    android:text="@string/btn_fl_shift_plus"
+                                    android:textSize="@dimen/text_size_small" />
+                            </LinearLayout>
+                        </LinearLayout>
+
+                        <androidx.appcompat.widget.SwitchCompat
+                            android:id="@+id/swFlSyncMain"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="@dimen/spacing_xs"
+                            android:text="@string/lbl_fl_sync_main"
+                            android:textColor="@color/text_primary"
+                            android:textSize="@dimen/text_size_body_small" />
+
                         <TextView
                             style="@style/SectionLabel"
                             android:layout_marginTop="@dimen/spacing_m"
@@ -575,16 +687,36 @@
                                 android:textSize="@dimen/text_size_small" />
                         </HorizontalScrollView>
 
-                        <Button
-                            android:id="@+id/btnFlShare"
-                            style="@style/Widget.DFRtools.Button"
+                        <LinearLayout
+                            android:id="@+id/layoutFlResultActions"
                             android:layout_width="match_parent"
-                            android:layout_height="@dimen/icon_size_xxl"
+                            android:layout_height="wrap_content"
                             android:layout_marginTop="@dimen/spacing_l"
-                            android:text="@string/btn_fl_share"
-                            android:textSize="@dimen/text_size_body_small"
-                            app:icon="@drawable/ic_share"
-                            app:iconGravity="textStart" />
+                            android:orientation="horizontal">
+
+                            <Button
+                                android:id="@+id/btnFlSave"
+                                style="@style/Widget.DFRtools.Button"
+                                android:layout_width="0dp"
+                                android:layout_height="@dimen/icon_size_xxl"
+                                android:layout_weight="1"
+                                android:text="@string/btn_fl_save"
+                                android:textSize="@dimen/text_size_body_small"
+                                app:icon="@drawable/ic_save"
+                                app:iconGravity="textStart" />
+
+                            <Button
+                                android:id="@+id/btnFlShare"
+                                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                                android:layout_width="0dp"
+                                android:layout_height="@dimen/icon_size_xxl"
+                                android:layout_marginStart="@dimen/spacing_s"
+                                android:layout_weight="1"
+                                android:text="@string/btn_fl_share"
+                                android:textSize="@dimen/text_size_body_small"
+                                app:icon="@drawable/ic_share"
+                                app:iconGravity="textStart" />
+                        </LinearLayout>
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
             </LinearLayout>

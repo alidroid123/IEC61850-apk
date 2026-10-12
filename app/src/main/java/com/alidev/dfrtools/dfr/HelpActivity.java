@@ -202,6 +202,7 @@ public class HelpActivity extends BaseActivity {
                             new HelpFeature(R.string.help_feat_fl_1_title, R.string.help_feat_fl_1_steps),
                             new HelpFeature(R.string.help_feat_fl_2_title, R.string.help_feat_fl_2_steps),
                             new HelpFeature(R.string.help_feat_fl_3_title, R.string.help_feat_fl_3_steps),
+                            new HelpFeature(R.string.help_feat_fl_4_title, R.string.help_feat_fl_4_steps),
                     }),
             new HelpSection(R.drawable.ic_line_data, R.string.help_ttl_line_db, R.string.help_sum_line_db, R.string.help_func_line_db,
                     new HelpComponent[]{
