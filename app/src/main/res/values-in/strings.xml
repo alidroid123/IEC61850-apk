@@ -430,6 +430,7 @@
     <string name="lbl_notif_time_days">%d hari lalu</string>
     <string name="msg_all_update_available_title">Update Tersedia: v%1$s &gt; v%2$s</string>
     <string name="lbl_update_whats_new">Yang baru:</string>
+    <string name="msg_update_already_latest">Versi %s sudah terpasang – tidak ada update yang lebih baru.</string>
     <string name="ttl_all_delete_data">HAPUS DATA?</string>
     <string name="ttl_base_theme_selection">Pilih Tema (%s)</string>
     <string name="ttl_dev_database">Database Device</string>

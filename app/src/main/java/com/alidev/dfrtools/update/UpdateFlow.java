@@ -49,6 +49,8 @@ public class UpdateFlow {
         }
         waitingForInstallPermission = false;
         File apkFile = new File(activity.getExternalFilesDir(null), "update.apk");
+        // A leftover download of a version that is already installed must not be offered again.
+        if (apkFile.exists() && !UpdateChecker.isApkNewerThanInstalled(activity, apkFile)) apkFile.delete();
         if (apkFile.exists()) {
             installDownloadedApk(apkFile);
         } else if (pendingInfo != null) {

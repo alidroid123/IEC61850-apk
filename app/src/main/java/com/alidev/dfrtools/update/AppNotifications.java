@@ -61,6 +61,8 @@ public class AppNotifications {
 
     public static synchronized List<Item> getAll(Context context) {
         List<Item> items = new ArrayList<>();
+        String installed = UpdateChecker.getCurrentVersionName(context);
+        boolean pruned = false;
         try {
             JSONArray arr = new JSONArray(prefs(context).getString(KEY_ITEMS, "[]"));
             for (int i = 0; i < arr.length(); i++) {
@@ -71,9 +73,16 @@ public class AppNotifications {
                 item.message = o.optString("message", "");
                 item.timestampMillis = o.optLong("timestampMillis", 0);
                 item.read = o.optBoolean("read", false);
+                // An "update available" entry for a version that is now installed (or older)
+                // can't be acted on any more - tapping it found no update - so it goes.
+                if (item.id.startsWith("update_") && !UpdateChecker.isNewer(item.id.substring(7), installed)) {
+                    pruned = true;
+                    continue;
+                }
                 items.add(item);
             }
         } catch (JSONException ignored) {}
+        if (pruned) save(context, items);
         return items;
     }
 

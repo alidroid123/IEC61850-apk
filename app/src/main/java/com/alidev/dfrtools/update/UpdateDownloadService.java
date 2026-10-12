@@ -110,7 +110,12 @@ public class UpdateDownloadService extends Service {
         } catch (Exception ignored) {}
 
         File apkFile = apkFile();
-        if (successful && apkFile.exists() && apkFile.length() > 0) {
+        if (successful && apkFile.exists() && apkFile.length() > 0 && !UpdateChecker.isApkNewerThanInstalled(this, apkFile)) {
+            // Same (or older) version than what's installed: the system installer would only
+            // fail or offer a pointless reinstall.
+            apkFile.delete();
+            Toast.makeText(this, getString(R.string.msg_update_already_latest, UpdateChecker.getCurrentVersionName(this)), Toast.LENGTH_LONG).show();
+        } else if (successful && apkFile.exists() && apkFile.length() > 0) {
             Uri apkUri = FileProvider.getUriForFile(this, getPackageName() + ".fileprovider", apkFile);
             Intent installIntent = new Intent(Intent.ACTION_VIEW);
             installIntent.setDataAndType(apkUri, "application/vnd.android.package-archive");

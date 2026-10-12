@@ -118,6 +118,23 @@ public class UpdateChecker {
         return sb.toString();
     }
 
+    /**
+     * Whether the downloaded APK is a newer build than the installed app (versionCode, falling
+     * back to versionName); true when it can't be read, so the installer still gets to decide.
+     */
+    @SuppressWarnings("deprecation")
+    public static boolean isApkNewerThanInstalled(Context context, java.io.File apk) {
+        try {
+            PackageInfo archive = context.getPackageManager().getPackageArchiveInfo(apk.getAbsolutePath(), 0);
+            if (archive == null) return true;
+            PackageInfo installed = context.getPackageManager().getPackageInfo(context.getPackageName(), 0);
+            if (archive.versionCode != installed.versionCode) return archive.versionCode > installed.versionCode;
+            return isNewer(archive.versionName, installed.versionName);
+        } catch (Exception e) {
+            return true;
+        }
+    }
+
     /** Numeric major.minor.patch comparison; returns true if `remote` is newer than `current`. */
     static boolean isNewer(String remote, String current) {
         int[] r = parseVersion(remote);

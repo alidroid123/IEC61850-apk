@@ -57,6 +57,12 @@ android {
     }
 
     buildTypes {
+        // An Android Studio run already carries the number the NEXT release will get (the
+        // release task bumps version.properties after publishing), so tell it apart in About and
+        // in update notifications. UpdateChecker compares the numeric part only.
+        debug {
+            versionNameSuffix "-dev"
+        }
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'

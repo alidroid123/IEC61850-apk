@@ -51,6 +51,11 @@ public class AppFcmService extends FirebaseMessagingService {
         // De-duped by version below (same id as the in-app checker uses), so a release the user
         // already saw via push and then re-confirms by opening the app doesn't show up twice.
         String version = message.getData().get("version");
+
+        // Already on this version (updated in-app before the push arrived, or an Android Studio
+        // build carrying the next release's number): there is nothing to install, and announcing
+        // it showed "vX > vX" with an update that could never go through.
+        if (version != null && !UpdateChecker.isNewer(version, UpdateChecker.getCurrentVersionName(this))) return;
         String notifId = version != null ? "update_" + version : "push_" + System.currentTimeMillis();
 
         // Matches the "vInstalled > vNew" title HomeActivity/AboutActivity use for the same

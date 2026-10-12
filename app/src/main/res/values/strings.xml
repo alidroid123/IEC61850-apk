@@ -360,6 +360,7 @@
     <string name="msg_all_update_downloading">Mengunduh update di background… instalasi akan muncul otomatis setelah selesai.</string>
     <string name="lbl_update_download_channel">Unduhan Update Aplikasi</string>
     <string name="msg_update_download_failed">Gagal mengunduh update. Silakan coba lagi.</string>
+    <string name="msg_update_already_latest">Version %s is already installed – there is no newer update.</string>
     <string name="msg_all_update_checking">Memeriksa update…</string>
     <string name="msg_all_update_none">Tidak ada update baru, atau gagal memeriksa koneksi</string>
     <string name="msg_push_update_available">Versi baru ComtradeDownloader sudah tersedia. Buka aplikasi untuk update.</string>
