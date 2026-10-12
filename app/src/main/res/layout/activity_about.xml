@@ -126,6 +126,42 @@
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
+        <!-- Step-by-step tutorial: chapters (item_tutorial_chapter) filled by AboutActivity. -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_xl"
+            android:text="@string/ttl_tut_header"
+            android:textColor="?attr/colorPrimary"
+            android:textSize="@dimen/text_size_body_large"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_xs"
+            android:lineSpacingExtra="@dimen/spacing_xs"
+            android:text="@string/msg_tut_intro"
+            android:textColor="@color/text_secondary"
+            android:textSize="@dimen/text_size_body_small" />
+
+        <LinearLayout
+            android:id="@+id/containerTutorial"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnTutorialHelp"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_m"
+            android:text="@string/btn_tut_help"
+            android:textSize="@dimen/text_size_body_small"
+            app:icon="@drawable/ic_info"
+            app:iconGravity="textStart" />
+
         <com.google.android.material.card.MaterialCardView
             style="@style/Widget.DFRtools.CardView"
             android:layout_width="match_parent"

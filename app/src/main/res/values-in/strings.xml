@@ -313,6 +313,70 @@
     <!-- // Message -->
     <string name="msg_abt_description">Perkakas lapangan untuk engineer proteksi. Aplikasi ini menyambung ke Power System Protection Relays melalui protokol IEC 61850 MMS untuk mengambil dan menganalisis rekaman gangguan COMTRADE, menentukan lokasi gangguan saluran dari rekaman kedua ujung, menjelajahi struktur data IED secara langsung, serta memantau pengukuran dan alarm dari banyak gardu induk sekaligus.</string>
     <string name="lbl_abt_features">Fitur Utama</string>
+
+    <!-- About: step-by-step tutorial (AboutActivity.TUTORIAL) -->
+    <string name="ttl_tut_header">Panduan Penggunaan</string>
+    <string name="msg_tut_intro">Ikuti bab secara berurutan, dari persiapan sampai analisa gangguan. Ketuk sebuah bab untuk melihat langkah-langkahnya, lalu pakai tombol di bawah langkah untuk langsung membuka layar yang dibahas.</string>
+    <string name="btn_tut_help">Bantuan per layar (penjelasan setiap tombol)</string>
+    <string name="btn_tut_open">Buka %s</string>
+
+    <string name="tut_link_settings">Pengaturan</string>
+    <string name="tut_link_import_config">Impor Konfigurasi</string>
+    <string name="tut_link_devices">Daftar Device</string>
+    <string name="tut_link_overview">Peta Status Gardu</string>
+    <string name="tut_link_download">Download DFR</string>
+    <string name="tut_link_history">Riwayat Download</string>
+    <string name="tut_link_viewer">DFR Viewer</string>
+    <string name="tut_link_line_db">Database Saluran</string>
+    <string name="tut_link_fl">FL Double Ended</string>
+    <string name="tut_link_explorer">IED Explorer</string>
+    <string name="tut_link_monitoring">IED Monitoring</string>
+    <string name="tut_link_template">Template Relay</string>
+    <string name="tut_link_notifications">Notifikasi</string>
+    <string name="tut_link_help">Bantuan</string>
+
+    <string name="tut_1_title">Persiapan Awal</string>
+    <string name="tut_1_goal">Izin, jaringan, dan pengaturan dasar sebelum terhubung ke relay.</string>
+    <string name="tut_1_steps">1. Berikan izin yang diminta aplikasi: Notifikasi (info update), \"Akses semua file\" (agar file DFR di folder Download/DFR dan folder lain bisa dibaca) dan \"Instal aplikasi tidak dikenal\" saat pertama kali memasang update.\n2. Hubungkan HP ke jaringan relay: intranet kantor atau VPN FortiClient. FortiClient bisa dibuka dari menu samping Beranda, atau otomatis ditawarkan saat cek intranet gagal.\n3. Buka Pengaturan, lalu periksa Port MMS (standar 102), IP Intranet untuk cek jaringan, jumlah ping, interval monitoring, dan bahasa aplikasi.\n4. Punya file backup konfigurasi dari rekan atau HP lama? Impor sekarang lewat Impor Konfigurasi - daftar device, titik monitoring, template relay, dan database saluran langsung terisi.</string>
+
+    <string name="tut_2_title">Daftar Device (Relay)</string>
+    <string name="tut_2_goal">Satu basis data relay, agar IP dan nama tidak perlu diketik berulang.</string>
+    <string name="tut_2_steps">1. Ketuk + untuk menambah device: UPT, ULTG, GI, Bay, Device, IP, Merk, dan Tipe relay.\n2. Untuk banyak device sekaligus, ketuk Impor CSV. Unduh template-nya dulu - urutan kolom: UPT, ULTG, NAMA GI, BAY, DEVICE, IP, MERK, TYPE. Bila IP di CSV sudah terdaftar dengan data berbeda, aplikasi bertanya TIMPA atau LEWATI.\n3. Saring daftar dengan filter berurutan UPT, ULTG, GI, BAY, lalu DEVICE.\n4. Ketuk ikon Ping semua di bagian atas untuk mengecek status online/offline dan port 102 (IEC 61850) setiap device.\n5. Ketuk sebuah device untuk aksi cepat: Ping, IED Explorer, Download DFR, Edit, atau Hapus. Ekspor CSV untuk membagikan daftar ke rekan.</string>
+
+    <string name="tut_3_title">Download DFR dari Relay</string>
+    <string name="tut_3_goal">Mengambil rekaman gangguan (COMTRADE) langsung dari relay lewat MMS / IEC 61850.</string>
+    <string name="tut_3_steps">1. Dari Daftar Device ketuk device lalu Download DFR, atau buka Download DFR dan pilih device lewat ikon daftar (bisa juga mengisi IP manual).\n2. Biarkan saklar INTRANET aktif agar jaringan dicek dulu. Bila koneksi gagal, coba Profile lain (Default, ABB/GE, Schneider).\n3. Ketuk HUBUNGKAN. Aplikasi mendeteksi merk relay lalu memindai folder rekaman secara otomatis.\n4. Rekaman tampil dari yang terbaru, 50 per halaman. Pakai Kembali/Lanjut, atau ketuk info halaman untuk lompat ke halaman tertentu.\n5. Ketuk UNDUH pada satu rekaman, atau pilih mode Bulk (N rekaman terbaru) / Single (rekaman ke-N) lalu MULAI UNDUH. File pasangannya (.cfg, .dat, .hdr, atau .zip dan h.zip) ikut terunduh.\n6. Setelah selesai pilih BUKA (langsung ke DFR Viewer), buka folder, atau bagikan file-nya.</string>
+    <string name="tut_3_note">File tersimpan di Download/DFR/&lt;GI&gt;_&lt;BAY&gt; dan juga muncul di Riwayat Download serta daftar record lokal FL Double Ended.</string>
+
+    <string name="tut_4_title">Riwayat Download</string>
+    <string name="tut_4_goal">Mengelola file DFR yang sudah tersimpan di HP.</string>
+    <string name="tut_4_steps">1. File dikelompokkan per folder GI_BAY - ketuk folder untuk melihat isinya.\n2. Ketuk file .cfg untuk membukanya di DFR Viewer.\n3. Bagikan isi folder ke aplikasi lain, atau hapus file/folder yang tidak diperlukan.\n4. Bila daftar kosong di Android 11 ke atas, berikan izin \"Akses semua file\" yang diminta.</string>
+
+    <string name="tut_5_title">Membaca Rekaman di DFR Viewer</string>
+    <string name="tut_5_goal">Melihat bentuk gelombang, mengukur nilai gangguan, dan membuat laporan.</string>
+    <string name="tut_5_steps">1. Buka rekaman dari Riwayat Download, dari tombol Buka setelah download, atau dari ikon folder: pilih file .cfg, atau arsip .zip/.rar berisi .cfg + .dat.\n2. Dari WhatsApp, Telegram, atau file manager: ketuk file .cfg/.dat/.zip/.rar, pilih Buka dengan, lalu DFR Viewer.\n3. Pada dialog mapping, cocokkan kanal dengan template relay. Mapping bisa diubah lagi lewat menu pengaturan, lalu Edit Konfigurasi.\n4. Geser kursor T1/T2 untuk membaca selisih waktu dan nilai. Kunci zoom dan kursor agar semua kanal bergerak bersama.\n5. Isi bagian penilaian (judul, fasa, nilai), lalu EKSPOR KE PDF atau DOWNLOAD IMG. File pendukung (.hdr/.inf/.xml) dibuka dari menu pengaturan.</string>
+    <string name="tut_5_note">DFR Viewer membaca file .dat format ASCII. Rekaman format BINARY tetap bisa dianalisa di FL Double Ended.</string>
+
+    <string name="tut_6_title">Database Saluran</string>
+    <string name="tut_6_goal">Panjang dan impedansi saluran, dipakai FL Double Ended.</string>
+    <string name="tut_6_steps">1. Di Excel, simpan sheet data konduktor sebagai CSV, lalu Impor di Database Saluran. Ringkasan menampilkan jumlah saluran yang ditambah atau diperbarui.\n2. Atau tambah saluran manual: GI, bay, GI lawan, panjang, R1/X1 dan R0/X0 per km.\n3. Data ini otomatis dipilih FL Double Ended bila ada saluran yang menghubungkan kedua GI, dan ikut tersimpan di Ekspor Konfigurasi.</string>
+
+    <string name="tut_7_title">FL Double Ended (Lokasi Gangguan)</string>
+    <string name="tut_7_goal">Menghitung jarak gangguan dari rekaman relay di kedua ujung saluran.</string>
+    <string name="tut_7_steps">1. Di UJUNG A pilih GI dan relay saluran, lalu ambil rekaman: Unduh dari relay (rekaman terdekat waktunya dengan ujung lain diberi tanda), atau File lokal - pilih rekaman tersimpan, file .cfg (.dat di folder yang sama ikut otomatis), atau arsip .zip/.rar.\n2. Lakukan hal yang sama di UJUNG B. Dari WhatsApp juga bisa: Buka dengan, FL Double Ended, lalu pilih Ujung A atau B.\n3. Periksa Mapping kanal (Va, Vb, Vc, Ia, Ib, Ic) di tiap ujung. Centang Balik polaritas arus bila CT di ujung itu terbalik.\n4. Pilih saluran dari Database Saluran, atau isi panjang, R1, X1, R0, X0. Lalu ketuk Analisa lokasi gangguan.\n5. Baca hasil: jarak dari tiap GI, jenis gangguan, perbandingan metode, grafik tegangan titik gangguan, dan tabel fasor. Baca juga peringatan yang muncul (polaritas, gangguan di luar saluran, data saluran).\n6. Atur slider Sinkronisasi vektor bila perlu, lalu Simpan hasil (laporan PDF + riwayat) atau Bagikan laporan.</string>
+    <string name="tut_7_note">Analisa terakhir tetap tersimpan: saat FL Double Ended dibuka lagi, rekaman, mapping, data saluran, dan hasil kembali seperti semula.</string>
+
+    <string name="tut_8_title">Monitoring IED</string>
+    <string name="tut_8_goal">Memantau nilai dan status relay secara berkala.</string>
+    <string name="tut_8_steps">1. Buka IED Explorer, isi IP relay (atau pilih dari daftar), lalu telusuri struktur Logical Device, Logical Node, dan Data Attribute.\n2. Ketuk + di samping sebuah nilai untuk menambahkannya ke Monitoring - atur nama, tipe, satuan, dan pengali.\n3. Untuk banyak relay sejenis, buat Template Relay sekali, lalu terapkan ke beberapa device sekaligus lewat tombol Template di IED Monitoring.\n4. Di IED Monitoring, perbarui semua device atau satu device saja. Ketuk ikon edit pada titik untuk mengatur alarm batas atas/bawah.\n5. Peta Status Gardu menampilkan status online/offline semua device per GI dalam satu layar.</string>
+
+    <string name="tut_9_title">Backup, Update, dan Notifikasi</string>
+    <string name="tut_9_goal">Menjaga data tetap aman dan aplikasi selalu versi terbaru.</string>
+    <string name="tut_9_steps">1. Di Pengaturan, Ekspor Konfigurasi secara berkala: satu file berisi daftar device, titik monitoring, template relay, node definition, dan database saluran. Bagikan ke rekan agar datanya sama.\n2. Impor Konfigurasi menggabungkan data dari file tersebut tanpa menimpa data yang sudah ada.\n3. Saat versi baru dirilis, muncul notifikasi update - ketuk untuk mengunduh dan memasangnya. Riwayat notifikasi ada di ikon lonceng Beranda.\n4. Cek update secara manual dengan tombol Cek Update di bagian bawah halaman ini.</string>
+
+    <string name="tut_10_title">Tips dan Pemecahan Masalah</string>
+    <string name="tut_10_goal">Solusi cepat untuk kendala yang paling sering muncul.</string>
+    <string name="tut_10_steps">1. Gagal terhubung ke relay: pastikan VPN/intranet aktif, cek Ping dan port 102 di Daftar Device, lalu coba Profile koneksi lain.\n2. Pesan pasangan .cfg + .dat tidak ditemukan: pilih file .cfg dari foldernya (.dat ikut otomatis), kirim keduanya dalam satu .zip/.rar, dan pastikan izin \"Akses semua file\" aktif.\n3. Arsip RAR berpassword tidak bisa dibuka - minta pengirim mengirim ulang tanpa password.\n4. Hasil FL Double Ended meragukan: baca peringatannya, cek polaritas CT dan data saluran, dan pastikan kedua rekaman berasal dari kejadian yang sama.\n5. Tema warna dan mode gelap diganti dari menu samping Beranda; bahasa aplikasi di Pengaturan.\n6. Penjelasan setiap tombol di tiap layar ada di Bantuan.</string>
     <string name="abt_feat_1_name">Unduh COMTRADE</string>
     <string name="abt_feat_1_desc">Ambil rekaman gangguan DFR dari relay via MMS, dengan mode Bulk / Single / Deep Scan dan profil vendor.</string>
     <string name="abt_feat_2_name">DFR Viewer</string>

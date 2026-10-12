@@ -331,6 +331,70 @@
     <!-- // Message -->
     <string name="msg_abt_description">A field toolkit for protection engineers. It connects to Power System Protection Relays over the IEC 61850 MMS protocol to retrieve and analyse COMTRADE fault records, locate line faults from the records of both line ends, browse an IED\'s live data model, and continuously monitor measurements and alarms across a whole fleet of substations.</string>
     <string name="lbl_abt_features">Main Features</string>
+
+    <!-- About: step-by-step tutorial (AboutActivity.TUTORIAL) -->
+    <string name="ttl_tut_header">User Guide</string>
+    <string name="msg_tut_intro">Work through the chapters in order, from set-up to fault analysis. Tap a chapter to see its steps, then use the buttons below the steps to jump straight to the screen it covers.</string>
+    <string name="btn_tut_help">Per-screen help (what every button does)</string>
+    <string name="btn_tut_open">Open %s</string>
+
+    <string name="tut_link_settings">Settings</string>
+    <string name="tut_link_import_config">Import Configuration</string>
+    <string name="tut_link_devices">Device List</string>
+    <string name="tut_link_overview">Substation Status Map</string>
+    <string name="tut_link_download">DFR Download</string>
+    <string name="tut_link_history">Download History</string>
+    <string name="tut_link_viewer">DFR Viewer</string>
+    <string name="tut_link_line_db">Line Database</string>
+    <string name="tut_link_fl">FL Double Ended</string>
+    <string name="tut_link_explorer">IED Explorer</string>
+    <string name="tut_link_monitoring">IED Monitoring</string>
+    <string name="tut_link_template">Relay Templates</string>
+    <string name="tut_link_notifications">Notifications</string>
+    <string name="tut_link_help">Help</string>
+
+    <string name="tut_1_title">Getting Started</string>
+    <string name="tut_1_goal">Permissions, network and basic settings before connecting to a relay.</string>
+    <string name="tut_1_steps">1. Grant the permissions the app asks for: Notifications (update news), \"All files access\" (so DFR files in Download/DFR and other folders can be read) and \"Install unknown apps\" the first time you install an update.\n2. Connect the phone to the relay network: the office intranet or FortiClient VPN. FortiClient can be opened from the Home side menu, and is offered automatically when the intranet check fails.\n3. Open Settings and check the MMS port (normally 102), the intranet IP used for the network check, ping counts, monitoring interval and app language.\n4. Have a configuration backup from a colleague or an old phone? Import it now with Import Configuration - the device list, monitoring points, relay templates and line database are filled in at once.</string>
+
+    <string name="tut_2_title">Device List (Relays)</string>
+    <string name="tut_2_goal">One relay database, so IPs and names never have to be typed twice.</string>
+    <string name="tut_2_steps">1. Tap + to add a device: UPT, ULTG, substation (GI), bay, device, IP, relay brand and type.\n2. For many devices at once, tap Import CSV. Download the template first - column order: UPT, ULTG, NAMA GI, BAY, DEVICE, IP, MERK, TYPE. When a CSV IP is already listed with different data, the app asks OVERWRITE or SKIP.\n3. Narrow the list with the filters, in order: UPT, ULTG, GI, BAY, then DEVICE.\n4. Tap the Ping all icon at the top to check every device\'s online/offline state and port 102 (IEC 61850).\n5. Tap a device for quick actions: Ping, IED Explorer, DFR Download, Edit or Delete. Export CSV to share the list with colleagues.</string>
+
+    <string name="tut_3_title">Downloading DFRs from a Relay</string>
+    <string name="tut_3_goal">Fetching disturbance records (COMTRADE) straight from the relay over MMS / IEC 61850.</string>
+    <string name="tut_3_steps">1. From the Device List tap a device and then DFR Download, or open DFR Download and pick a device with the list icon (or type the IP).\n2. Leave the INTRANET switch on so the network is checked first. If connecting fails, try another Profile (Default, ABB/GE, Schneider).\n3. Tap CONNECT. The app detects the relay brand and scans the record folders automatically.\n4. Records are listed newest first, 50 per page. Use Prev/Next, or tap the page info to jump to a page.\n5. Tap DOWNLOAD on one record, or choose Bulk (the N newest records) / Single (record number N) and start the download. The partner files (.cfg, .dat, .hdr, or .zip and h.zip) come along.\n6. When done, choose OPEN (straight into the DFR Viewer), open the folder, or share the files.</string>
+    <string name="tut_3_note">Files are saved in Download/DFR/&lt;GI&gt;_&lt;BAY&gt; and also show up in Download History and in FL Double Ended\'s local record list.</string>
+
+    <string name="tut_4_title">Download History</string>
+    <string name="tut_4_goal">Managing the DFR files already on the phone.</string>
+    <string name="tut_4_steps">1. Files are grouped per GI_BAY folder - tap a folder to see its contents.\n2. Tap a .cfg file to open it in the DFR Viewer.\n3. Share a folder\'s contents with another app, or delete files/folders you no longer need.\n4. If the list is empty on Android 11 or later, grant the \"All files access\" permission it asks for.</string>
+
+    <string name="tut_5_title">Reading Records in the DFR Viewer</string>
+    <string name="tut_5_goal">Viewing waveforms, measuring fault values and making a report.</string>
+    <string name="tut_5_steps">1. Open a record from Download History, from the Open button after a download, or with the folder icon: pick a .cfg file, or a .zip/.rar archive holding the .cfg + .dat.\n2. From WhatsApp, Telegram or a file manager: tap the .cfg/.dat/.zip/.rar file, choose Open with, then DFR Viewer.\n3. In the mapping dialog, match the channels to the relay template. The mapping can be changed later from the settings menu, Edit Configuration.\n4. Drag the T1/T2 cursors to read time and value differences. Lock zoom and cursors so every channel moves together.\n5. Fill in the assessment (title, phases, values), then export to PDF or DOWNLOAD IMG. Companion files (.hdr/.inf/.xml) open from the settings menu.</string>
+    <string name="tut_5_note">The DFR Viewer reads ASCII .dat files. BINARY records can still be analysed in FL Double Ended.</string>
+
+    <string name="tut_6_title">Line Database</string>
+    <string name="tut_6_goal">Line lengths and impedances, used by FL Double Ended.</string>
+    <string name="tut_6_steps">1. In Excel, save the conductor data sheet as CSV, then Import it in the Line Database. A summary shows how many lines were added or updated.\n2. Or add a line by hand: GI, bay, remote GI, length, R1/X1 and R0/X0 per km.\n3. FL Double Ended picks this data automatically when a line connects both substations, and it is included in the configuration export.</string>
+
+    <string name="tut_7_title">FL Double Ended (Fault Location)</string>
+    <string name="tut_7_goal">Computing the fault distance from the relay records at both line ends.</string>
+    <string name="tut_7_steps">1. At END A pick the substation and line relay, then get a record: Download from relay (the record closest in time to the other end is marked), or Local file - a stored record, a .cfg file (its .dat in the same folder comes along) or a .zip/.rar archive.\n2. Do the same at END B. From WhatsApp too: Open with, FL Double Ended, then choose end A or B.\n3. Check the Channel mapping (Va, Vb, Vc, Ia, Ib, Ic) of each end. Tick Invert current polarity when that end\'s CT is reversed.\n4. Pick the line from the Line Database, or fill in length, R1, X1, R0, X0. Then tap Analyze.\n5. Read the result: distance from each substation, fault type, method comparison, fault-point voltage chart and phasor tables. Read any warnings too (polarity, fault outside the line, line data).\n6. Adjust the vector synchronisation slider if needed, then Save the result (PDF report + history) or Share the report.</string>
+    <string name="tut_7_note">The last analysis is kept: when FL Double Ended is opened again, the records, mapping, line data and result come back as they were.</string>
+
+    <string name="tut_8_title">IED Monitoring</string>
+    <string name="tut_8_goal">Watching relay values and states periodically.</string>
+    <string name="tut_8_steps">1. Open the IED Explorer, enter the relay IP (or pick it from the list), and browse its Logical Devices, Logical Nodes and Data Attributes.\n2. Tap + next to a value to add it to Monitoring - set its name, type, unit and multiplier.\n3. For many relays of the same type, build a Relay Template once and apply it to several devices at once with the Template button in IED Monitoring.\n4. In IED Monitoring, refresh all devices or just one. Tap a point\'s edit icon to set upper/lower alarm limits.\n5. The Substation Status Map shows every device\'s online/offline state per substation on one screen.</string>
+
+    <string name="tut_9_title">Backup, Updates and Notifications</string>
+    <string name="tut_9_goal">Keeping your data safe and the app up to date.</string>
+    <string name="tut_9_steps">1. In Settings, Export Configuration regularly: one file with the device list, monitoring points, relay templates, node definitions and line database. Share it so colleagues work with the same data.\n2. Import Configuration merges that file into your data without overwriting anything already there.\n3. When a new version is released an update notification appears - tap it to download and install. Past notifications are under the bell icon on Home.\n4. Check for updates by hand with the Check Update button at the bottom of this page.</string>
+
+    <string name="tut_10_title">Tips and Troubleshooting</string>
+    <string name="tut_10_goal">Quick fixes for the most common problems.</string>
+    <string name="tut_10_steps">1. Can\'t connect to a relay: make sure the VPN/intranet is on, check Ping and port 102 in the Device List, then try another connection Profile.\n2. \".cfg + .dat pair not found\": pick the .cfg from its folder (the .dat comes along), send both in one .zip/.rar, and make sure \"All files access\" is granted.\n3. Password-protected RAR archives can\'t be opened - ask the sender to resend without a password.\n4. Doubtful FL Double Ended result: read its warnings, check CT polarity and line data, and make sure both records are of the same event.\n5. Colour theme and dark mode are changed from the Home side menu; the app language in Settings.\n6. What every button on every screen does is explained in Help.</string>
     <string name="abt_feat_1_name">COMTRADE Download</string>
     <string name="abt_feat_1_desc">Retrieve DFR fault records from a relay over MMS, with Bulk / Single / Deep Scan modes and vendor profiles.</string>
     <string name="abt_feat_2_name">DFR Viewer</string>
