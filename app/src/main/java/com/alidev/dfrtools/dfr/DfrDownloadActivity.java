@@ -99,6 +99,14 @@ public class DfrDownloadActivity extends BaseActivity {
                 drawerLayout.closeDrawers();
                 startActivity(new Intent(this, IEDMonitoringActivity.class));
                 return true;
+            } else if (id == R.id.nav_fault_locator) {
+                drawerLayout.closeDrawers();
+                startActivity(new Intent(this, FaultLocatorActivity.class));
+                return true;
+            } else if (id == R.id.nav_line_db) {
+                drawerLayout.closeDrawers();
+                startActivity(new Intent(this, LineDatabaseActivity.class));
+                return true;
             } else if (id == R.id.nav_about) {
                 drawerLayout.closeDrawers();
                 startActivity(new Intent(this, AboutActivity.class));

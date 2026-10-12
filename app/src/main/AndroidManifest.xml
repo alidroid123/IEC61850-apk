@@ -148,6 +148,21 @@
             android:exported="false"
             android:label="Edit Relay Template" />
 
+        <!-- configChanges: the two loaded DFR records + result live only in memory, a rotation
+             must not throw them away. -->
+        <activity
+            android:name=".dfr.FaultLocatorActivity"
+            android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
+            android:exported="false"
+            android:label="FL Double Ended"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity
+            android:name=".dfr.LineDatabaseActivity"
+            android:exported="false"
+            android:label="Database Saluran"
+            android:windowSoftInputMode="adjustResize" />
+
         <activity
             android:name=".dfr.SubstationOverviewActivity"
             android:exported="false"

@@ -238,7 +238,7 @@
     <string name="msg_backup_export_ok">Configuration exported successfully</string>
     <string name="msg_backup_export_fail">Export failed: %1$s</string>
     <string name="msg_backup_save_as_ok">File konfigurasi berhasil disimpan</string>
-    <string name="msg_backup_import_ok">Import complete: %1$d device(s), %2$d monitoring point(s), %3$d template(s), %4$d definition(s) added</string>
+    <string name="msg_backup_import_ok">Import complete: %1$d device(s), %2$d monitoring point(s), %3$d template(s), %4$d definition(s), %5$d line(s) added</string>
     <string name="msg_backup_import_fail">Import failed: file is not a valid backup (%1$s)</string>
     <string name="ttl_tmpl_edit_main">Edit Relay Template</string>
     <string name="btn_tmpl_add_template">Add Template</string>
@@ -315,7 +315,7 @@
     <string name="lbl_view_trigger_time_label">Trigger Time :</string>
 
     <!-- // Message -->
-    <string name="msg_abt_description">A field toolkit for protection engineers. It connects to Power System Protection Relays over the IEC 61850 MMS protocol to retrieve and analyse COMTRADE fault records, browse an IED\'s live data model, and continuously monitor measurements and alarms across a whole fleet of substations.</string>
+    <string name="msg_abt_description">A field toolkit for protection engineers. It connects to Power System Protection Relays over the IEC 61850 MMS protocol to retrieve and analyse COMTRADE fault records, locate line faults from the records of both line ends, browse an IED\'s live data model, and continuously monitor measurements and alarms across a whole fleet of substations.</string>
     <string name="lbl_abt_features">Main Features</string>
     <string name="abt_feat_1_name">COMTRADE Download</string>
     <string name="abt_feat_1_desc">Retrieve DFR fault records from a relay over MMS, with Bulk / Single / Deep Scan modes and vendor profiles.</string>
@@ -332,7 +332,7 @@
     <string name="abt_feat_7_name">Relay Templates</string>
     <string name="abt_feat_7_desc">Define a reusable point set per relay model and apply it to any device of that type in one step.</string>
     <string name="abt_feat_8_name">Backup &amp; Restore</string>
-    <string name="abt_feat_8_desc">Export devices, monitored points, and templates into one JSON file, and merge it back without overwriting.</string>
+    <string name="abt_feat_8_desc">Export devices, monitored points, templates, node definitions, and the Line Database into one JSON file, and merge it back without overwriting.</string>
     <string name="abt_feat_9_name">Automatic Updates</string>
     <string name="abt_feat_9_desc">Checks GitHub for new releases, installs them in-app, and can announce them by push notification.</string>
     <string name="abt_feat_10_name">Themes &amp; Language</string>
@@ -785,7 +785,7 @@
     <string name="help_cmp_set_3_name">Application Language spinner</string>
     <string name="help_cmp_set_3_desc">Switches the whole app between Indonesian and English instantly.</string>
     <string name="help_cmp_set_4_name">Export Configuration</string>
-    <string name="help_cmp_set_4_desc">Saves the device list, monitoring points, and relay templates into one JSON backup file.</string>
+    <string name="help_cmp_set_4_desc">Saves the device list, monitoring points, relay templates, node definitions and the Line Database into one JSON backup file.</string>
     <string name="help_cmp_set_5_name">Import Configuration</string>
     <string name="help_cmp_set_5_desc">Merges a previously exported file\'s devices/points/templates into what\'s already on this phone, without overwriting existing entries.</string>
     <string name="help_feat_set_1_title">Adjusting Technical Defaults</string>
@@ -816,4 +816,227 @@
     <string name="help_feat_tips_2_steps">1. Open the side drawer with {ic:menu}.\n2. Tap one of the five colour dots under \"Colour Scheme\" to change the scheme.\n3. Pick the multi-colour dot for the Abstract theme, which rotates the palette per screen.\n4. Tap {ic:theme} \"Change Mode\" to switch between Light and Dark.</string>
     <string name="help_feat_tips_3_title">Offline vs Online</string>
     <string name="help_feat_tips_3_steps">1. Most of the app works fully offline.\n2. Only actions that talk to a physical relay (connect, explore, download, monitor, ping) need the phone on the same network as the relay, usually via VPN.</string>
+
+    <!-- FL Double Ended (FaultLocatorActivity) -->
+    <string name="menu_home_fl">FL DOUBLE ENDED</string>
+    <string name="ttl_fl_title">FL Double Ended</string>
+    <string name="lbl_fl_subtitle">Two-ended fault location from 2 relay DFRs</string>
+    <string name="cd_fl_back">Back</string>
+    <string name="cd_fl_method_info">Method info</string>
+    <string name="lbl_fl_end_a">END A (SUBSTATION A)</string>
+    <string name="lbl_fl_end_b">END B (SUBSTATION B)</string>
+    <string name="lbl_fl_gi_a_short">Substation A</string>
+    <string name="lbl_fl_gi_b_short">Substation B</string>
+    <string name="lbl_fl_gi">Substation</string>
+    <string name="lbl_fl_relay">Relay / IP</string>
+    <string name="lbl_fl_no_devices_item">(no relay in database)</string>
+    <string name="btn_fl_download_relay">Download from relay</string>
+    <string name="btn_fl_local_file">Local file</string>
+    <string name="btn_fl_mapping">Channel mapping</string>
+    <string name="btn_fl_open_viewer">Open in viewer</string>
+    <string name="msg_fl_no_record">No record selected yet</string>
+    <string name="msg_fl_record_info">%1$s\n%2$s • trigger %3$s\n%4$s Hz • %5$d analog • %6$s</string>
+    <string name="msg_fl_mapping_summary">V: %1$s / %2$s / %3$s   I: %4$s / %5$s / %6$s</string>
+    <string name="msg_fl_mapping_incomplete">Channel mapping incomplete – tap Channel mapping</string>
+    <string name="lbl_fl_inverted_tag">(current inverted)</string>
+    <string name="lbl_fl_status_ready">READY</string>
+    <string name="lbl_fl_status_check_map">CHECK MAPPING</string>
+
+    <string name="lbl_fl_line_header">LINE PARAMETERS</string>
+    <string name="hint_fl_length">Line length (km)</string>
+    <string name="lbl_fl_total_values">Enter whole-line totals (Ω, µS) instead of per km</string>
+    <string name="hint_fl_r1">R1 (Ω/km)</string>
+    <string name="hint_fl_x1">X1 (Ω/km)</string>
+    <string name="hint_fl_r0">R0 (Ω/km) – optional</string>
+    <string name="hint_fl_x0">X0 (Ω/km) – optional</string>
+    <string name="hint_fl_b1">B1 (µS/km) – optional</string>
+    <string name="hint_fl_r1_total">R1 line (Ω)</string>
+    <string name="hint_fl_x1_total">X1 line (Ω)</string>
+    <string name="hint_fl_r0_total">R0 line (Ω) – optional</string>
+    <string name="hint_fl_x0_total">X0 line (Ω) – optional</string>
+    <string name="hint_fl_b1_total">B1 line (µS) – optional</string>
+    <string name="hint_fl_offset">Window (cycles) – auto</string>
+    <string name="msg_fl_line_hint">Primary-side line impedance. The two-ended method only needs Z1 (R1, X1); Z0 is used for the single-ended cross-check and the fault resistance of earth faults. Fill B1 for long lines (over ~150 km) to switch to the distributed (hyperbolic) line model. Leave the window empty to let the most stable fault window be picked automatically.</string>
+    <string name="btn_fl_analyze">Analyze fault location</string>
+
+    <string name="lbl_fl_result_header">FAULT LOCATION RESULT</string>
+    <string name="lbl_fl_from">From %s</string>
+    <string name="msg_fl_pct">%1$s %% of the %2$s km line</string>
+    <string name="msg_fl_spread">±%1$s km (spread over %2$d windows)</string>
+    <string name="lbl_fl_fault_type">FAULT %1$s (%2$s)</string>
+    <string name="lbl_fl_methods_header">Method comparison</string>
+    <string name="lbl_fl_method_de_neg">Two-ended, negative sequence (main)</string>
+    <string name="lbl_fl_method_de_pos_sup">Two-ended, superimposed positive sequence (main)</string>
+    <string name="lbl_fl_method_de_pos_total">Two-ended, positive sequence (main)</string>
+    <string name="lbl_fl_method_de_pos">Two-ended, positive sequence</string>
+    <string name="lbl_fl_method_sync">Two-ended, time-synchronised</string>
+    <string name="lbl_fl_method_takagi">Single-ended Takagi from %s</string>
+    <string name="lbl_fl_sync_untrusted">relay clocks not synchronised – ignore</string>
+    <string name="val_fl_method">%1$s km (Δ %2$s)</string>
+    <string name="val_fl_from_end">= %1$s km from %2$s</string>
+    <string name="val_fl_na">n/a</string>
+    <string name="lbl_fl_profile_header">Fault-point voltage along the line</string>
+    <string name="msg_fl_profile_hint">|V| (sequence used by the main method, kV) computed along the line from each end using that end\'s own voltage and current. Both curves can only agree at the real fault point – their crossing is the fault location.</string>
+    <string name="lbl_fl_curve_from">From %s</string>
+    <string name="lbl_fl_details_header">Analysis details</string>
+    <string name="lbl_fl_det_rf">Fault resistance (estimate)</string>
+    <string name="lbl_fl_det_dir">Direction seen by %s</string>
+    <string name="val_fl_dir_fwd">Forward (into the line)</string>
+    <string name="val_fl_dir_rev">Reverse (towards the bus)</string>
+    <string name="val_fl_dir_unknown">Undetermined</string>
+    <string name="lbl_fl_det_delta">Phasor alignment angle A↔B</string>
+    <string name="lbl_fl_det_inc_diff">Inception time difference (DFR clocks)</string>
+    <string name="lbl_fl_det_window">Fault window</string>
+    <string name="val_fl_window">%1$s cycles after inception, %2$d windows</string>
+    <string name="lbl_fl_det_model">Line model</string>
+    <string name="val_fl_model_lumped">Lumped (short/medium line)</string>
+    <string name="val_fl_model_dist">Distributed / hyperbolic (long line)</string>
+    <string name="lbl_fl_det_record">Record %s</string>
+    <string name="val_fl_record">%1$s Hz (%2$d/cycle) %3$s\ninception t=%4$s ms (%5$s)</string>
+    <string name="val_fl_src_i">current</string>
+    <string name="val_fl_src_v">voltage</string>
+    <string name="val_fl_src_t">trigger time</string>
+    <string name="lbl_fl_phasor_header">Phasors (primary, angle ref. Va pre-fault)</string>
+    <string name="lbl_fl_prefault">Pre-fault</string>
+    <string name="lbl_fl_fault">Fault</string>
+    <string name="btn_fl_share">Share report</string>
+    <string name="btn_fl_fix_polarity">Invert current polarity of %s &amp; re-analyze</string>
+    <string name="ttl_fl_report">Double-ended fault location report</string>
+    <string name="lbl_fl_record_files">Records:</string>
+
+    <string name="msg_fl_connecting">Connecting to %s…</string>
+    <string name="msg_fl_connect_retry">Retrying %1$s with connection profile %2$d…</string>
+    <string name="msg_fl_connect_fail">Could not connect to %1$s (%2$s).\n\nMake sure the phone is on the relay network (intranet/VPN) and the IP is correct.</string>
+    <string name="msg_fl_no_remote_files">No COMTRADE record found on this relay.</string>
+    <string name="ttl_fl_pick_record">Pick record – %s</string>
+    <string name="lbl_fl_closest_match">★ closest in time to the other end\'s record</string>
+    <string name="msg_fl_download_failed">Download failed.</string>
+    <string name="msg_fl_extracting">Extracting %s…</string>
+    <string name="msg_fl_reading">Reading %s…</string>
+    <string name="msg_fl_no_cfg_in_files">No .cfg + .dat pair found in the selected/downloaded files.</string>
+    <string name="msg_fl_load_fail">Failed to read the record: %s</string>
+    <string name="ttl_fl_local_pick">Local record – %s</string>
+    <string name="lbl_fl_pick_storage">Browse storage…</string>
+    <string name="lbl_fl_pick_storage_sub">Select the .cfg and .dat together, or one .zip</string>
+    <string name="msg_fl_no_local">No downloaded records found yet.</string>
+    <string name="msg_fl_pick_relay_first">Pick a relay first.</string>
+    <string name="msg_fl_no_devices">The relay database is empty – add relays in Relay List, or use Local file.</string>
+    <string name="ttl_fl_mapping">Channel mapping – %s</string>
+    <string name="lbl_fl_none_option">— not set —</string>
+    <string name="lbl_fl_invert_current">Invert current polarity (CT star point towards the line)</string>
+    <string name="hint_fl_vmult">Voltage multiplier</string>
+    <string name="hint_fl_imult">Current multiplier</string>
+    <string name="btn_fl_auto">Auto</string>
+    <string name="msg_fl_scaling_primary">Values in this record are PRIMARY – leave both multipliers at 1.</string>
+    <string name="msg_fl_scaling_secondary">Values are SECONDARY and converted with the ratios in the cfg (VT %1$s, CT %2$s). Leave the multipliers at 1.</string>
+    <string name="msg_fl_scaling_no_ratio">Values are SECONDARY and the cfg has no ratio – enter the VT ratio (e.g. 1500 for 150 kV/100 V) and CT ratio (e.g. 2000 for 2000/1 A) as multipliers.</string>
+    <string name="msg_fl_need_both">Load a record for both ends first.</string>
+    <string name="msg_fl_invalid_line">Fill in the line length, R1 and X1 (greater than 0).</string>
+    <string name="msg_fl_analyzing">Analyzing…</string>
+    <string name="ttl_fl_error">Cannot continue</string>
+    <string name="err_fl_mapping">The channel mapping of %s is incomplete – set Va, Vb, Vc, Ia, Ib, Ic.</string>
+    <string name="err_fl_rate">The sampling rate of %1$s is too low (%2$s Hz) – at least 8 samples per cycle are needed.</string>
+    <string name="err_fl_short">The record of %s is too short around the fault (needs at least ~1 cycle before and 2 cycles after inception).</string>
+    <string name="err_fl_no_signal">No usable voltage/current signal – check the channel mapping and scaling.</string>
+    <string name="err_fl_exception">The analysis failed: %s</string>
+
+    <string name="warn_fl_sec_no_ratio">%s: secondary values without a ratio in the cfg – the km result is wrong unless the VT/CT multipliers are set in Channel mapping.</string>
+    <string name="warn_fl_freq_diff">Nominal frequency differs between the records (%1$s vs %2$s Hz).</string>
+    <string name="warn_fl_inc_trigger">%s: fault inception not detected in the signals – the trigger time was used.</string>
+    <string name="warn_fl_no_prefault">%s: not enough pre-fault data – superimposed checks skipped.</string>
+    <string name="warn_fl_short_fault">The fault was cleared quickly – the window was shifted to fit and accuracy may be lower.</string>
+    <string name="warn_fl_unstable">Phasors change during the window (%1$s %%) – CT saturation, evolving fault or breaker opening; verify the result.</string>
+    <string name="warn_fl_no_root">The two |V| curves never cross – the closest approach was used. Check the record pairing, CT polarity and line data.</string>
+    <string name="warn_fl_two_roots">The equation has a second solution at %1$s km from %2$s; the one consistent with the positive sequence was chosen.</string>
+    <string name="warn_fl_out_of_line">The result falls outside the line (%1$s %%) – external fault, wrong record pairing, CT polarity or line data?</string>
+    <string name="warn_fl_dir_rev">%s sees the fault in REVERSE – its CT polarity is probably inverted (or the fault is not on this line).</string>
+    <string name="warn_fl_no_z0">Enter Z0 (R0, X0) to get the single-ended cross-check and the fault resistance of earth faults.</string>
+    <string name="warn_fl_time_gap">The two records are %s s apart – make sure both belong to the same event.</string>
+    <string name="warn_fl_phase_rot">%s: negative-sequence voltage exceeds positive before the fault – phase order or mapping is wrong (B and C swapped?).</string>
+    <string name="warn_fl_pre_v_mismatch">Pre-fault voltages differ (%1$s kV vs %2$s kV) – check the VT ratio/scaling.</string>
+    <string name="warn_fl_pre_i_mismatch">Pre-fault load currents differ (%1$s A vs %2$s A) – check the CT ratio/scaling (or a tapped load).</string>
+    <string name="warn_fl_pre_polarity">Pre-fault load current flows into the line at both ends – one CT polarity is probably inverted.</string>
+
+    <string name="ttl_fl_info">Method</string>
+    <string name="msg_fl_info">Main method: unsynchronised two-ended fault location (IEEE C37.114-2014; Novosel et al. 1996; Tziouvaras, Roberts &amp; Benmouyal 2001).\n\n1. The COMTRADE records of the line relays at substation A and B are read (ASCII, BINARY, BINARY32, FLOAT32, zip) and converted to primary values.\n\n2. Fault inception is detected in each record with a cycle-to-cycle superimposed detector.\n\n3. Fundamental phasors are estimated by a one-cycle least-squares fit (fundamental + 2nd/3rd harmonic + DC trend), so the decaying DC offset of the fault current does not bias them.\n\n4. Symmetrical components are calculated. Unbalanced faults use the negative sequence (V2, I2); three-phase faults use the superimposed positive sequence (fault minus pre-fault).\n\n5. The fault-point voltage is computed by walking the line model from each end: |V2A − m·Z1·I2A| = |V2B − (1−m)·Z1·I2B|. Only magnitudes are compared, so the two relay clocks do NOT need to be synchronised, and the result is not affected by fault resistance, load current or zero-sequence mutual coupling. Long lines can use the distributed (hyperbolic) model.\n\n6. The equation is solved on several consecutive windows; the final result is their median and the spread is shown as ± km.\n\n7. Cross-checks: two-ended positive sequence, two-ended time-synchronised (valid only with GPS-synchronised relays) and single-ended Takagi from each end. A large difference between methods means the data should be checked.\n\nRequirements: both records belong to the same event, both CTs measure current flowing into the line, and the line impedance is correct. Typical accuracy is 1–2 percent of line length, set mainly by the accuracy of Z1.\n\nTravelling-wave location is not used: relay DFRs sample at 1–4 kHz, far too slow for travelling waves.</string>
+
+    <string name="help_ttl_fl">FL Double Ended</string>
+    <string name="help_sum_fl">Locate a line fault from the DFRs of both substations</string>
+    <string name="help_func_fl">Takes one COMTRADE record from the line relay at each end (GI A and GI B) and calculates the fault distance with the unsynchronised two-ended negative-sequence method, which needs no clock synchronisation between the relays and is not affected by fault resistance or load. Single-ended Takagi and other methods are shown alongside as a cross-check.</string>
+    <string name="help_cmp_fl_1_name">Download from relay</string>
+    <string name="help_cmp_fl_1_desc">Connects to the relay selected for that end, scans its COMTRADE folders and lets you pick a record. The file is saved in the same DFR folder as the Download screen.</string>
+    <string name="help_cmp_fl_2_name">Local file</string>
+    <string name="help_cmp_fl_2_desc">Uses a record already on the phone: from Download History, or any .cfg + .dat / .zip picked from storage.</string>
+    <string name="help_cmp_fl_3_name">Channel mapping</string>
+    <string name="help_cmp_fl_3_desc">Which channels are Va, Vb, Vc, Ia, Ib, Ic, CT polarity, and extra VT/CT multipliers. Detected automatically and remembered per relay.</string>
+    <string name="help_cmp_fl_4_name">Info icon</string>
+    <string name="help_cmp_fl_4_desc">Explains the calculation method step by step.</string>
+    <string name="help_feat_fl_1_title">Locating a Fault</string>
+    <string name="help_feat_fl_1_steps">1. Under END A pick the substation and the line relay, then tap Download from relay (or Local file) and choose the fault record.\n2. Do the same under END B - the record closest in time to END A is marked with a star.\n3. Fill in the line length and R1/X1 (per km, or switch on whole-line totals). Add R0/X0 for earth-fault cross-checks and B1 for long lines.\n4. Tap Analyze fault location.</string>
+    <string name="help_feat_fl_2_title">Reading the Result</string>
+    <string name="help_feat_fl_2_steps">1. The big numbers are the distance from each substation; the ± value is the spread over several fault windows.\n2. The method comparison shows every result as km from END A with its difference to the main result.\n3. The chart shows the fault-point voltage computed from each end - the crossing is the fault.\n4. Tap Share report to send the result as text.</string>
+    <string name="help_feat_fl_3_title">When the Result Looks Wrong</string>
+    <string name="help_feat_fl_3_steps">1. Read the {ic:warning} warnings under the result.\n2. If one end sees the fault in REVERSE, tap the button to invert that end\'s current polarity and re-analyze.\n3. Check that both records belong to the same event and that the line impedance is primary-side ohms.\n4. Open {ic:settings} Channel mapping if a channel was detected wrongly or the record is in secondary values without ratios.</string>
+
+    <!-- Line Database (LineDatabaseActivity) -->
+    <string name="menu_home_line_db">LINE DATABASE</string>
+    <string name="ttl_line_db">Line Database</string>
+    <string name="ttl_line_pick">Pick Line Configuration</string>
+    <string name="btn_line_add">Add</string>
+    <string name="btn_line_delete_all">Clear</string>
+    <string name="hint_line_search">Search GI, bay, conductor…</string>
+    <string name="lbl_line_all_gi">All substations</string>
+    <string name="lbl_line_count">%1$d of %2$d lines</string>
+    <string name="lbl_line_empty">No line data yet.\nImport the conductor-data CSV or add a line by hand.</string>
+    <string name="lbl_line_match">★ MATCHES THE SELECTED RELAYS</string>
+    <string name="msg_line_pick_hint_pair">Lines between %1$s and %2$s are listed first. Long-press a row to edit it.</string>
+    <string name="msg_line_pick_hint">Tap a line to use it. Long-press a row to edit it.</string>
+    <string name="ttl_line_add">Add Line</string>
+    <string name="ttl_line_edit">Edit Line</string>
+    <string name="hint_line_gi">Substation (GI)</string>
+    <string name="hint_line_bay">Bay</string>
+    <string name="hint_line_lawan">Remote substation (GI lawan)</string>
+    <string name="hint_line_kv">Voltage (kV)</string>
+    <string name="hint_line_merk">Relay brand</string>
+    <string name="hint_line_tipe">Relay type</string>
+    <string name="hint_line_konduktor">Conductor</string>
+    <string name="hint_line_ccc">CCC (A)</string>
+    <string name="hint_line_upt">UPT</string>
+    <string name="hint_line_ultg">ULTG</string>
+    <string name="msg_line_edit_hint">Primary-side values per km. Negative sequence is taken equal to positive sequence (Z2 = Z1). Whole-line Z and angle are calculated automatically.</string>
+    <string name="msg_line_required">Fill in the substation, line length, R1 and X1.</string>
+    <string name="ttl_line_import">Import Line Data</string>
+    <string name="msg_line_import_ok">Done: %1$d line(s) added, %2$d updated (same GI + bay + remote GI), %3$d row(s) skipped (no GI or no length/R1/X1).</string>
+    <string name="msg_line_import_none">No line rows found (%1$d column(s) recognised).\n\nThe CSV needs a header row with at least: GI, BAY, REF GI LAWAN, PANJANG (KM), R1 (OHM/KM), X1 (OHM/KM) – or Z1 + SUDUT instead of R1/X1. Optional: R0, X0, Z0, TEG (KV), MERK, TIPE, KONDUKTOR, CCC, UPT, ULTG, B1. Comma or semicolon separated.</string>
+    <string name="msg_line_import_fail">Import failed: %s</string>
+    <string name="msg_line_export_ok">%d line(s) exported to CSV</string>
+    <string name="ttl_line_delete_all">Clear Line Database</string>
+    <string name="msg_line_delete_all">Delete all %d line(s)? This cannot be undone – export first if you need a copy.</string>
+
+    <!-- FL Double Ended: line configuration -->
+    <string name="lbl_fl_line_config">Line configuration</string>
+    <string name="msg_fl_line_config_manual">Manual – not picked from the Line Database</string>
+    <string name="lbl_fl_line_config_auto">Auto:</string>
+    <string name="lbl_fl_line_config_edited">(values edited by hand)</string>
+    <string name="btn_fl_pick_line">Pick</string>
+    <string name="help_cmp_fl_5_name">Line configuration</string>
+    <string name="help_cmp_fl_5_desc">Fills the line length and R1/X1/R0/X0 from the Line Database. A line that connects both selected substations is picked automatically.</string>
+    <string name="help_ttl_line_db">Line Database</string>
+    <string name="help_sum_line_db">Line length and sequence impedances per bay</string>
+    <string name="help_func_line_db">Stores each line\'s length and positive/zero-sequence impedance (Z2 = Z1) per relay bay, used by FL Double Ended. Fill it by importing the conductor-data spreadsheet as CSV or by adding lines by hand. Included in Export/Import Configuration.</string>
+    <string name="help_cmp_line_1_name">Import</string>
+    <string name="help_cmp_line_1_desc">Reads a CSV by its column names (one or two header rows, comma or semicolon). A row with the same GI + bay + remote GI updates the existing line.</string>
+    <string name="help_cmp_line_2_name">Export</string>
+    <string name="help_cmp_line_2_desc">Writes the whole database to a CSV that can be imported again.</string>
+    <string name="help_cmp_line_3_name">Add / edit</string>
+    <string name="help_cmp_line_3_desc">Tap a line to edit it, or the Add button for a new one. Z and angle are calculated from R and X.</string>
+    <string name="help_feat_line_1_title">Importing the Conductor Data</string>
+    <string name="help_feat_line_1_steps">1. In Excel, save the conductor-data sheet as CSV.\n2. Open Line Database and tap {ic:import} Import.\n3. Pick the CSV file - the summary shows how many lines were added or updated.</string>
+
+    <string name="abt_feat_11_name">FL Double Ended</string>
+    <string name="abt_feat_11_desc">Locate a line fault from the DFRs of the relays at both substations, downloaded straight from the relays. Unsynchronised negative-sequence two-ended method, with fault type, fault resistance and single-ended cross-checks.</string>
+    <string name="abt_feat_12_name">Line Database</string>
+    <string name="abt_feat_12_desc">Line length and positive/zero-sequence impedance per bay, pre-filled with the conductor data and editable or importable from CSV. Picked automatically by FL Double Ended.</string>
+    <string name="btn_line_load_default">Load built-in data</string>
+    <string name="msg_line_load_default_ok">%d line(s) loaded from the built-in data</string>
 </resources>

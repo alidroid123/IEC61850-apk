@@ -1,0 +1,283 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/bg_app"
+    android:fitsSystemWindows="true"
+    android:orientation="vertical">
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/bg_header_layered">
+
+        <View
+            android:layout_width="150dp"
+            android:layout_height="150dp"
+            android:layout_gravity="top|end"
+            android:layout_marginTop="-60dp"
+            android:layout_marginEnd="-40dp"
+            android:background="@drawable/shape_decor_blob_light" />
+
+        <View
+            android:layout_width="90dp"
+            android:layout_height="90dp"
+            android:layout_gravity="bottom|start"
+            android:layout_marginBottom="-30dp"
+            android:layout_marginStart="-20dp"
+            android:alpha="0.18"
+            android:background="@drawable/shape_decor_blob_accent" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingHorizontal="@dimen/spacing_l"
+            android:paddingVertical="@dimen/spacing_s">
+
+            <ImageButton
+                android:id="@+id/btnBack"
+                android:layout_width="@dimen/icon_size_xl"
+                android:layout_height="@dimen/icon_size_xl"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/cd_fl_back"
+                android:src="@drawable/ic_arrow_back"
+                app:tint="@color/white" />
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/spacing_m"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/tvLineDbTitle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="end"
+                    android:fontFamily="sans-serif-medium"
+                    android:maxLines="1"
+                    android:text="@string/ttl_line_db"
+                    android:textColor="@color/white"
+                    android:textSize="@dimen/text_size_title_small"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/tvLineDbSubtitle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:textColor="#CCFFFFFF"
+                    android:textSize="@dimen/text_size_caption" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center_horizontal"
+                android:orientation="vertical">
+
+                <ImageButton
+                    android:id="@+id/btnLineAdd"
+                    android:layout_width="@dimen/icon_size_xl"
+                    android:layout_height="@dimen/icon_size_xl"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="@string/btn_line_add"
+                    android:padding="@dimen/spacing_s"
+                    android:src="@drawable/ic_add"
+                    app:tint="@color/white" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/btn_line_add"
+                    android:textColor="@color/white"
+                    android:textSize="@dimen/text_size_tiny" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/layoutLineExport"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/spacing_xs"
+                android:gravity="center_horizontal"
+                android:orientation="vertical">
+
+                <ImageButton
+                    android:id="@+id/btnLineExport"
+                    android:layout_width="@dimen/icon_size_xl"
+                    android:layout_height="@dimen/icon_size_xl"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="@string/btn_dev_export"
+                    android:padding="@dimen/spacing_s"
+                    android:src="@drawable/ic_export"
+                    app:tint="@color/white" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/btn_dev_export"
+                    android:textColor="@color/white"
+                    android:textSize="@dimen/text_size_tiny" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/spacing_xs"
+                android:gravity="center_horizontal"
+                android:orientation="vertical">
+
+                <ImageButton
+                    android:id="@+id/btnLineImport"
+                    android:layout_width="@dimen/icon_size_xl"
+                    android:layout_height="@dimen/icon_size_xl"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="@string/btn_dev_import"
+                    android:padding="@dimen/spacing_s"
+                    android:src="@drawable/ic_import"
+                    app:tint="@color/white" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/btn_dev_import"
+                    android:textColor="@color/white"
+                    android:textSize="@dimen/text_size_tiny" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/layoutLineDeleteAll"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/spacing_xs"
+                android:gravity="center_horizontal"
+                android:orientation="vertical">
+
+                <ImageButton
+                    android:id="@+id/btnLineDeleteAll"
+                    android:layout_width="@dimen/icon_size_xl"
+                    android:layout_height="@dimen/icon_size_xl"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="@string/btn_line_delete_all"
+                    android:padding="@dimen/spacing_s"
+                    android:src="@drawable/ic_delete"
+                    app:tint="@color/white" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/btn_line_delete_all"
+                    android:textColor="@color/white"
+                    android:textSize="@dimen/text_size_tiny" />
+            </LinearLayout>
+        </LinearLayout>
+    </FrameLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/bg_navy_dim"
+        android:orientation="vertical"
+        android:padding="@dimen/spacing_m">
+
+        <TextView
+            android:id="@+id/tvLinePickHint"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/spacing_s"
+            android:textColor="?attr/colorPrimary"
+            android:textSize="@dimen/text_size_body_small"
+            android:textStyle="bold"
+            android:visibility="gone" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <Spinner
+                android:id="@+id/spLineGi"
+                android:layout_width="0dp"
+                android:layout_height="@dimen/input_field_height"
+                android:layout_marginEnd="@dimen/spacing_xs"
+                android:layout_weight="1"
+                android:background="@drawable/bg_spinner"
+                android:spinnerMode="dropdown" />
+
+            <EditText
+                android:id="@+id/etLineSearch"
+                android:layout_width="0dp"
+                android:layout_height="@dimen/input_field_height"
+                android:layout_weight="1"
+                android:background="@drawable/bg_edit_text"
+                android:drawableStart="@drawable/ic_search"
+                android:drawablePadding="@dimen/spacing_xs"
+                android:drawableTint="@color/text_secondary"
+                android:hint="@string/hint_line_search"
+                android:imeOptions="actionSearch"
+                android:inputType="text"
+                android:paddingHorizontal="@dimen/spacing_s"
+                android:singleLine="true"
+                android:textColor="@color/text_primary"
+                android:textColorHint="@color/text_hint"
+                android:textSize="@dimen/text_size_body_small" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvLines"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:clipToPadding="false"
+            android:paddingHorizontal="@dimen/spacing_m"
+            android:paddingTop="@dimen/spacing_xs"
+            android:paddingBottom="@dimen/spacing_huge" />
+
+        <LinearLayout
+            android:id="@+id/layoutLineEmpty"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:gravity="center_horizontal"
+            android:orientation="vertical"
+            android:padding="@dimen/spacing_xxl"
+            android:visibility="gone">
+
+            <ImageView
+                android:layout_width="@dimen/icon_size_huge"
+                android:layout_height="@dimen/icon_size_huge"
+                android:alpha="0.4"
+                android:src="@drawable/ic_line_data"
+                app:tint="?attr/colorPrimary" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_m"
+                android:gravity="center"
+                android:text="@string/lbl_line_empty"
+                android:textColor="@color/text_secondary"
+                android:textSize="@dimen/text_size_body" />
+
+            <Button
+                android:id="@+id/btnLineLoadDefault"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_l"
+                android:text="@string/btn_line_load_default"
+                android:textColor="?attr/colorPrimary"
+                app:strokeColor="?attr/colorPrimary" />
+        </LinearLayout>
+    </FrameLayout>
+</LinearLayout>

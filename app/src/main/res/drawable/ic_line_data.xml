@@ -1,0 +1,19 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+  <!-- Transmission tower: legs with a lattice opening -->
+  <path
+      android:fillColor="@android:color/white"
+      android:fillType="evenOdd"
+      android:pathData="M11,2h2l5,20h-2.2l-1.2,-4.8H9.4L8.2,22H6L11,2zM12,6.2L9.9,15.2h4.2L12,6.2z" />
+  <!-- Cross arms -->
+  <path
+      android:fillColor="@android:color/white"
+      android:pathData="M3,6.2h18v1.6H3zM5,10.4h14v1.6H5z" />
+  <!-- Insulator strings -->
+  <path
+      android:fillColor="@android:color/white"
+      android:pathData="M3.4,7.8h1.2v2.2H3.4zM19.4,7.8h1.2v2.2h-1.2zM5.4,12h1.2v2.2H5.4zM17.4,12h1.2v2.2h-1.2z" />
+</vector>

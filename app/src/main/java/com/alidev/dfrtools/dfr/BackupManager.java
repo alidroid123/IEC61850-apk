@@ -13,7 +13,7 @@ import java.util.Set;
 
 /**
  * Bundles/restores the app's user-authored configuration - device database, monitoring points,
- * relay templates, and node definitions - into one JSON file, so it survives a phone swap or can
+ * relay templates, node definitions and the line database - into one JSON file, so it survives a phone swap or can
  * be shared to a teammate working on the same substations. Operates directly on the same raw
  * JSON blobs the respective managers persist (dfr_prefs/device_list, monitoring_prefs/
  * monitored_nodes, relay_templates_prefs/templates, node_definition_prefs/definitions) rather
@@ -27,7 +27,7 @@ public class BackupManager {
     private static final int BACKUP_FORMAT_VERSION = 1;
 
     public static class ImportResult {
-        public int devicesAdded, nodesAdded, templatesAdded, definitionsAdded;
+        public int devicesAdded, nodesAdded, templatesAdded, definitionsAdded, linesAdded;
     }
 
     public static JSONObject exportConfig(Context context) throws JSONException {
@@ -47,6 +47,10 @@ public class BackupManager {
 
         SharedPreferences defPrefs = context.getSharedPreferences("node_definition_prefs", Context.MODE_PRIVATE);
         root.put("nodeDefinitions", new JSONArray(defPrefs.getString("definitions", "[]")));
+
+        new LineDataManager(context); // makes sure the bundled line data is in before it is exported
+        SharedPreferences linePrefs = context.getSharedPreferences(LineDataManager.PREF_NAME, Context.MODE_PRIVATE);
+        root.put("lineDatabase", new JSONArray(linePrefs.getString(LineDataManager.KEY_ITEMS, "[]")));
 
         return root;
     }
@@ -127,6 +131,25 @@ public class BackupManager {
                 }
             }
             defPrefs.edit().putString("definitions", merged.toString()).apply();
+        }
+
+        // Line database: same "never overwrite" rule, keyed like LineData.key() (GI + bay + remote GI).
+        SharedPreferences linePrefs = context.getSharedPreferences(LineDataManager.PREF_NAME, Context.MODE_PRIVATE);
+        JSONArray importedLines = root.optJSONArray("lineDatabase");
+        if (importedLines != null) {
+            JSONArray merged = new JSONArray(linePrefs.getString(LineDataManager.KEY_ITEMS, "[]"));
+            Set<String> existingKeys = new HashSet<>();
+            for (int i = 0; i < merged.length(); i++) {
+                existingKeys.add(LineDataManager.fromJson(merged.getJSONObject(i)).key());
+            }
+            for (int i = 0; i < importedLines.length(); i++) {
+                JSONObject l = importedLines.getJSONObject(i);
+                if (existingKeys.add(LineDataManager.fromJson(l).key())) {
+                    merged.put(l);
+                    result.linesAdded++;
+                }
+            }
+            linePrefs.edit().putString(LineDataManager.KEY_ITEMS, merged.toString()).apply();
         }
 
         return result;

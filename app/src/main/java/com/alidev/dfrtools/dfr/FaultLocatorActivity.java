@@ -1,0 +1,1426 @@
+package com.alidev.dfrtools.dfr;
+
+import android.content.ClipData;
+import android.content.Intent;
+import android.graphics.Color;
+import android.net.Uri;
+import android.os.Bundle;
+import android.os.Environment;
+import android.text.TextUtils;
+import android.util.TypedValue;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.LinearLayout;
+import android.widget.Spinner;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.widget.SwitchCompat;
+import androidx.core.content.ContextCompat;
+import androidx.core.content.FileProvider;
+
+import com.alidev.dfrtools.R;
+import com.alidev.dfrtools.dfr.DoubleEndedFaultLocator.ChannelMap;
+import com.alidev.dfrtools.dfr.DoubleEndedFaultLocator.Cx;
+import com.alidev.dfrtools.dfr.DoubleEndedFaultLocator.EndSummary;
+import com.alidev.dfrtools.dfr.DoubleEndedFaultLocator.Phasors;
+import com.alidev.dfrtools.dfr.DoubleEndedFaultLocator.Result;
+import com.alidev.dfrtools.utils.ConfigHelper;
+import com.github.mikephil.charting.charts.LineChart;
+import com.github.mikephil.charting.components.LimitLine;
+import com.github.mikephil.charting.components.XAxis;
+import com.github.mikephil.charting.data.Entry;
+import com.github.mikephil.charting.data.LineDataSet;
+import com.google.android.material.textfield.TextInputEditText;
+import com.google.android.material.textfield.TextInputLayout;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import java.util.Locale;
+import java.util.TreeSet;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
+/**
+ * "FL Double Ended": locates a line fault from the DFR (COMTRADE) records of the line relays at
+ * both substations. Each end picks its GI + relay from the Relay Database and either downloads a
+ * record straight from the relay over MMS (same smart search as DfrDownloadActivity, saved into
+ * the same Download/DFR/<GI>_<BAY> folder) or reuses one already on the phone. The math lives in
+ * DoubleEndedFaultLocator.
+ */
+public class FaultLocatorActivity extends BaseActivity {
+
+    private static final String PREFS = "fl_prefs";
+    private static final int REQ_STORAGE_A = 401, REQ_STORAGE_B = 402, REQ_PICK_LINE = 403;
+    private static final String[] ROLE_LABELS = {"Va", "Vb", "Vc", "Ia", "Ib", "Ic"};
+
+    /** Everything known about one line end. */
+    private static class EndState {
+        final boolean isA;
+        View root;
+        Spinner spGi, spRelay;
+        TextView tvRecord, tvStatus;
+        View actions, btnOpenViewer;
+        final List<DeviceListActivity.DeviceItem> relays = new ArrayList<>();
+        File cfg, dat;
+        ComtradeRecord rec;
+        ChannelMap map;
+        /** MMS directory timestamp of the record picked from the relay, 0 for local files. */
+        long remoteFileTime;
+
+        EndState(boolean isA) { this.isA = isA; }
+    }
+
+    private final EndState endA = new EndState(true), endB = new EndState(false);
+    private final List<DeviceListActivity.DeviceItem> devices = new ArrayList<>();
+    private final List<String> giNames = new ArrayList<>();
+    private final ExecutorService executor = Executors.newSingleThreadExecutor();
+
+    private TextInputEditText etLength, etR1, etX1, etR0, etX0, etB1, etOffset;
+    private TextInputLayout tilR1, tilX1, tilR0, tilX0, tilB1;
+    private SwitchCompat swTotal;
+    private View overlay, cardResult;
+    private TextView tvProgress;
+    private Result lastResult;
+    private String lastLinePairKey;
+    /** The line fields currently show values remembered for lastLinePairKey (not user typing). */
+    private boolean lineParamsRestored;
+    /** Relay connection kept open while the user picks a record, so it can be closed on exit. */
+    private volatile Iec61850DfrClient openClient;
+    private TextView tvLineConfig;
+    /** Line Database row the line fields were filled from (null = typed by hand). */
+    private LineData selectedLine;
+    private boolean selectedLineAuto, selectedLineEdited, fillingLineFields;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_fault_locator);
+
+        findViewById(R.id.btnBack).setOnClickListener(v -> finish());
+        findViewById(R.id.btnFlInfo).setOnClickListener(v -> showInfoDialog(getString(R.string.ttl_fl_info), getString(R.string.msg_fl_info)));
+
+        overlay = findViewById(R.id.overlayFlProgress);
+        tvProgress = findViewById(R.id.tvFlProgress);
+        cardResult = findViewById(R.id.cardFlResult);
+
+        etLength = findViewById(R.id.etFlLength);
+        etR1 = findViewById(R.id.etFlR1);
+        etX1 = findViewById(R.id.etFlX1);
+        etR0 = findViewById(R.id.etFlR0);
+        etX0 = findViewById(R.id.etFlX0);
+        etB1 = findViewById(R.id.etFlB1);
+        etOffset = findViewById(R.id.etFlOffset);
+        tilR1 = findViewById(R.id.tilFlR1);
+        tilX1 = findViewById(R.id.tilFlX1);
+        tilR0 = findViewById(R.id.tilFlR0);
+        tilX0 = findViewById(R.id.tilFlX0);
+        tilB1 = findViewById(R.id.tilFlB1);
+        swTotal = findViewById(R.id.swFlTotal);
+        swTotal.setOnCheckedChangeListener((b, checked) -> updateLineHints());
+        updateLineHints();
+        tvLineConfig = findViewById(R.id.tvFlLineConfig);
+        findViewById(R.id.btnFlPickLine).setOnClickListener(v -> pickLineFromDatabase());
+        android.text.TextWatcher editedWatcher = new android.text.TextWatcher() {
+            @Override public void beforeTextChanged(CharSequence s, int st, int c, int a) { }
+            @Override public void onTextChanged(CharSequence s, int st, int b, int c) { }
+            @Override public void afterTextChanged(android.text.Editable s) {
+                if (fillingLineFields || selectedLine == null || selectedLineEdited) return;
+                selectedLineEdited = true;
+                renderLineConfig();
+            }
+        };
+        for (EditText et : new EditText[]{etLength, etR1, etX1, etR0, etX0, etB1}) et.addTextChangedListener(editedWatcher);
+
+        loadDevices();
+        bindEnd(endA, findViewById(R.id.endA));
+        bindEnd(endB, findViewById(R.id.endB));
+        if (devices.isEmpty()) Toast.makeText(this, R.string.msg_fl_no_devices, Toast.LENGTH_LONG).show();
+
+        findViewById(R.id.btnFlAnalyze).setOnClickListener(v -> runAnalysis());
+        findViewById(R.id.btnFlShare).setOnClickListener(v -> shareReport());
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        executor.shutdownNow();
+        Iec61850DfrClient c = openClient;
+        if (c != null) new Thread(c::disconnect).start();
+    }
+
+    // ------------------------------------------------------------------
+    // Relay database / end selection
+    // ------------------------------------------------------------------
+
+    private void loadDevices() {
+        devices.clear();
+        giNames.clear();
+        TreeSet<String> gis = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
+        try {
+            JSONArray arr = new JSONArray(getSharedPreferences("dfr_prefs", MODE_PRIVATE).getString("device_list", "[]"));
+            for (int i = 0; i < arr.length(); i++) {
+                JSONObject obj = arr.getJSONObject(i);
+                DeviceListActivity.DeviceItem d = new DeviceListActivity.DeviceItem();
+                d.gi = obj.optString("gi", "").replace("\"", "").trim();
+                d.bay = obj.optString("bay", "").replace("\"", "").trim();
+                d.device = obj.optString("device", "").replace("\"", "").trim();
+                d.ip = obj.optString("ip", "").replace("\"", "").trim();
+                d.merk = obj.optString("merk", "").trim();
+                d.type = obj.optString("type", "").trim();
+                if (d.ip.isEmpty()) continue;
+                devices.add(d);
+                if (!d.gi.isEmpty()) gis.add(d.gi);
+            }
+        } catch (Exception ignored) { }
+        giNames.addAll(gis);
+    }
+
+    private void bindEnd(EndState st, View root) {
+        st.root = root;
+        st.spGi = root.findViewById(R.id.spFlGi);
+        st.spRelay = root.findViewById(R.id.spFlRelay);
+        st.tvRecord = root.findViewById(R.id.tvFlRecord);
+        st.tvStatus = root.findViewById(R.id.tvFlEndStatus);
+        st.actions = root.findViewById(R.id.layoutFlRecordActions);
+        st.btnOpenViewer = root.findViewById(R.id.btnFlOpenViewer);
+        ((TextView) root.findViewById(R.id.tvFlEndBadge)).setText(st.isA ? "A" : "B");
+        ((TextView) root.findViewById(R.id.tvFlEndTitle)).setText(st.isA ? R.string.lbl_fl_end_a : R.string.lbl_fl_end_b);
+
+        List<String> giItems = new ArrayList<>(giNames);
+        if (giItems.isEmpty()) giItems.add(getString(R.string.lbl_fl_no_devices_item));
+        st.spGi.setAdapter(styledAdapter(giItems));
+
+        String lastIp = getSharedPreferences(PREFS, MODE_PRIVATE).getString(st.isA ? "last_ip_a" : "last_ip_b", "");
+        DeviceListActivity.DeviceItem last = findDevice(lastIp);
+        int giIdx = last != null ? giNames.indexOf(last.gi) : (!st.isA && giNames.size() > 1 ? 1 : 0);
+        if (giIdx >= 0 && giIdx < giItems.size()) st.spGi.setSelection(giIdx, false);
+        populateRelays(st, lastIp);
+
+        st.spGi.setOnItemSelectedListener(new SimpleSelection(() -> populateRelays(st, null)));
+        st.spRelay.setOnItemSelectedListener(new SimpleSelection(() -> onRelayChanged(st)));
+
+        root.findViewById(R.id.btnFlScan).setOnClickListener(v -> onScanClicked(st));
+        root.findViewById(R.id.btnFlLocal).setOnClickListener(v -> onLocalClicked(st));
+        root.findViewById(R.id.btnFlMapping).setOnClickListener(v -> showMappingDialog(st));
+        st.btnOpenViewer.setOnClickListener(v -> openInViewer(st));
+        restoreLineParams();
+    }
+
+    private void populateRelays(EndState st, @Nullable String preferIp) {
+        st.relays.clear();
+        int giPos = st.spGi.getSelectedItemPosition();
+        String gi = giPos >= 0 && giPos < giNames.size() ? giNames.get(giPos) : null;
+        for (DeviceListActivity.DeviceItem d : devices) if (gi != null && gi.equalsIgnoreCase(d.gi)) st.relays.add(d);
+        List<String> labels = new ArrayList<>();
+        int sel = 0;
+        for (int i = 0; i < st.relays.size(); i++) {
+            DeviceListActivity.DeviceItem d = st.relays.get(i);
+            labels.add(d.bay + " • " + d.device + "  (" + d.ip + ")");
+            if (d.ip.equals(preferIp)) sel = i;
+        }
+        if (labels.isEmpty()) labels.add(getString(R.string.lbl_fl_no_devices_item));
+        st.spRelay.setAdapter(styledAdapter(labels));
+        st.spRelay.setSelection(sel, false);
+        // A new adapter whose selection stays at the same position fires no selection callback,
+        // so a GI change has to report the (possibly new) relay itself.
+        if (preferIp == null) onRelayChanged(st);
+    }
+
+    private void onRelayChanged(EndState st) {
+        DeviceListActivity.DeviceItem d = selectedRelay(st);
+        if (d == null) return;
+        getSharedPreferences(PREFS, MODE_PRIVATE).edit().putString(st.isA ? "last_ip_a" : "last_ip_b", d.ip).apply();
+        restoreLineParams();
+    }
+
+    @Nullable
+    private DeviceListActivity.DeviceItem selectedRelay(EndState st) {
+        int pos = st.spRelay.getSelectedItemPosition();
+        return pos >= 0 && pos < st.relays.size() ? st.relays.get(pos) : null;
+    }
+
+    @Nullable
+    private DeviceListActivity.DeviceItem findDevice(String ip) {
+        if (TextUtils.isEmpty(ip)) return null;
+        for (DeviceListActivity.DeviceItem d : devices) if (d.ip.equals(ip)) return d;
+        return null;
+    }
+
+    private String endName(EndState st) {
+        DeviceListActivity.DeviceItem d = selectedRelay(st);
+        if (d != null && !d.gi.isEmpty()) return d.gi;
+        if (st.rec != null && !st.rec.stationName.isEmpty()) return st.rec.stationName;
+        return getString(st.isA ? R.string.lbl_fl_gi_a_short : R.string.lbl_fl_gi_b_short);
+    }
+
+    // ------------------------------------------------------------------
+    // Download from relay
+    // ------------------------------------------------------------------
+
+    private void onScanClicked(EndState st) {
+        DeviceListActivity.DeviceItem d = selectedRelay(st);
+        if (d == null) {
+            Toast.makeText(this, R.string.msg_fl_pick_relay_first, Toast.LENGTH_SHORT).show();
+            return;
+        }
+        showProgress(getString(R.string.msg_fl_connecting, d.ip));
+        executor.execute(() -> {
+            Iec61850DfrClient client = new Iec61850DfrClient();
+            openClient = client;
+            int port = ConfigHelper.getMmsPort(this);
+            int timeout = getResources().getInteger(R.integer.config_mms_connect_timeout_ms);
+            // Same three ISO-stack profiles as the Download screen's profile spinner, tried in
+            // turn so the user doesn't have to know which one this relay vendor needs.
+            boolean ok = false;
+            for (int profile = 0; profile <= 2 && !ok; profile++) {
+                if (profile > 0) showProgress(getString(R.string.msg_fl_connect_retry, d.ip, profile));
+                ok = client.connect(d.ip, port, timeout, profile);
+            }
+            if (!ok) {
+                String why = client.getLastError();
+                openClient = null;
+                runOnUiThread(() -> {
+                    hideProgress();
+                    showInfoDialog(getString(R.string.ttl_fl_error), getString(R.string.msg_fl_connect_fail, d.ip, why));
+                });
+                return;
+            }
+            ComtradeSmartSearch.Logger logger = message -> showProgress(message.replaceFirst("^[!iv]\\s*", ""));
+            showProgress(getString(R.string.msg_dl_detecting_vendor));
+            ComtradeSmartSearch.VendorInfo vendor = ComtradeSmartSearch.detectVendor(this, client, logger);
+            showProgress(getString(R.string.msg_dl_scanning));
+            ComtradeSmartSearch.ScanResult scan = ComtradeSmartSearch.scan(this, client, vendor.deepScan, logger);
+            runOnUiThread(() -> {
+                hideProgress();
+                if (isFinishing() || scan.targetFiles.isEmpty()) {
+                    if (!isFinishing()) Toast.makeText(this, R.string.msg_fl_no_remote_files, Toast.LENGTH_LONG).show();
+                    disconnectLater(client);
+                    return;
+                }
+                showRemotePicker(st, d, client, scan);
+            });
+        });
+    }
+
+    private void showRemotePicker(EndState st, DeviceListActivity.DeviceItem d, Iec61850DfrClient client, ComtradeSmartSearch.ScanResult scan) {
+        View v = getLayoutInflater().inflate(R.layout.dialog_pick_list, null);
+        AlertDialog dialog = cardDialog(v);
+        ((TextView) v.findViewById(R.id.tvPickListTitle)).setText(getString(R.string.ttl_fl_pick_record, d.gi + " • " + d.bay));
+        LinearLayout container = v.findViewById(R.id.llPickListItems);
+
+        DfrFileEntry closest = closestToOtherEnd(st, scan.targetFiles);
+        final boolean[] picked = {false};
+        int shown = 0;
+        for (DfrFileEntry entry : scan.targetFiles) {
+            if (shown++ >= 60) break;
+            View row = getLayoutInflater().inflate(R.layout.item_dialog_pick_row, container, false);
+            ((TextView) row.findViewById(R.id.tvPickRowTitle)).setText(entry.cleanName());
+            String sub = entry.formattedDate() + "  •  " + entry.formattedSize();
+            if (entry == closest) sub += "\n" + getString(R.string.lbl_fl_closest_match);
+            ((TextView) row.findViewById(R.id.tvPickRowSubtitle)).setText(sub);
+            row.setOnClickListener(view -> {
+                picked[0] = true;
+                dialog.dismiss();
+                downloadRemote(st, d, client, entry, scan.allFiles);
+            });
+            container.addView(row);
+        }
+        v.findViewById(R.id.btnPickListCancel).setOnClickListener(view -> dialog.dismiss());
+        dialog.setOnDismissListener(di -> { if (!picked[0]) disconnectLater(client); });
+        dialog.show();
+    }
+
+    /**
+     * The record on this relay most likely to be the same event as the one already loaded for the
+     * other end. MMS file times and cfg timestamps can be in different time zones (relay UTC vs
+     * local), so the distance is taken modulo whole hours - this is only a visual hint.
+     */
+    @Nullable
+    private DfrFileEntry closestToOtherEnd(EndState st, List<DfrFileEntry> files) {
+        EndState other = st.isA ? endB : endA;
+        long ref;
+        if (other.remoteFileTime > 0) ref = other.remoteFileTime;
+        else if (other.rec != null && other.rec.triggerMicros != Long.MIN_VALUE) ref = other.rec.triggerMicros / 1000;
+        else return null;
+        DfrFileEntry best = null;
+        long bestDiff = Long.MAX_VALUE;
+        for (DfrFileEntry f : files) {
+            if (f.lastModifiedEpochMillis <= 0) continue;
+            long diff = Math.abs(f.lastModifiedEpochMillis - ref) % 3_600_000L;
+            diff = Math.min(diff, 3_600_000L - diff);
+            if (diff < bestDiff) { bestDiff = diff; best = f; }
+        }
+        return bestDiff <= 5 * 60_000L ? best : null;
+    }
+
+    private File outputDir(@Nullable DeviceListActivity.DeviceItem d) {
+        String sub = "General";
+        if (d != null && !TextUtils.isEmpty(d.gi) && !TextUtils.isEmpty(d.bay)) {
+            sub = (d.gi + "_" + d.bay).replaceAll("[^a-zA-Z0-9_]", "_");
+        }
+        File target = new File(new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), "DFR"), sub);
+        if (target.exists() || target.mkdirs()) return target;
+        File fallback = new File(new File(getExternalFilesDir(null), "DFR"), sub);
+        if (!fallback.exists()) fallback.mkdirs();
+        return fallback;
+    }
+
+    private void downloadRemote(EndState st, DeviceListActivity.DeviceItem d, Iec61850DfrClient client,
+                                DfrFileEntry target, List<DfrFileEntry> allFiles) {
+        showProgress(getString(R.string.msg_dl_downloading_file, target.cleanName()));
+        executor.execute(() -> {
+            File outDir = outputDir(d);
+            List<File> saved = new ArrayList<>();
+            try {
+                for (DfrFileEntry f : ComtradeSmartSearch.resolveFileSet(target, allFiles)) {
+                    String localName = f.cleanName();
+                    File out = new File(outDir, localName);
+                    showProgress(getString(R.string.msg_dl_downloading_file, localName));
+                    if (client.downloadFile(f.fullPath(), out.getAbsolutePath())) saved.add(out);
+                }
+            } finally {
+                client.disconnect();
+                openClient = null;
+            }
+            if (saved.isEmpty()) {
+                runOnUiThread(() -> {
+                    hideProgress();
+                    Toast.makeText(this, R.string.msg_fl_download_failed, Toast.LENGTH_LONG).show();
+                });
+                return;
+            }
+            File[] pair = resolveRecord(saved);
+            loadRecordInBackground(st, pair, target.lastModifiedEpochMillis);
+        });
+    }
+
+    /** Picks the .cfg/.dat pair out of a downloaded/imported file set, unzipping vendor archives. */
+    @Nullable
+    private File[] resolveRecord(List<File> files) {
+        for (File f : files) {
+            if (f.getName().toLowerCase(Locale.ROOT).endsWith(".cfg")) {
+                File dat = ComtradeRecord.findDatFor(f);
+                if (dat != null) return new File[]{f, dat};
+            }
+        }
+        for (File f : files) {
+            String lower = f.getName().toLowerCase(Locale.ROOT);
+            if (!lower.endsWith(".zip")) continue;
+            try {
+                showProgress(getString(R.string.msg_fl_extracting, f.getName()));
+                File dir = new File(f.getParentFile(), f.getName().substring(0, f.getName().length() - 4));
+                for (File cfg : ComtradeRecord.extractZip(f, dir)) {
+                    File dat = ComtradeRecord.findDatFor(cfg);
+                    if (dat != null) return new File[]{cfg, dat};
+                }
+            } catch (Exception ignored) { }
+        }
+        return null;
+    }
+
+    /** Must run on the executor. */
+    private void loadRecordInBackground(EndState st, @Nullable File[] pair, long remoteTime) {
+        if (pair == null) {
+            runOnUiThread(() -> {
+                hideProgress();
+                showInfoDialog(getString(R.string.ttl_fl_error), getString(R.string.msg_fl_no_cfg_in_files));
+            });
+            return;
+        }
+        showProgress(getString(R.string.msg_fl_reading, pair[0].getName()));
+        try {
+            ComtradeRecord rec = ComtradeRecord.load(pair[0], pair[1]);
+            ChannelMap map = restoreMapping(st, rec);
+            runOnUiThread(() -> {
+                hideProgress();
+                st.cfg = pair[0];
+                st.dat = pair[1];
+                st.rec = rec;
+                st.map = map;
+                st.remoteFileTime = remoteTime;
+                renderEnd(st);
+                if (!map.complete(rec.analogCount())) showMappingDialog(st);
+            });
+        } catch (Exception e) {
+            runOnUiThread(() -> {
+                hideProgress();
+                showInfoDialog(getString(R.string.ttl_fl_error), getString(R.string.msg_fl_load_fail, String.valueOf(e.getMessage())));
+            });
+        }
+    }
+
+    // ------------------------------------------------------------------
+    // Local records
+    // ------------------------------------------------------------------
+
+    private void onLocalClicked(EndState st) {
+        DeviceListActivity.DeviceItem d = selectedRelay(st);
+        String preferFolder = d != null ? outputDir(d).getName() : null;
+        List<File> records = new ArrayList<>();
+        File[] roots = {
+                new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), "DFR"),
+                new File(getExternalFilesDir(null), "DFR")
+        };
+        for (File root : roots) collectRecords(root, records, 0);
+        Collections.sort(records, (x, y) -> {
+            boolean px = x.getParentFile() != null && x.getParentFile().getName().equals(preferFolder);
+            boolean py = y.getParentFile() != null && y.getParentFile().getName().equals(preferFolder);
+            if (px != py) return px ? -1 : 1;
+            return Long.compare(y.lastModified(), x.lastModified());
+        });
+
+        View v = getLayoutInflater().inflate(R.layout.dialog_pick_list, null);
+        AlertDialog dialog = cardDialog(v);
+        ((TextView) v.findViewById(R.id.tvPickListTitle)).setText(getString(R.string.ttl_fl_local_pick, getString(st.isA ? R.string.lbl_fl_gi_a_short : R.string.lbl_fl_gi_b_short)));
+        LinearLayout container = v.findViewById(R.id.llPickListItems);
+
+        View browse = getLayoutInflater().inflate(R.layout.item_dialog_pick_row, container, false);
+        ((TextView) browse.findViewById(R.id.tvPickRowTitle)).setText(R.string.lbl_fl_pick_storage);
+        ((TextView) browse.findViewById(R.id.tvPickRowSubtitle)).setText(R.string.lbl_fl_pick_storage_sub);
+        browse.setOnClickListener(view -> {
+            dialog.dismiss();
+            Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+            intent.setType("*/*");
+            intent.addCategory(Intent.CATEGORY_OPENABLE);
+            intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
+            try {
+                startActivityForResult(intent, st.isA ? REQ_STORAGE_A : REQ_STORAGE_B);
+            } catch (Exception e) {
+                Toast.makeText(this, R.string.msg_view_picker_fail, Toast.LENGTH_SHORT).show();
+            }
+        });
+        container.addView(browse);
+
+        if (records.isEmpty()) {
+            TextView empty = new TextView(this);
+            empty.setText(R.string.msg_fl_no_local);
+            empty.setTextColor(ContextCompat.getColor(this, R.color.text_secondary));
+            empty.setPadding(dp(8), dp(12), dp(8), dp(12));
+            container.addView(empty);
+        }
+        SimpleDateFormat fmt = new SimpleDateFormat("dd MMM yyyy HH:mm", Locale.getDefault());
+        int shown = 0;
+        for (File f : records) {
+            if (shown++ >= 100) break;
+            View row = getLayoutInflater().inflate(R.layout.item_dialog_pick_row, container, false);
+            ((TextView) row.findViewById(R.id.tvPickRowTitle)).setText(f.getName());
+            String folder = f.getParentFile() != null ? f.getParentFile().getName() : "";
+            ((TextView) row.findViewById(R.id.tvPickRowSubtitle)).setText(folder + "  •  " + fmt.format(new Date(f.lastModified())));
+            row.setOnClickListener(view -> {
+                dialog.dismiss();
+                showProgress(getString(R.string.msg_fl_reading, f.getName()));
+                executor.execute(() -> loadRecordInBackground(st, resolveRecord(Collections.singletonList(f)), 0));
+            });
+            container.addView(row);
+        }
+        v.findViewById(R.id.btnPickListCancel).setOnClickListener(view -> dialog.dismiss());
+        dialog.show();
+    }
+
+    /** .cfg files that have a .dat next to them, plus vendor .zip archives (not their "h.zip" pair). */
+    private void collectRecords(File dir, List<File> out, int depth) {
+        File[] files = dir.listFiles();
+        if (files == null) return;
+        for (File f : files) {
+            if (f.isDirectory()) {
+                if (depth < 2) collectRecords(f, out, depth + 1);
+                continue;
+            }
+            String lower = f.getName().toLowerCase(Locale.ROOT);
+            if (lower.endsWith(".cfg") && ComtradeRecord.findDatFor(f) != null) out.add(f);
+            else if (lower.endsWith(".zip") && !lower.endsWith("h.zip")) out.add(f);
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REQ_PICK_LINE) {
+            if (resultCode != RESULT_OK || data == null) return;
+            LineData d = new LineDataManager(this).get(data.getStringExtra(LineDatabaseActivity.EXTRA_RESULT_ID));
+            if (d != null) applyLineData(d, false);
+            return;
+        }
+        if ((requestCode != REQ_STORAGE_A && requestCode != REQ_STORAGE_B) || resultCode != RESULT_OK || data == null) return;
+        EndState st = requestCode == REQ_STORAGE_A ? endA : endB;
+        List<Uri> uris = new ArrayList<>();
+        ClipData clip = data.getClipData();
+        if (clip != null) for (int i = 0; i < clip.getItemCount(); i++) uris.add(clip.getItemAt(i).getUri());
+        else if (data.getData() != null) uris.add(data.getData());
+        if (uris.isEmpty()) return;
+        showProgress(getString(R.string.msg_fl_reading, ""));
+        executor.execute(() -> {
+            // Copied into private storage so the .cfg/.dat pairing can use plain File lookups no
+            // matter which document provider the files came from.
+            File dir = new File(getCacheDir(), "fl_import_" + (st.isA ? "a" : "b") + "_" + System.currentTimeMillis());
+            dir.mkdirs();
+            List<File> copied = new ArrayList<>();
+            for (Uri uri : uris) {
+                String name = displayName(uri);
+                File out = new File(dir, name.replaceAll("[\\\\/:*?\"<>|]", "_"));
+                try (InputStream is = getContentResolver().openInputStream(uri); OutputStream os = new FileOutputStream(out)) {
+                    if (is == null) continue;
+                    byte[] buf = new byte[16384];
+                    int n;
+                    while ((n = is.read(buf)) > 0) os.write(buf, 0, n);
+                    copied.add(out);
+                } catch (Exception ignored) { }
+            }
+            loadRecordInBackground(st, resolveRecord(copied), 0);
+        });
+    }
+
+    private String displayName(Uri uri) {
+        try (android.database.Cursor c = getContentResolver().query(uri, null, null, null, null)) {
+            if (c != null && c.moveToFirst()) {
+                int idx = c.getColumnIndex(android.provider.OpenableColumns.DISPLAY_NAME);
+                if (idx >= 0 && c.getString(idx) != null) return c.getString(idx);
+            }
+        } catch (Exception ignored) { }
+        String seg = uri.getLastPathSegment();
+        return seg != null ? seg.substring(seg.lastIndexOf('/') + 1) : "file";
+    }
+
+    // ------------------------------------------------------------------
+    // Record summary + channel mapping
+    // ------------------------------------------------------------------
+
+    private void renderEnd(EndState st) {
+        if (st.rec == null) {
+            st.tvRecord.setText(R.string.msg_fl_no_record);
+            st.actions.setVisibility(View.GONE);
+            st.tvStatus.setVisibility(View.GONE);
+            return;
+        }
+        ComtradeRecord r = st.rec;
+        String info = getString(R.string.msg_fl_record_info, st.cfg.getName(),
+                r.stationName.isEmpty() ? "-" : r.stationName, r.triggerText.isEmpty() ? "-" : r.triggerText,
+                fmt(estimateFs(r), 0), r.analogCount(), r.fileType);
+        boolean complete = st.map != null && st.map.complete(r.analogCount());
+        String mapping = complete
+                ? getString(R.string.msg_fl_mapping_summary, chName(r, st.map.va), chName(r, st.map.vb), chName(r, st.map.vc),
+                chName(r, st.map.ia), chName(r, st.map.ib), chName(r, st.map.ic))
+                : getString(R.string.msg_fl_mapping_incomplete);
+        if (complete && st.map.invertCurrent) mapping += "  " + getString(R.string.lbl_fl_inverted_tag);
+        st.tvRecord.setText(info + "\n" + mapping);
+        st.actions.setVisibility(View.VISIBLE);
+        st.btnOpenViewer.setVisibility(r.fileType.startsWith("ASCII") ? View.VISIBLE : View.GONE);
+        st.tvStatus.setVisibility(View.VISIBLE);
+        st.tvStatus.setText(complete ? R.string.lbl_fl_status_ready : R.string.lbl_fl_status_check_map);
+        st.tvStatus.setTextColor(ContextCompat.getColor(this, complete ? R.color.status_safe : R.color.status_warning));
+    }
+
+    private static double estimateFs(ComtradeRecord r) {
+        if (r.sampleCount < 2) return 0;
+        double span = r.time[r.sampleCount - 1] - r.time[0];
+        return span > 0 ? (r.sampleCount - 1) / span : 0;
+    }
+
+    private static String chName(ComtradeRecord r, int idx) {
+        return idx >= 0 && idx < r.analogCount() ? r.analogs.get(idx).id : "?";
+    }
+
+    private ChannelMap restoreMapping(EndState st, ComtradeRecord rec) {
+        ChannelMap auto = DoubleEndedFaultLocator.autoMap(rec);
+        DeviceListActivity.DeviceItem d = selectedRelay(st);
+        if (d == null) return auto;
+        String json = getSharedPreferences(PREFS, MODE_PRIVATE).getString("map_" + d.ip, null);
+        if (json == null) return auto;
+        try {
+            JSONObject o = new JSONObject(json);
+            ChannelMap m = auto.copy();
+            int[] idx = new int[6];
+            for (int k = 0; k < 6; k++) {
+                idx[k] = indexOfChannel(rec, o.optString(ROLE_LABELS[k], ""));
+                if (idx[k] < 0) return auto; // this record doesn't have the saved channels
+            }
+            m.va = idx[0]; m.vb = idx[1]; m.vc = idx[2]; m.ia = idx[3]; m.ib = idx[4]; m.ic = idx[5];
+            m.invertCurrent = o.optBoolean("invert", false);
+            m.vMult = o.optDouble("vMult", 1);
+            m.iMult = o.optDouble("iMult", 1);
+            return m;
+        } catch (Exception e) {
+            return auto;
+        }
+    }
+
+    private static int indexOfChannel(ComtradeRecord rec, String id) {
+        for (int i = 0; i < rec.analogCount(); i++) if (rec.analogs.get(i).id.equals(id)) return i;
+        return -1;
+    }
+
+    private void saveMapping(EndState st) {
+        DeviceListActivity.DeviceItem d = selectedRelay(st);
+        if (d == null || st.rec == null || st.map == null) return;
+        try {
+            JSONObject o = new JSONObject();
+            int[] idx = {st.map.va, st.map.vb, st.map.vc, st.map.ia, st.map.ib, st.map.ic};
+            for (int k = 0; k < 6; k++) o.put(ROLE_LABELS[k], chName(st.rec, idx[k]));
+            o.put("invert", st.map.invertCurrent);
+            o.put("vMult", st.map.vMult);
+            o.put("iMult", st.map.iMult);
+            getSharedPreferences(PREFS, MODE_PRIVATE).edit().putString("map_" + d.ip, o.toString()).apply();
+        } catch (Exception ignored) { }
+    }
+
+    private void showMappingDialog(EndState st) {
+        if (st.rec == null) return;
+        ComtradeRecord rec = st.rec;
+        ChannelMap working = st.map != null ? st.map.copy() : DoubleEndedFaultLocator.autoMap(rec);
+        View v = getLayoutInflater().inflate(R.layout.dialog_fl_mapping, null);
+        AlertDialog dialog = cardDialog(v);
+        ((TextView) v.findViewById(R.id.tvFlMapTitle)).setText(getString(R.string.ttl_fl_mapping, endName(st)));
+        ((TextView) v.findViewById(R.id.tvFlMapScaling)).setText(scalingDescription(rec, working));
+
+        List<String> options = new ArrayList<>();
+        options.add(getString(R.string.lbl_fl_none_option));
+        for (ComtradeRecord.AnalogChannel ch : rec.analogs) options.add(ch.label());
+        LinearLayout rows = v.findViewById(R.id.containerFlMapRows);
+        Spinner[] spinners = new Spinner[6];
+        for (int k = 0; k < 6; k++) {
+            LinearLayout row = new LinearLayout(this);
+            row.setOrientation(LinearLayout.HORIZONTAL);
+            row.setGravity(android.view.Gravity.CENTER_VERTICAL);
+            row.setPadding(0, dp(3), 0, dp(3));
+            TextView label = new TextView(this);
+            label.setText(ROLE_LABELS[k]);
+            label.setTypeface(label.getTypeface(), android.graphics.Typeface.BOLD);
+            label.setTextColor(resolveColor(com.google.android.material.R.attr.colorPrimary));
+            label.setWidth(dp(40));
+            row.addView(label);
+            Spinner sp = new Spinner(this);
+            sp.setBackgroundResource(R.drawable.bg_spinner);
+            sp.setAdapter(styledAdapter(options));
+            row.addView(sp, new LinearLayout.LayoutParams(0, dp(40), 1f));
+            rows.addView(row);
+            spinners[k] = sp;
+        }
+        SwitchCompat swInvert = v.findViewById(R.id.swFlInvert);
+        EditText etV = v.findViewById(R.id.etFlVMult), etI = v.findViewById(R.id.etFlIMult);
+        Runnable fill = () -> {
+            int[] idx = {working.va, working.vb, working.vc, working.ia, working.ib, working.ic};
+            for (int k = 0; k < 6; k++) spinners[k].setSelection(idx[k] + 1);
+            swInvert.setChecked(working.invertCurrent);
+            etV.setText(fmtPlain(working.vMult));
+            etI.setText(fmtPlain(working.iMult));
+        };
+        fill.run();
+
+        v.findViewById(R.id.btnFlMapAuto).setOnClickListener(view -> {
+            ChannelMap auto = DoubleEndedFaultLocator.autoMap(rec);
+            working.va = auto.va; working.vb = auto.vb; working.vc = auto.vc;
+            working.ia = auto.ia; working.ib = auto.ib; working.ic = auto.ic;
+            fill.run();
+        });
+        v.findViewById(R.id.btnFlMapCancel).setOnClickListener(view -> dialog.dismiss());
+        v.findViewById(R.id.btnFlMapSave).setOnClickListener(view -> {
+            ChannelMap m = new ChannelMap();
+            int[] idx = new int[6];
+            for (int k = 0; k < 6; k++) idx[k] = spinners[k].getSelectedItemPosition() - 1;
+            m.va = idx[0]; m.vb = idx[1]; m.vc = idx[2]; m.ia = idx[3]; m.ib = idx[4]; m.ic = idx[5];
+            m.invertCurrent = swInvert.isChecked();
+            m.vMult = parsePositive(etV.getText().toString(), 1);
+            m.iMult = parsePositive(etI.getText().toString(), 1);
+            st.map = m;
+            saveMapping(st);
+            renderEnd(st);
+            dialog.dismiss();
+        });
+        dialog.show();
+    }
+
+    private String scalingDescription(ComtradeRecord rec, ChannelMap map) {
+        boolean anySecondary = false, missingRatio = false;
+        String vt = "-", ct = "-";
+        int[] all = {map.va, map.vb, map.vc, map.ia, map.ib, map.ic};
+        for (int k = 0; k < 6; k++) {
+            if (all[k] < 0 || all[k] >= rec.analogCount()) continue;
+            ComtradeRecord.AnalogChannel ch = rec.analogs.get(all[k]);
+            if (ch.ps != 'S') continue;
+            anySecondary = true;
+            if (!ch.hasRatio()) { missingRatio = true; continue; }
+            String ratio = fmtPlain(ch.primary / ch.secondary);
+            if (k < 3) vt = ratio; else ct = ratio;
+        }
+        if (missingRatio) return getString(R.string.msg_fl_scaling_no_ratio);
+        if (anySecondary) return getString(R.string.msg_fl_scaling_secondary, vt, ct);
+        return getString(R.string.msg_fl_scaling_primary);
+    }
+
+    private void openInViewer(EndState st) {
+        if (st.cfg == null || st.dat == null) return;
+        try {
+            Intent intent = new Intent(this, DfrViewerActivity.class);
+            intent.setData(FileProvider.getUriForFile(this, getPackageName() + ".fileprovider", st.cfg));
+            intent.putExtra("paired_dat_uri", FileProvider.getUriForFile(this, getPackageName() + ".fileprovider", st.dat).toString());
+            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            startActivity(intent);
+        } catch (Exception e) {
+            Toast.makeText(this, getString(R.string.msg_view_general_error, e.getMessage()), Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    // ------------------------------------------------------------------
+    // Line parameters (remembered per pair of relays, either direction)
+    // ------------------------------------------------------------------
+
+    private String linePairKey() {
+        DeviceListActivity.DeviceItem a = selectedRelay(endA), b = selectedRelay(endB);
+        if (a == null || b == null) return null;
+        String x = a.ip, y = b.ip;
+        return "line_" + (x.compareTo(y) <= 0 ? x + "|" + y : y + "|" + x);
+    }
+
+    private void restoreLineParams() {
+        if (endA.spRelay == null || endB.spRelay == null) return;
+        String key = linePairKey();
+        if (key == null || key.equals(lastLinePairKey)) return;
+        lastLinePairKey = key;
+        String json = getSharedPreferences(PREFS, MODE_PRIVATE).getString(key, null);
+        JSONObject o = null;
+        try {
+            if (json != null) o = new JSONObject(json);
+        } catch (Exception ignored) { }
+        if (o == null) {
+            // First time for this pair of relays: take the Line Database row that ties both
+            // substations together, if there is one.
+            LineData match = new LineDataManager(this).bestMatch(selectedRelay(endA), selectedRelay(endB));
+            if (match != null) {
+                applyLineData(match, true);
+                return;
+            }
+            // Never leave another line's remembered data on screen for a pair it doesn't belong
+            // to - but don't wipe what the user is typing for a brand-new pair either.
+            if (lineParamsRestored) fillLineParams(new JSONObject());
+            lineParamsRestored = false;
+            setSelectedLine(null, false, false);
+            return;
+        }
+        fillLineParams(o);
+        lineParamsRestored = true;
+        LineData line = new LineDataManager(this).get(o.optString("lineId", null));
+        setSelectedLine(line, false, o.optBoolean("lineEdited", false));
+    }
+
+    private void fillLineParams(JSONObject o) {
+        fillingLineFields = true;
+        swTotal.setChecked(o.optBoolean("total", false));
+        etLength.setText(o.optString("len", ""));
+        etR1.setText(o.optString("r1", ""));
+        etX1.setText(o.optString("x1", ""));
+        etR0.setText(o.optString("r0", ""));
+        etX0.setText(o.optString("x0", ""));
+        etB1.setText(o.optString("b1", ""));
+        fillingLineFields = false;
+    }
+
+    private void pickLineFromDatabase() {
+        Intent intent = new Intent(this, LineDatabaseActivity.class);
+        intent.putExtra(LineDatabaseActivity.EXTRA_PICK, true);
+        DeviceListActivity.DeviceItem a = selectedRelay(endA), b = selectedRelay(endB);
+        if (a != null) intent.putExtra(LineDatabaseActivity.EXTRA_RELAY_A, new String[]{a.gi, a.bay, a.merk, a.type});
+        if (b != null) intent.putExtra(LineDatabaseActivity.EXTRA_RELAY_B, new String[]{b.gi, b.bay, b.merk, b.type});
+        startActivityForResult(intent, REQ_PICK_LINE);
+    }
+
+    /** Fills the line fields from a Line Database row (per-km values, Z2 = Z1). */
+    private void applyLineData(LineData d, boolean auto) {
+        fillingLineFields = true;
+        swTotal.setChecked(false);
+        etLength.setText(plain(d.lengthKm));
+        etR1.setText(plain(d.r1));
+        etX1.setText(plain(d.x1));
+        etR0.setText(plain(d.r0));
+        etX0.setText(plain(d.x0));
+        etB1.setText(plain(d.b1));
+        fillingLineFields = false;
+        lineParamsRestored = true;
+        setSelectedLine(d, auto, false);
+    }
+
+    private void setSelectedLine(@Nullable LineData d, boolean auto, boolean edited) {
+        selectedLine = d;
+        selectedLineAuto = auto;
+        selectedLineEdited = edited;
+        renderLineConfig();
+    }
+
+    private void renderLineConfig() {
+        if (tvLineConfig == null) return;
+        if (selectedLine == null) {
+            tvLineConfig.setText(R.string.msg_fl_line_config_manual);
+            return;
+        }
+        String text = selectedLine.routeLabel() + "\n" + selectedLine.detailLabel();
+        if (selectedLineAuto) text = getString(R.string.lbl_fl_line_config_auto) + " " + text;
+        if (selectedLineEdited) text += "\n" + getString(R.string.lbl_fl_line_config_edited);
+        tvLineConfig.setText(text);
+    }
+
+    private static String plain(double v) {
+        if (Double.isNaN(v)) return "";
+        String s = String.format(Locale.US, "%.6f", v).replaceAll("0+$", "");
+        return s.endsWith(".") ? s.substring(0, s.length() - 1) : s;
+    }
+
+    private void saveLineParams() {
+        String key = linePairKey();
+        if (key == null) return;
+        try {
+            JSONObject o = new JSONObject();
+            o.put("total", swTotal.isChecked());
+            o.put("len", text(etLength));
+            o.put("r1", text(etR1));
+            o.put("x1", text(etX1));
+            o.put("r0", text(etR0));
+            o.put("x0", text(etX0));
+            o.put("b1", text(etB1));
+            if (selectedLine != null) {
+                o.put("lineId", selectedLine.id);
+                o.put("lineEdited", selectedLineEdited);
+            }
+            getSharedPreferences(PREFS, MODE_PRIVATE).edit().putString(key, o.toString()).apply();
+            lastLinePairKey = key;
+            lineParamsRestored = true;
+        } catch (Exception ignored) { }
+    }
+
+    private void updateLineHints() {
+        boolean total = swTotal.isChecked();
+        tilR1.setHint(getString(total ? R.string.hint_fl_r1_total : R.string.hint_fl_r1));
+        tilX1.setHint(getString(total ? R.string.hint_fl_x1_total : R.string.hint_fl_x1));
+        tilR0.setHint(getString(total ? R.string.hint_fl_r0_total : R.string.hint_fl_r0));
+        tilX0.setHint(getString(total ? R.string.hint_fl_x0_total : R.string.hint_fl_x0));
+        tilB1.setHint(getString(total ? R.string.hint_fl_b1_total : R.string.hint_fl_b1));
+    }
+
+    @Nullable
+    private DoubleEndedFaultLocator.LineParams readLineParams() {
+        DoubleEndedFaultLocator.LineParams lp = new DoubleEndedFaultLocator.LineParams();
+        lp.lengthKm = parseNumber(text(etLength));
+        double k = swTotal.isChecked() && lp.lengthKm > 0 ? 1.0 / lp.lengthKm : 1.0;
+        lp.r1 = parseNumber(text(etR1)) * k;
+        lp.x1 = parseNumber(text(etX1)) * k;
+        lp.r0 = orZero(parseNumber(text(etR0))) * k;
+        lp.x0 = orZero(parseNumber(text(etX0))) * k;
+        lp.b1 = orZero(parseNumber(text(etB1))) * k;
+        if (!(lp.lengthKm > 0) || !(lp.x1 > 0) || !(lp.r1 >= 0)) return null;
+        return lp;
+    }
+
+    // ------------------------------------------------------------------
+    // Analysis
+    // ------------------------------------------------------------------
+
+    private void runAnalysis() {
+        if (endA.rec == null || endB.rec == null) {
+            Toast.makeText(this, R.string.msg_fl_need_both, Toast.LENGTH_LONG).show();
+            return;
+        }
+        DoubleEndedFaultLocator.LineParams lp = readLineParams();
+        if (lp == null) {
+            Toast.makeText(this, R.string.msg_fl_invalid_line, Toast.LENGTH_LONG).show();
+            etLength.requestFocus();
+            return;
+        }
+        saveLineParams();
+        double offset = parseNumber(text(etOffset));
+        ComtradeRecord recA = endA.rec, recB = endB.rec;
+        ChannelMap mapA = endA.map, mapB = endB.map;
+        showProgress(getString(R.string.msg_fl_analyzing));
+        executor.execute(() -> {
+            Result res;
+            try {
+                res = DoubleEndedFaultLocator.analyze(recA, mapA, recB, mapB, lp, offset);
+            } catch (Exception e) {
+                res = new Result();
+                res.error = "EXCEPTION";
+                res.errorArgs = new Object[]{String.valueOf(e.getMessage())};
+            }
+            Result finalRes = res;
+            runOnUiThread(() -> {
+                hideProgress();
+                if (finalRes.error != null) {
+                    cardResult.setVisibility(View.GONE);
+                    showInfoDialog(getString(R.string.ttl_fl_error), errorText(finalRes));
+                    return;
+                }
+                lastResult = finalRes;
+                renderResult(finalRes);
+            });
+        });
+    }
+
+    private String errorText(Result r) {
+        String a = endName(endA), b = endName(endB);
+        switch (r.error) {
+            case DoubleEndedFaultLocator.ERR_MAPPING_A: return getString(R.string.err_fl_mapping, a);
+            case DoubleEndedFaultLocator.ERR_MAPPING_B: return getString(R.string.err_fl_mapping, b);
+            case DoubleEndedFaultLocator.ERR_RATE_A: return getString(R.string.err_fl_rate, a, fmt((Double) r.errorArgs[0], 0));
+            case DoubleEndedFaultLocator.ERR_RATE_B: return getString(R.string.err_fl_rate, b, fmt((Double) r.errorArgs[0], 0));
+            case DoubleEndedFaultLocator.ERR_SHORT_A: return getString(R.string.err_fl_short, a);
+            case DoubleEndedFaultLocator.ERR_SHORT_B: return getString(R.string.err_fl_short, b);
+            case DoubleEndedFaultLocator.ERR_LINE: return getString(R.string.msg_fl_invalid_line);
+            case DoubleEndedFaultLocator.ERR_NO_SIGNAL: return getString(R.string.err_fl_no_signal);
+            default: return getString(R.string.err_fl_exception, r.errorArgs.length > 0 ? r.errorArgs[0] : r.error);
+        }
+    }
+
+    private void renderResult(Result r) {
+        String nameA = endName(endA), nameB = endName(endB);
+        cardResult.setVisibility(View.VISIBLE);
+
+        FaultLineView line = findViewById(R.id.faultLineView);
+        line.setEnds(nameA, nameB);
+        line.setFault(r.distA / r.lengthKm, Double.isNaN(r.spreadKm) ? Double.NaN : r.spreadKm / r.lengthKm,
+                fmt(r.distA, 2) + " km");
+
+        ((TextView) findViewById(R.id.tvFlFromALabel)).setText(getString(R.string.lbl_fl_from, nameA));
+        ((TextView) findViewById(R.id.tvFlFromBLabel)).setText(getString(R.string.lbl_fl_from, nameB));
+        ((TextView) findViewById(R.id.tvFlFromA)).setText(fmt(r.distA, 2) + " km");
+        ((TextView) findViewById(R.id.tvFlFromB)).setText(fmt(r.distB, 2) + " km");
+        String summary = getString(R.string.msg_fl_pct, fmt(r.distA / r.lengthKm * 100, 1), fmt(r.lengthKm, 2));
+        if (!Double.isNaN(r.spreadKm)) summary = getString(R.string.msg_fl_spread, fmt(r.spreadKm, 2), r.windowsUsed) + "  •  " + summary;
+        ((TextView) findViewById(R.id.tvFlSummary)).setText(summary);
+        ((TextView) findViewById(R.id.tvFlFaultType)).setText(getString(R.string.lbl_fl_fault_type, rstName(r.faultType), r.faultType));
+
+        renderWarnings(r, nameA, nameB);
+        renderMethods(r, nameA, nameB);
+        renderChart(r, nameA, nameB);
+        renderDetails(r, nameA, nameB);
+        ((TextView) findViewById(R.id.tvFlPhasors)).setText(phasorTable(r, nameA, nameB));
+
+        View scroll = findViewById(R.id.scrollFl);
+        scroll.post(() -> ((androidx.core.widget.NestedScrollView) scroll).smoothScrollTo(0, cardResult.getTop()));
+    }
+
+    private void renderWarnings(Result r, String nameA, String nameB) {
+        LinearLayout box = findViewById(R.id.containerFlWarnings);
+        box.removeAllViews();
+        for (DoubleEndedFaultLocator.Warning w : r.warnings) {
+            String text = warningText(w, nameA, nameB);
+            if (text == null) continue;
+            TextView tv = new TextView(this);
+            tv.setText("⚠  " + text);
+            tv.setTextColor(ContextCompat.getColor(this, R.color.status_warning));
+            tv.setTextSize(TypedValue.COMPLEX_UNIT_PX, getResources().getDimension(R.dimen.text_size_small));
+            tv.setPadding(0, dp(2), 0, dp(4));
+            box.addView(tv);
+        }
+        Button fix = findViewById(R.id.btnFlFixPolarity);
+        // Exactly one end looking reverse is the classic signature of an inverted CT polarity
+        // setting in that relay's DFR - offer the one-tap retry instead of making the user dig
+        // into the mapping dialog.
+        EndState suspect = r.dirA < 0 && r.dirB >= 0 ? endA : r.dirB < 0 && r.dirA >= 0 ? endB : null;
+        if (suspect == null) {
+            fix.setVisibility(View.GONE);
+            return;
+        }
+        fix.setVisibility(View.VISIBLE);
+        fix.setText(getString(R.string.btn_fl_fix_polarity, suspect == endA ? nameA : nameB));
+        fix.setOnClickListener(v -> {
+            suspect.map.invertCurrent = !suspect.map.invertCurrent;
+            saveMapping(suspect);
+            renderEnd(suspect);
+            runAnalysis();
+        });
+    }
+
+    @Nullable
+    private String warningText(DoubleEndedFaultLocator.Warning w, String nameA, String nameB) {
+        Object[] a = w.args;
+        switch (w.code) {
+            case "SEC_NO_RATIO_A": return getString(R.string.warn_fl_sec_no_ratio, nameA);
+            case "SEC_NO_RATIO_B": return getString(R.string.warn_fl_sec_no_ratio, nameB);
+            case "FREQ_DIFF": return getString(R.string.warn_fl_freq_diff, fmt((Double) a[0], 1), fmt((Double) a[1], 1));
+            case "INC_TRIGGER_A": return getString(R.string.warn_fl_inc_trigger, nameA);
+            case "INC_TRIGGER_B": return getString(R.string.warn_fl_inc_trigger, nameB);
+            case "NO_PREFAULT_A": return getString(R.string.warn_fl_no_prefault, nameA);
+            case "NO_PREFAULT_B": return getString(R.string.warn_fl_no_prefault, nameB);
+            case "SHORT_FAULT": return getString(R.string.warn_fl_short_fault);
+            case "UNSTABLE": return getString(R.string.warn_fl_unstable, fmt((Double) a[0], 0));
+            case "NO_ROOT": return getString(R.string.warn_fl_no_root);
+            case "TWO_ROOTS": return getString(R.string.warn_fl_two_roots, fmt((Double) a[0], 2), nameA);
+            case "OUT_OF_LINE": return getString(R.string.warn_fl_out_of_line, fmt((Double) a[0], 1));
+            case "DIR_A_REV": return getString(R.string.warn_fl_dir_rev, nameA);
+            case "DIR_B_REV": return getString(R.string.warn_fl_dir_rev, nameB);
+            case "NO_Z0": return getString(R.string.warn_fl_no_z0);
+            case "TIME_GAP": return getString(R.string.warn_fl_time_gap, fmt(Math.abs((Double) a[0]), 1));
+            case "PHASE_ROT_A": return getString(R.string.warn_fl_phase_rot, nameA);
+            case "PHASE_ROT_B": return getString(R.string.warn_fl_phase_rot, nameB);
+            case "PRE_V_MISMATCH": return getString(R.string.warn_fl_pre_v_mismatch, fmt((Double) a[0], 1), fmt((Double) a[1], 1));
+            case "PRE_I_MISMATCH": return getString(R.string.warn_fl_pre_i_mismatch, fmt((Double) a[0], 0), fmt((Double) a[1], 0));
+            case "PRE_POLARITY": return getString(R.string.warn_fl_pre_polarity);
+            default: return null;
+        }
+    }
+
+    private void renderMethods(Result r, String nameA, String nameB) {
+        LinearLayout box = findViewById(R.id.containerFlMethods);
+        box.removeAllViews();
+        String main;
+        if (r.sequenceUsed == 2) main = getString(R.string.lbl_fl_method_de_neg);
+        else if (r.superimposed) main = getString(R.string.lbl_fl_method_de_pos_sup);
+        else main = getString(R.string.lbl_fl_method_de_pos_total);
+        addRow(box, main, fmt(r.distA, 2) + " km", true);
+        if (!Double.isNaN(r.mPos)) addRow(box, getString(R.string.lbl_fl_method_de_pos), methodValue(r, r.mPos * r.lengthKm), false);
+        if (!Double.isNaN(r.mSync)) {
+            String v = methodValue(r, r.mSync * r.lengthKm);
+            if (!r.syncTrusted) v += "\n" + getString(R.string.lbl_fl_sync_untrusted);
+            addRow(box, getString(R.string.lbl_fl_method_sync), v, false);
+        }
+        addRow(box, getString(R.string.lbl_fl_method_takagi, nameA),
+                Double.isNaN(r.takagiA) ? getString(R.string.val_fl_na) : methodValue(r, r.takagiA), false);
+        addRow(box, getString(R.string.lbl_fl_method_takagi, nameB),
+                Double.isNaN(r.takagiB) ? getString(R.string.val_fl_na)
+                        : methodValue(r, r.lengthKm - r.takagiB) + "\n" + getString(R.string.val_fl_from_end, fmt(r.takagiB, 2), nameB), false);
+    }
+
+    /** A cross-check result, always expressed as km from end A so the column is comparable. */
+    private String methodValue(Result r, double kmFromA) {
+        double delta = kmFromA - r.distA;
+        return getString(R.string.val_fl_method, fmt(kmFromA, 2), (delta >= 0 ? "+" : "") + fmt(delta, 2));
+    }
+
+    private void renderDetails(Result r, String nameA, String nameB) {
+        LinearLayout box = findViewById(R.id.containerFlDetails);
+        box.removeAllViews();
+        addRow(box, getString(R.string.lbl_fl_det_rf), Double.isNaN(r.rf) ? getString(R.string.val_fl_na) : fmt(r.rf, 2) + " Ω", false);
+        addRow(box, getString(R.string.lbl_fl_det_dir, nameA), dirText(r.dirA), false);
+        addRow(box, getString(R.string.lbl_fl_det_dir, nameB), dirText(r.dirB), false);
+        addRow(box, getString(R.string.lbl_fl_det_delta), fmt(r.syncAngleDeg, 1) + "°", false);
+        if (!Double.isNaN(r.inceptionDiffMs)) {
+            addRow(box, getString(R.string.lbl_fl_det_inc_diff), fmt(r.inceptionDiffMs, 2) + " ms", false);
+        }
+        addRow(box, getString(R.string.lbl_fl_det_window), getString(R.string.val_fl_window, fmt(r.offsetCycles, 3), r.windowsUsed), false);
+        addRow(box, getString(R.string.lbl_fl_det_model), getString(r.distributedModel ? R.string.val_fl_model_dist : R.string.val_fl_model_lumped), false);
+        addEndDetails(box, r.endA, nameA);
+        addEndDetails(box, r.endB, nameB);
+    }
+
+    private void addEndDetails(LinearLayout box, EndSummary e, String name) {
+        String src = getString("I".equals(e.inceptionSource) ? R.string.val_fl_src_i
+                : "V".equals(e.inceptionSource) ? R.string.val_fl_src_v : R.string.val_fl_src_t);
+        addRow(box, getString(R.string.lbl_fl_det_record, name),
+                getString(R.string.val_fl_record, fmt(e.fs, 0), e.samplesPerCycle, e.fileType, fmt(e.inceptionTime * 1000, 1), src), false);
+    }
+
+    private String dirText(int dir) {
+        return getString(dir > 0 ? R.string.val_fl_dir_fwd : dir < 0 ? R.string.val_fl_dir_rev : R.string.val_fl_dir_unknown);
+    }
+
+    private void addRow(LinearLayout box, String label, String value, boolean highlight) {
+        LinearLayout row = new LinearLayout(this);
+        row.setOrientation(LinearLayout.HORIZONTAL);
+        row.setPadding(0, dp(5), 0, dp(5));
+        TextView l = new TextView(this);
+        l.setText(label);
+        l.setTextColor(ContextCompat.getColor(this, R.color.text_secondary));
+        l.setTextSize(TypedValue.COMPLEX_UNIT_PX, getResources().getDimension(R.dimen.text_size_body_small));
+        row.addView(l, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1.2f));
+        TextView v = new TextView(this);
+        v.setText(value);
+        v.setGravity(android.view.Gravity.END);
+        v.setTextColor(highlight ? resolveColor(com.google.android.material.R.attr.colorPrimary) : ContextCompat.getColor(this, R.color.text_primary));
+        v.setTextSize(TypedValue.COMPLEX_UNIT_PX, getResources().getDimension(R.dimen.text_size_body_small));
+        v.setTypeface(v.getTypeface(), android.graphics.Typeface.BOLD);
+        row.addView(v, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+        box.addView(row);
+        View div = new View(this);
+        div.setBackgroundColor(ContextCompat.getColor(this, R.color.divider));
+        box.addView(div, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 1));
+    }
+
+    private void renderChart(Result r, String nameA, String nameB) {
+        LineChart chart = findViewById(R.id.chartFlProfile);
+        if (r.profileKm == null) {
+            chart.clear();
+            return;
+        }
+        List<Entry> ea = new ArrayList<>(), eb = new ArrayList<>();
+        for (int k = 0; k < r.profileKm.length; k++) {
+            ea.add(new Entry((float) r.profileKm[k], (float) r.profileA[k]));
+            eb.add(new Entry((float) r.profileKm[k], (float) r.profileB[k]));
+        }
+        int textColor = ContextCompat.getColor(this, R.color.text_secondary);
+        LineDataSet da = new LineDataSet(ea, getString(R.string.lbl_fl_curve_from, nameA));
+        LineDataSet db = new LineDataSet(eb, getString(R.string.lbl_fl_curve_from, nameB));
+        int colorA = resolveColor(com.google.android.material.R.attr.colorPrimary);
+        int colorB = ContextCompat.getColor(this, R.color.unit_accent_2);
+        for (LineDataSet ds : new LineDataSet[]{da, db}) {
+            ds.setDrawCircles(false);
+            ds.setDrawValues(false);
+            ds.setLineWidth(2f);
+            ds.setHighlightEnabled(false);
+        }
+        da.setColor(colorA);
+        db.setColor(colorB);
+        chart.setData(new com.github.mikephil.charting.data.LineData(da, db));
+        chart.getDescription().setEnabled(false);
+        chart.getAxisRight().setEnabled(false);
+        chart.getAxisLeft().setTextColor(textColor);
+        chart.getLegend().setTextColor(textColor);
+        XAxis x = chart.getXAxis();
+        x.setPosition(XAxis.XAxisPosition.BOTTOM);
+        x.setTextColor(textColor);
+        x.removeAllLimitLines();
+        LimitLine ll = new LimitLine((float) r.distA, fmt(r.distA, 2) + " km");
+        ll.setLineColor(ContextCompat.getColor(this, R.color.status_danger));
+        ll.setTextColor(ContextCompat.getColor(this, R.color.status_danger));
+        ll.setLineWidth(1.5f);
+        ll.enableDashedLine(10f, 6f, 0f);
+        x.addLimitLine(ll);
+        chart.setTouchEnabled(true);
+        chart.setPinchZoom(true);
+        chart.setNoDataTextColor(textColor);
+        chart.setBackgroundColor(Color.TRANSPARENT);
+        chart.invalidate();
+    }
+
+    private String phasorTable(Result r, String nameA, String nameB) {
+        StringBuilder sb = new StringBuilder();
+        appendPhasors(sb, r.endA, nameA);
+        sb.append('\n');
+        appendPhasors(sb, r.endB, nameB);
+        return sb.toString().trim();
+    }
+
+    private void appendPhasors(StringBuilder sb, EndSummary e, String name) {
+        sb.append(name).append('\n');
+        sb.append(String.format(Locale.US, "%-4s %22s %22s%n", "", getString(R.string.lbl_fl_prefault), getString(R.string.lbl_fl_fault)));
+        String[] names = {"Va", "Vb", "Vc", "Ia", "Ib", "Ic", "V1", "V2", "V0", "I1", "I2", "I0"};
+        for (int k = 0; k < names.length; k++) {
+            boolean isV = names[k].startsWith("V");
+            sb.append(String.format(Locale.US, "%-4s %22s %22s%n", names[k],
+                    e.hasPrefault ? phasorText(pick(e.pre, k), isV, e.displayRefAngle) : "-",
+                    phasorText(pick(e.flt, k), isV, e.displayRefAngle)));
+        }
+    }
+
+    private static Cx pick(Phasors p, int k) {
+        switch (k) {
+            case 0: case 1: case 2: return p.v[k];
+            case 3: case 4: case 5: return p.i[k - 3];
+            case 6: return p.v1;
+            case 7: return p.v2;
+            case 8: return p.v0;
+            case 9: return p.i1;
+            case 10: return p.i2;
+            default: return p.i0;
+        }
+    }
+
+    private static String phasorText(Cx x, boolean isV, double refAngle) {
+        double ang = Math.toDegrees(x.arg() - refAngle);
+        while (ang > 180) ang -= 360;
+        while (ang <= -180) ang += 360;
+        return isV ? String.format(Locale.US, "%9.2f kV ∠%7.1f°", x.abs() / 1000, ang)
+                : String.format(Locale.US, "%9.1f A  ∠%7.1f°", x.abs(), ang);
+    }
+
+    /** PLN-style R/S/T naming, matching the DFR Viewer's assessment phase options. */
+    private static String rstName(String type) {
+        switch (type) {
+            case "AG": return "R-N";
+            case "BG": return "S-N";
+            case "CG": return "T-N";
+            case "AB": return "R-S";
+            case "BC": return "S-T";
+            case "CA": return "R-T";
+            case "ABG": return "RS-N";
+            case "BCG": return "ST-N";
+            case "CAG": return "RT-N";
+            case "ABC": return "R-S-T";
+            default: return "?";
+        }
+    }
+
+    // ------------------------------------------------------------------
+    // Report sharing
+    // ------------------------------------------------------------------
+
+    private void shareReport() {
+        Result r = lastResult;
+        if (r == null) return;
+        String nameA = endName(endA), nameB = endName(endB);
+        StringBuilder sb = new StringBuilder();
+        sb.append(getString(R.string.ttl_fl_report)).append('\n');
+        sb.append(nameA).append(" – ").append(nameB).append(" (").append(fmt(r.lengthKm, 2)).append(" km)\n\n");
+        if (selectedLine != null) {
+            sb.append(getString(R.string.lbl_fl_line_config)).append(": ").append(selectedLine.routeLabel())
+                    .append(" (").append(selectedLine.bay).append(')');
+            if (selectedLineEdited) sb.append(' ').append(getString(R.string.lbl_fl_line_config_edited));
+            sb.append('\n');
+        }
+        sb.append(getString(R.string.lbl_fl_fault_type, rstName(r.faultType), r.faultType)).append('\n');
+        sb.append(getString(R.string.lbl_fl_from, nameA)).append(": ").append(fmt(r.distA, 2)).append(" km\n");
+        sb.append(getString(R.string.lbl_fl_from, nameB)).append(": ").append(fmt(r.distB, 2)).append(" km\n");
+        if (!Double.isNaN(r.spreadKm)) sb.append(getString(R.string.msg_fl_spread, fmt(r.spreadKm, 2), r.windowsUsed)).append('\n');
+        sb.append('\n').append(getString(R.string.lbl_fl_methods_header)).append('\n');
+        appendRows(sb, findViewById(R.id.containerFlMethods));
+        sb.append('\n').append(getString(R.string.lbl_fl_details_header)).append('\n');
+        appendRows(sb, findViewById(R.id.containerFlDetails));
+        LinearLayout warn = findViewById(R.id.containerFlWarnings);
+        if (warn.getChildCount() > 0) {
+            sb.append('\n');
+            for (int i = 0; i < warn.getChildCount(); i++) sb.append(((TextView) warn.getChildAt(i)).getText()).append('\n');
+        }
+        sb.append('\n').append(getString(R.string.lbl_fl_record_files)).append('\n');
+        sb.append("A: ").append(endA.cfg != null ? endA.cfg.getName() : "-").append(" (").append(endA.rec.triggerText).append(")\n");
+        sb.append("B: ").append(endB.cfg != null ? endB.cfg.getName() : "-").append(" (").append(endB.rec.triggerText).append(")\n");
+        sb.append('\n').append(phasorTable(r, nameA, nameB)).append('\n');
+
+        Intent intent = new Intent(Intent.ACTION_SEND);
+        intent.setType("text/plain");
+        intent.putExtra(Intent.EXTRA_SUBJECT, getString(R.string.ttl_fl_report) + " " + nameA + " – " + nameB);
+        intent.putExtra(Intent.EXTRA_TEXT, sb.toString());
+        startActivity(Intent.createChooser(intent, getString(R.string.btn_fl_share)));
+    }
+
+    private static void appendRows(StringBuilder sb, LinearLayout box) {
+        for (int i = 0; i < box.getChildCount(); i++) {
+            View row = box.getChildAt(i);
+            if (!(row instanceof LinearLayout) || ((LinearLayout) row).getChildCount() < 2) continue;
+            CharSequence label = ((TextView) ((LinearLayout) row).getChildAt(0)).getText();
+            CharSequence value = ((TextView) ((LinearLayout) row).getChildAt(1)).getText();
+            sb.append("• ").append(label).append(": ").append(value.toString().replace('\n', ' ')).append('\n');
+        }
+    }
+
+    // ------------------------------------------------------------------
+    // Small helpers
+    // ------------------------------------------------------------------
+
+    private void disconnectLater(Iec61850DfrClient client) {
+        executor.execute(() -> {
+            client.disconnect();
+            if (openClient == client) openClient = null;
+        });
+    }
+
+    private void showInfoDialog(String title, String body) {
+        View v = getLayoutInflater().inflate(R.layout.dialog_fl_info, null);
+        AlertDialog dialog = cardDialog(v);
+        ((TextView) v.findViewById(R.id.tvFlInfoTitle)).setText(title);
+        ((TextView) v.findViewById(R.id.tvFlInfoBody)).setText(body);
+        v.findViewById(R.id.btnFlInfoClose).setOnClickListener(x -> dialog.dismiss());
+        dialog.show();
+    }
+
+    private AlertDialog cardDialog(View v) {
+        AlertDialog dialog = new AlertDialog.Builder(this, R.style.Theme_Comtrade_Dialog).setView(v).create();
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+            dialog.getWindow().setGravity(android.view.Gravity.CENTER);
+        }
+        return dialog;
+    }
+
+    private void showProgress(String label) {
+        runOnUiThread(() -> {
+            tvProgress.setText(label);
+            overlay.setVisibility(View.VISIBLE);
+        });
+    }
+
+    private void hideProgress() {
+        runOnUiThread(() -> overlay.setVisibility(View.GONE));
+    }
+
+    private ArrayAdapter<String> styledAdapter(List<String> items) {
+        return new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, items) {
+            @NonNull
+            @Override
+            public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
+                View v = super.getView(position, convertView, parent);
+                ((TextView) v).setTextColor(ContextCompat.getColor(getContext(), R.color.text_primary));
+                ((TextView) v).setTextSize(13);
+                ((TextView) v).setSingleLine(true);
+                return v;
+            }
+
+            @Override
+            public View getDropDownView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
+                View v = super.getDropDownView(position, convertView, parent);
+                ((TextView) v).setTextColor(ContextCompat.getColor(getContext(), R.color.text_primary));
+                return v;
+            }
+        };
+    }
+
+    /** OnItemSelectedListener that ignores the spurious first callback fired on attach. */
+    private static class SimpleSelection implements AdapterView.OnItemSelectedListener {
+        private final Runnable action;
+        private boolean first = true;
+
+        SimpleSelection(Runnable action) { this.action = action; }
+
+        @Override
+        public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+            if (first) { first = false; return; }
+            action.run();
+        }
+
+        @Override
+        public void onNothingSelected(AdapterView<?> parent) { }
+    }
+
+    private int resolveColor(int attr) {
+        TypedValue tv = new TypedValue();
+        getTheme().resolveAttribute(attr, tv, true);
+        return tv.data;
+    }
+
+    private static String text(EditText et) {
+        return et.getText() == null ? "" : et.getText().toString().trim();
+    }
+
+    /** Accepts both "0.07" and "0,07" (Indonesian keyboards); NaN when empty/invalid. */
+    private static double parseNumber(String s) {
+        if (s == null || s.trim().isEmpty()) return Double.NaN;
+        try {
+            return Double.parseDouble(s.trim().replace(',', '.'));
+        } catch (NumberFormatException e) {
+            return Double.NaN;
+        }
+    }
+
+    private static double orZero(double v) { return Double.isNaN(v) ? 0 : v; }
+
+    private static double parsePositive(String s, double def) {
+        double v = parseNumber(s);
+        return v > 0 ? v : def;
+    }
+
+    private static String fmt(double v, int decimals) {
+        if (Double.isNaN(v)) return "-";
+        return String.format(Locale.US, "%." + decimals + "f", v);
+    }
+
+    private static String fmtPlain(double v) {
+        if (v == Math.rint(v)) return String.valueOf((long) v);
+        return String.valueOf(v);
+    }
+
+    private int dp(int v) {
+        return (int) (v * getResources().getDisplayMetrics().density);
+    }
+}

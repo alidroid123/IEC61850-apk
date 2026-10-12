@@ -31,6 +31,8 @@ Requirement: `compileSdk 34`, `minSdk 24` (Android 7.0+), `targetSdk 34`, Java 8
 | **Unduh COMTRADE** | Sambung ke relay lewat MMS, deteksi vendor otomatis, mode Bulk/Single/Deep Scan. |
 | **Viewer DFR** | Plot channel analog & digital, kursor T1/T2, ekspor grafik/laporan PDF. |
 | **Riwayat Unduhan** | Kelola file COMTRADE yang sudah diunduh, per folder. |
+| **FL Double Ended** | Lokasi gangguan saluran dari 2 DFR (relay di GI A & GI B): pilih GI + relay tiap ujung dari Database Relay, unduh record langsung lewat MMS atau pakai file lokal. Metode utama dua ujung tak-tersinkron urutan negatif (IEEE C37.114), pembanding urutan positif, tersinkron-waktu & Takagi satu ujung; klasifikasi jenis gangguan, Rf, arah, cek polaritas/rasio CT-VT. Engine: `DoubleEndedFaultLocator` + reader COMTRADE lengkap `ComtradeRecord` (ASCII/BINARY/BINARY32/FLOAT32/zip). |
+| **Database Saluran** | Sudah terisi data konduktor bawaan (`app/src/main/assets/line_database_default.csv`, 166 saluran, dimuat sekali saat database masih kosong). Panjang saluran + impedansi urutan positif/nol (Z2 = Z1) per bay relay, dipakai FL Double Ended untuk mengisi parameter saluran (otomatis memilih saluran yang menghubungkan kedua GI). Impor CSV data konduktor berdasarkan nama kolom (header 1–2 baris, koma/titik-koma), ekspor CSV, tambah/ubah manual; ikut di Ekspor/Impor Konfigurasi. Kode: `LineData`, `LineDataCsv`, `LineDataManager`, `LineDatabaseActivity`. |
 | **Database Relay** | Data gardu induk/bay/IP/merk/tipe per relay, ping satuan & massal, impor/ekspor CSV. |
 | **IED Explorer** | Jelajahi model data IEC 61850 (LD/LN/DO/DA) sebuah IED secara langsung; "Get Definition" memindai seluruh device untuk atribut `d` (deskripsi) + status `general`/`stVal` pasangannya dan menyimpannya ke tabel Node Definitions (bisa di-export CSV); "Full List" membaca nilai SEMUA node di device sebagai daftar datar, berjalan di background (`FullListFetchService`) dengan notifikasi live. |
 | **Monitoring IED** | Polling titik pantau dari banyak IED, ambang alarm, invert warna boolean per-titik, bulk edit (tabel dengan tipe dropdown, tambah baris, pilih alamat live, drag reorder), refresh per grup. |
@@ -51,6 +53,9 @@ app/src/main/java/com/alidev/dfrtools/
  │   ├─ DeviceListActivity, InternalFileManagerActivity, SettingsActivity
  │   ├─ NodeDefinition, NodeDefinitionManager, NodeDefinitionListActivity <- tabel atribut 'd' (Get Definition di MMS Explorer)
  │   ├─ FullListEntry, FullListFetchService <- "Full List" MMS Explorer: baca semua node, foreground service + notifikasi
+ │   ├─ FaultLocatorActivity, FaultLineView <- menu "FL Double Ended" (UI, unduh DFR 2 ujung, hasil)
+ │   ├─ DoubleEndedFaultLocator      <- engine lokasi gangguan dua ujung (pure Java, bisa diuji tanpa device)
+ │   ├─ ComtradeRecord               <- reader COMTRADE 1991/1999/2013 lengkap (ASCII/BINARY/BINARY32/FLOAT32, zip)
  │   ├─ ThemeManager                 <- 5 tema, rotasi warna per-Activity untuk tema Abstract
  │   ├─ BackupManager                <- ekspor/impor config (device/monitoring/template/definisi node) jadi satu JSON
  │   ├─ Iec61850DfrClient            <- wrapper Java atas native (BLOCKING, panggil dari background thread)

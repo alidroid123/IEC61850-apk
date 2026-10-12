@@ -70,6 +70,14 @@ public class HomeActivity extends BaseActivity {
                 drawerLayout.closeDrawers();
                 startActivity(new Intent(this, RelayTemplateEditActivity.class));
                 return true;
+            } else if (id == R.id.nav_fault_locator) {
+                drawerLayout.closeDrawers();
+                startActivity(new Intent(this, FaultLocatorActivity.class));
+                return true;
+            } else if (id == R.id.nav_line_db) {
+                drawerLayout.closeDrawers();
+                startActivity(new Intent(this, LineDatabaseActivity.class));
+                return true;
             } else if (id == R.id.nav_sld) {
                 drawerLayout.closeDrawers();
                 startActivity(new Intent(this, SubstationOverviewActivity.class));
@@ -125,6 +133,14 @@ public class HomeActivity extends BaseActivity {
 
         findViewById(R.id.cardMonitoring).setOnClickListener(v -> {
             startActivity(new Intent(this, IEDMonitoringActivity.class));
+        });
+
+        findViewById(R.id.cardFaultLocator).setOnClickListener(v -> {
+            startActivity(new Intent(this, FaultLocatorActivity.class));
+        });
+
+        findViewById(R.id.cardLineDatabase).setOnClickListener(v -> {
+            startActivity(new Intent(this, LineDatabaseActivity.class));
         });
 
         tvStatGiCount = findViewById(R.id.tvStatGiCount);
@@ -211,6 +227,7 @@ public class HomeActivity extends BaseActivity {
             JSONArray nodes = config.optJSONArray("monitoredNodes");
             JSONObject templates = config.optJSONObject("relayTemplates");
             JSONArray defs = config.optJSONArray("nodeDefinitions");
+            // lineDatabase deliberately not checked: it ships pre-filled with the bundled data.
             return (devices == null || devices.length() == 0)
                     && (nodes == null || nodes.length() == 0)
                     && (templates == null || templates.length() == 0)

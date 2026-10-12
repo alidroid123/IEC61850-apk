@@ -190,6 +190,28 @@ public class HelpActivity extends BaseActivity {
                             new HelpFeature(R.string.help_feat_view_3_title, R.string.help_feat_view_3_steps),
                             new HelpFeature(R.string.help_feat_view_4_title, R.string.help_feat_view_4_steps),
                     }),
+            new HelpSection(R.drawable.ic_fault_locator, R.string.help_ttl_fl, R.string.help_sum_fl, R.string.help_func_fl,
+                    new HelpComponent[]{
+                            new HelpComponent(R.drawable.ic_download, R.string.help_cmp_fl_1_name, R.string.help_cmp_fl_1_desc),
+                            new HelpComponent(R.drawable.ic_folder, R.string.help_cmp_fl_2_name, R.string.help_cmp_fl_2_desc),
+                            new HelpComponent(R.drawable.ic_settings, R.string.help_cmp_fl_3_name, R.string.help_cmp_fl_3_desc),
+                            new HelpComponent(R.drawable.ic_info, R.string.help_cmp_fl_4_name, R.string.help_cmp_fl_4_desc),
+                            new HelpComponent(R.drawable.ic_line_data, R.string.help_cmp_fl_5_name, R.string.help_cmp_fl_5_desc),
+                    },
+                    new HelpFeature[]{
+                            new HelpFeature(R.string.help_feat_fl_1_title, R.string.help_feat_fl_1_steps),
+                            new HelpFeature(R.string.help_feat_fl_2_title, R.string.help_feat_fl_2_steps),
+                            new HelpFeature(R.string.help_feat_fl_3_title, R.string.help_feat_fl_3_steps),
+                    }),
+            new HelpSection(R.drawable.ic_line_data, R.string.help_ttl_line_db, R.string.help_sum_line_db, R.string.help_func_line_db,
+                    new HelpComponent[]{
+                            new HelpComponent(R.drawable.ic_import, R.string.help_cmp_line_1_name, R.string.help_cmp_line_1_desc),
+                            new HelpComponent(R.drawable.ic_export, R.string.help_cmp_line_2_name, R.string.help_cmp_line_2_desc),
+                            new HelpComponent(R.drawable.ic_add, R.string.help_cmp_line_3_name, R.string.help_cmp_line_3_desc),
+                    },
+                    new HelpFeature[]{
+                            new HelpFeature(R.string.help_feat_line_1_title, R.string.help_feat_line_1_steps),
+                    }),
             new HelpSection(R.drawable.ic_ied_monitor, R.string.help_ttl_monitoring, R.string.help_sum_monitoring, R.string.help_func_monitoring,
                     new HelpComponent[]{
                             new HelpComponent(R.drawable.ic_sync, R.string.help_cmp_mon_1_name, R.string.help_cmp_mon_1_desc),

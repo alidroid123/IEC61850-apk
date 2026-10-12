@@ -34,8 +34,10 @@ public class AboutActivity extends BaseActivity {
     private static final AboutFeature[] FEATURES = {
             new AboutFeature(R.drawable.ic_download,    R.string.abt_feat_1_name,  R.string.abt_feat_1_desc),
             new AboutFeature(R.drawable.ic_dfr_chart,   R.string.abt_feat_2_name,  R.string.abt_feat_2_desc),
+            new AboutFeature(R.drawable.ic_fault_locator, R.string.abt_feat_11_name, R.string.abt_feat_11_desc),
             new AboutFeature(R.drawable.ic_history,     R.string.abt_feat_3_name,  R.string.abt_feat_3_desc),
             new AboutFeature(R.drawable.ic_list,        R.string.abt_feat_4_name,  R.string.abt_feat_4_desc),
+            new AboutFeature(R.drawable.ic_line_data,   R.string.abt_feat_12_name, R.string.abt_feat_12_desc),
             new AboutFeature(R.drawable.ic_mms,         R.string.abt_feat_5_name,  R.string.abt_feat_5_desc),
             new AboutFeature(R.drawable.ic_ied_monitor, R.string.abt_feat_6_name,  R.string.abt_feat_6_desc),
             new AboutFeature(R.drawable.ic_template,    R.string.abt_feat_7_name,  R.string.abt_feat_7_desc),

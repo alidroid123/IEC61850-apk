@@ -230,7 +230,7 @@
     <string name="ttl_backup_share_chooser">Bagikan File Backup</string>
     <string name="msg_backup_export_ok">Konfigurasi berhasil diekspor</string>
     <string name="msg_backup_export_fail">Ekspor gagal: %1$s</string>
-    <string name="msg_backup_import_ok">Impor selesai: %1$d device, %2$d titik pantau, %3$d template, %4$d definisi ditambahkan</string>
+    <string name="msg_backup_import_ok">Impor selesai: %1$d device, %2$d titik pantau, %3$d template, %4$d definisi, %5$d saluran ditambahkan</string>
     <string name="msg_backup_import_fail">Impor gagal: file bukan backup yang valid (%1$s)</string>
     <string name="ttl_tmpl_edit_main">Edit Template Relay</string>
     <string name="btn_tmpl_add_template">Tambah Template</string>
@@ -297,7 +297,7 @@
     <string name="lbl_view_trigger_time_label">Waktu Trigger :</string>
 
     <!-- // Message -->
-    <string name="msg_abt_description">Perkakas lapangan untuk engineer proteksi. Aplikasi ini menyambung ke Power System Protection Relays melalui protokol IEC 61850 MMS untuk mengambil dan menganalisis rekaman gangguan COMTRADE, menjelajahi struktur data IED secara langsung, serta memantau pengukuran dan alarm dari banyak gardu induk sekaligus.</string>
+    <string name="msg_abt_description">Perkakas lapangan untuk engineer proteksi. Aplikasi ini menyambung ke Power System Protection Relays melalui protokol IEC 61850 MMS untuk mengambil dan menganalisis rekaman gangguan COMTRADE, menentukan lokasi gangguan saluran dari rekaman kedua ujung, menjelajahi struktur data IED secara langsung, serta memantau pengukuran dan alarm dari banyak gardu induk sekaligus.</string>
     <string name="lbl_abt_features">Fitur Utama</string>
     <string name="abt_feat_1_name">Unduh COMTRADE</string>
     <string name="abt_feat_1_desc">Ambil rekaman gangguan DFR dari relay via MMS, dengan mode Bulk / Single / Deep Scan dan profil vendor.</string>
@@ -314,7 +314,7 @@
     <string name="abt_feat_7_name">Template Relay</string>
     <string name="abt_feat_7_desc">Buat set titik pantau per tipe relay dan terapkan ke device manapun dari tipe itu dalam satu langkah.</string>
     <string name="abt_feat_8_name">Backup &amp; Restore</string>
-    <string name="abt_feat_8_desc">Ekspor device, titik pantau, dan template jadi satu file JSON, lalu gabungkan kembali tanpa menimpa data lama.</string>
+    <string name="abt_feat_8_desc">Ekspor device, titik pantau, template, definisi node, dan Database Saluran jadi satu file JSON, lalu gabungkan kembali tanpa menimpa data lama.</string>
     <string name="abt_feat_9_name">Update Otomatis</string>
     <string name="abt_feat_9_desc">Mengecek rilis baru di GitHub, memasangnya langsung dari aplikasi, dan bisa memberi tahu lewat notifikasi.</string>
     <string name="abt_feat_10_name">Tema &amp; Bahasa</string>
@@ -751,7 +751,7 @@
     <string name="help_cmp_set_3_name">Spinner Bahasa Aplikasi</string>
     <string name="help_cmp_set_3_desc">Mengganti seluruh bahasa aplikasi antara Indonesia dan Inggris secara langsung.</string>
     <string name="help_cmp_set_4_name">Ekspor Konfigurasi</string>
-    <string name="help_cmp_set_4_desc">Menyimpan daftar device, titik pantau, dan template relay jadi satu file JSON cadangan.</string>
+    <string name="help_cmp_set_4_desc">Menyimpan daftar device, titik pantau, template relay, definisi node, dan Database Saluran jadi satu file JSON cadangan.</string>
     <string name="help_cmp_set_5_name">Impor Konfigurasi</string>
     <string name="help_cmp_set_5_desc">Menggabungkan device/titik/template dari file hasil ekspor sebelumnya ke data yang sudah ada di HP ini, tanpa menimpa data yang sudah ada.</string>
     <string name="help_feat_set_1_title">Mengatur Nilai Default Teknis</string>
@@ -782,4 +782,227 @@
     <string name="help_feat_tips_2_steps">1. Buka menu samping lewat {ic:menu}.\n2. Ketuk salah satu dari lima titik warna di bawah \"Skema Warna\" untuk mengganti skema.\n3. Pilih titik multi-warna untuk tema Abstract, yang merotasi palet warna per layar.\n4. Ketuk {ic:theme} \"Ganti Mode\" untuk berpindah antara Terang dan Gelap.</string>
     <string name="help_feat_tips_3_title">Offline vs Online</string>
     <string name="help_feat_tips_3_steps">1. Sebagian besar aplikasi dapat digunakan sepenuhnya offline.\n2. Hanya aksi yang berkomunikasi dengan relay fisik (hubungkan, explore, download, monitoring, ping) yang membutuhkan ponsel berada di jaringan yang sama dengan relay, biasanya melalui VPN.</string>
+
+    <!-- FL Double Ended (FaultLocatorActivity) -->
+    <string name="menu_home_fl">FL DOUBLE ENDED</string>
+    <string name="ttl_fl_title">FL Double Ended</string>
+    <string name="lbl_fl_subtitle">Lokasi gangguan dua ujung dari 2 DFR relay</string>
+    <string name="cd_fl_back">Kembali</string>
+    <string name="cd_fl_method_info">Info metode</string>
+    <string name="lbl_fl_end_a">UJUNG A (GI A)</string>
+    <string name="lbl_fl_end_b">UJUNG B (GI B)</string>
+    <string name="lbl_fl_gi_a_short">GI A</string>
+    <string name="lbl_fl_gi_b_short">GI B</string>
+    <string name="lbl_fl_gi">Gardu Induk</string>
+    <string name="lbl_fl_relay">Relay / IP</string>
+    <string name="lbl_fl_no_devices_item">(tidak ada relay di database)</string>
+    <string name="btn_fl_download_relay">Unduh dari relay</string>
+    <string name="btn_fl_local_file">File lokal</string>
+    <string name="btn_fl_mapping">Mapping kanal</string>
+    <string name="btn_fl_open_viewer">Buka di viewer</string>
+    <string name="msg_fl_no_record">Belum ada record dipilih</string>
+    <string name="msg_fl_record_info">%1$s\n%2$s • trigger %3$s\n%4$s Hz • %5$d analog • %6$s</string>
+    <string name="msg_fl_mapping_summary">V: %1$s / %2$s / %3$s   I: %4$s / %5$s / %6$s</string>
+    <string name="msg_fl_mapping_incomplete">Mapping kanal belum lengkap – tap Mapping kanal</string>
+    <string name="lbl_fl_inverted_tag">(arus dibalik)</string>
+    <string name="lbl_fl_status_ready">SIAP</string>
+    <string name="lbl_fl_status_check_map">CEK MAPPING</string>
+
+    <string name="lbl_fl_line_header">PARAMETER SALURAN</string>
+    <string name="hint_fl_length">Panjang saluran (km)</string>
+    <string name="lbl_fl_total_values">Isi nilai total saluran (Ω, µS), bukan per km</string>
+    <string name="hint_fl_r1">R1 (Ω/km)</string>
+    <string name="hint_fl_x1">X1 (Ω/km)</string>
+    <string name="hint_fl_r0">R0 (Ω/km) – opsional</string>
+    <string name="hint_fl_x0">X0 (Ω/km) – opsional</string>
+    <string name="hint_fl_b1">B1 (µS/km) – opsional</string>
+    <string name="hint_fl_r1_total">R1 saluran (Ω)</string>
+    <string name="hint_fl_x1_total">X1 saluran (Ω)</string>
+    <string name="hint_fl_r0_total">R0 saluran (Ω) – opsional</string>
+    <string name="hint_fl_x0_total">X0 saluran (Ω) – opsional</string>
+    <string name="hint_fl_b1_total">B1 saluran (µS) – opsional</string>
+    <string name="hint_fl_offset">Jendela (siklus) – auto</string>
+    <string name="msg_fl_line_hint">Impedansi saluran sisi primer. Metode dua ujung hanya butuh Z1 (R1, X1); Z0 dipakai untuk pembanding single-ended dan tahanan gangguan pada gangguan tanah. Isi B1 untuk saluran panjang (di atas ±150 km) agar memakai model saluran terdistribusi (hiperbolik). Kosongkan jendela agar jendela gangguan paling stabil dipilih otomatis.</string>
+    <string name="btn_fl_analyze">Analisa lokasi gangguan</string>
+
+    <string name="lbl_fl_result_header">HASIL LOKASI GANGGUAN</string>
+    <string name="lbl_fl_from">Dari %s</string>
+    <string name="msg_fl_pct">%1$s %% dari panjang saluran %2$s km</string>
+    <string name="msg_fl_spread">±%1$s km (sebaran %2$d jendela)</string>
+    <string name="lbl_fl_fault_type">GANGGUAN %1$s (%2$s)</string>
+    <string name="lbl_fl_methods_header">Perbandingan metode</string>
+    <string name="lbl_fl_method_de_neg">Dua ujung, urutan negatif (utama)</string>
+    <string name="lbl_fl_method_de_pos_sup">Dua ujung, urutan positif superimposed (utama)</string>
+    <string name="lbl_fl_method_de_pos_total">Dua ujung, urutan positif (utama)</string>
+    <string name="lbl_fl_method_de_pos">Dua ujung, urutan positif</string>
+    <string name="lbl_fl_method_sync">Dua ujung, tersinkron waktu</string>
+    <string name="lbl_fl_method_takagi">Satu ujung (Takagi) dari %s</string>
+    <string name="lbl_fl_sync_untrusted">jam relay tidak sinkron – abaikan</string>
+    <string name="val_fl_method">%1$s km (Δ %2$s)</string>
+    <string name="val_fl_from_end">= %1$s km dari %2$s</string>
+    <string name="val_fl_na">tidak tersedia</string>
+    <string name="lbl_fl_profile_header">Tegangan titik gangguan sepanjang saluran</string>
+    <string name="msg_fl_profile_hint">|V| (urutan yang dipakai metode utama, kV) dihitung menyusuri saluran dari tiap ujung memakai tegangan dan arus ujung itu sendiri. Kedua kurva hanya bisa sama di titik gangguan sebenarnya – perpotongannya adalah lokasi gangguan.</string>
+    <string name="lbl_fl_curve_from">Dari %s</string>
+    <string name="lbl_fl_details_header">Detail analisa</string>
+    <string name="lbl_fl_det_rf">Tahanan gangguan (estimasi)</string>
+    <string name="lbl_fl_det_dir">Arah dilihat %s</string>
+    <string name="val_fl_dir_fwd">Forward (ke arah saluran)</string>
+    <string name="val_fl_dir_rev">Reverse (ke arah bus)</string>
+    <string name="val_fl_dir_unknown">Tidak dapat ditentukan</string>
+    <string name="lbl_fl_det_delta">Sudut penyelarasan phasor A↔B</string>
+    <string name="lbl_fl_det_inc_diff">Selisih waktu inception (jam DFR)</string>
+    <string name="lbl_fl_det_window">Jendela gangguan</string>
+    <string name="val_fl_window">%1$s siklus setelah inception, %2$d jendela</string>
+    <string name="lbl_fl_det_model">Model saluran</string>
+    <string name="val_fl_model_lumped">Terpusat (saluran pendek/menengah)</string>
+    <string name="val_fl_model_dist">Terdistribusi / hiperbolik (saluran panjang)</string>
+    <string name="lbl_fl_det_record">Record %s</string>
+    <string name="val_fl_record">%1$s Hz (%2$d/siklus) %3$s\ninception t=%4$s ms (%5$s)</string>
+    <string name="val_fl_src_i">arus</string>
+    <string name="val_fl_src_v">tegangan</string>
+    <string name="val_fl_src_t">waktu trigger</string>
+    <string name="lbl_fl_phasor_header">Phasor (primer, sudut ref. Va pra-gangguan)</string>
+    <string name="lbl_fl_prefault">Pra-gangguan</string>
+    <string name="lbl_fl_fault">Gangguan</string>
+    <string name="btn_fl_share">Bagikan laporan</string>
+    <string name="btn_fl_fix_polarity">Balik polaritas arus %s &amp; analisa ulang</string>
+    <string name="ttl_fl_report">Laporan lokasi gangguan dua ujung</string>
+    <string name="lbl_fl_record_files">Record:</string>
+
+    <string name="msg_fl_connecting">Menghubungkan ke %s…</string>
+    <string name="msg_fl_connect_retry">Mencoba ulang %1$s dengan profil koneksi %2$d…</string>
+    <string name="msg_fl_connect_fail">Gagal terhubung ke %1$s (%2$s).\n\nPastikan HP berada di jaringan relay (intranet/VPN) dan IP sudah benar.</string>
+    <string name="msg_fl_no_remote_files">Tidak ada record COMTRADE di relay ini.</string>
+    <string name="ttl_fl_pick_record">Pilih record – %s</string>
+    <string name="lbl_fl_closest_match">★ waktunya paling dekat dengan record ujung lain</string>
+    <string name="msg_fl_download_failed">Unduhan gagal.</string>
+    <string name="msg_fl_extracting">Mengekstrak %s…</string>
+    <string name="msg_fl_reading">Membaca %s…</string>
+    <string name="msg_fl_no_cfg_in_files">Pasangan .cfg + .dat tidak ditemukan di file yang dipilih/diunduh.</string>
+    <string name="msg_fl_load_fail">Gagal membaca record: %s</string>
+    <string name="ttl_fl_local_pick">Record lokal – %s</string>
+    <string name="lbl_fl_pick_storage">Pilih dari penyimpanan…</string>
+    <string name="lbl_fl_pick_storage_sub">Pilih .cfg dan .dat sekaligus, atau satu file .zip</string>
+    <string name="msg_fl_no_local">Belum ada record hasil unduhan.</string>
+    <string name="msg_fl_pick_relay_first">Pilih relay terlebih dulu.</string>
+    <string name="msg_fl_no_devices">Database relay kosong – tambahkan relay di Daftar Relay, atau gunakan File lokal.</string>
+    <string name="ttl_fl_mapping">Mapping kanal – %s</string>
+    <string name="lbl_fl_none_option">— belum dipilih —</string>
+    <string name="lbl_fl_invert_current">Balik polaritas arus (titik bintang CT ke arah saluran)</string>
+    <string name="hint_fl_vmult">Pengali tegangan</string>
+    <string name="hint_fl_imult">Pengali arus</string>
+    <string name="btn_fl_auto">Auto</string>
+    <string name="msg_fl_scaling_primary">Nilai di record ini sudah PRIMER – biarkan kedua pengali = 1.</string>
+    <string name="msg_fl_scaling_secondary">Nilai SEKUNDER dan dikonversi dengan rasio dari cfg (VT %1$s, CT %2$s). Biarkan pengali = 1.</string>
+    <string name="msg_fl_scaling_no_ratio">Nilai SEKUNDER dan cfg tidak punya rasio – isi rasio VT (mis. 1500 untuk 150 kV/100 V) dan rasio CT (mis. 2000 untuk 2000/1 A) sebagai pengali.</string>
+    <string name="msg_fl_need_both">Muat record untuk kedua ujung terlebih dulu.</string>
+    <string name="msg_fl_invalid_line">Isi panjang saluran, R1 dan X1 (lebih dari 0).</string>
+    <string name="msg_fl_analyzing">Menganalisa…</string>
+    <string name="ttl_fl_error">Tidak dapat dilanjutkan</string>
+    <string name="err_fl_mapping">Mapping kanal %s belum lengkap – tentukan Va, Vb, Vc, Ia, Ib, Ic.</string>
+    <string name="err_fl_rate">Sampling rate %1$s terlalu rendah (%2$s Hz) – minimal 8 sampel per siklus.</string>
+    <string name="err_fl_short">Record %s terlalu pendek di sekitar gangguan (butuh minimal ±1 siklus sebelum dan 2 siklus sesudah inception).</string>
+    <string name="err_fl_no_signal">Tidak ada sinyal tegangan/arus yang bisa dipakai – cek mapping kanal dan skala.</string>
+    <string name="err_fl_exception">Analisa gagal: %s</string>
+
+    <string name="warn_fl_sec_no_ratio">%s: nilai sekunder tanpa rasio di cfg – hasil km salah kecuali pengali VT/CT diisi di Mapping kanal.</string>
+    <string name="warn_fl_freq_diff">Frekuensi nominal kedua record berbeda (%1$s vs %2$s Hz).</string>
+    <string name="warn_fl_inc_trigger">%s: awal gangguan tidak terdeteksi dari sinyal – dipakai waktu trigger.</string>
+    <string name="warn_fl_no_prefault">%s: data pra-gangguan kurang – pengecekan superimposed dilewati.</string>
+    <string name="warn_fl_short_fault">Gangguan cepat padam – jendela digeser agar muat, akurasi bisa berkurang.</string>
+    <string name="warn_fl_unstable">Phasor berubah selama jendela (%1$s %%) – CT jenuh, gangguan berkembang, atau PMT membuka; verifikasi hasilnya.</string>
+    <string name="warn_fl_no_root">Kedua kurva |V| tidak berpotongan – dipakai titik terdekat. Cek pasangan record, polaritas CT, dan data saluran.</string>
+    <string name="warn_fl_two_roots">Persamaan punya solusi kedua di %1$s km dari %2$s; dipilih yang konsisten dengan urutan positif.</string>
+    <string name="warn_fl_out_of_line">Hasil di luar saluran (%1$s %%) – gangguan eksternal, pasangan record salah, polaritas CT, atau data saluran?</string>
+    <string name="warn_fl_dir_rev">%s melihat gangguan arah REVERSE – polaritas CT kemungkinan terbalik (atau gangguan bukan di saluran ini).</string>
+    <string name="warn_fl_no_z0">Isi Z0 (R0, X0) untuk pembanding single-ended dan tahanan gangguan pada gangguan tanah.</string>
+    <string name="warn_fl_time_gap">Kedua record berselisih %s detik – pastikan keduanya dari kejadian yang sama.</string>
+    <string name="warn_fl_phase_rot">%s: tegangan urutan negatif lebih besar dari positif sebelum gangguan – urutan fasa atau mapping salah (S dan T tertukar?).</string>
+    <string name="warn_fl_pre_v_mismatch">Tegangan pra-gangguan berbeda (%1$s kV vs %2$s kV) – cek rasio/skala VT.</string>
+    <string name="warn_fl_pre_i_mismatch">Arus beban pra-gangguan berbeda (%1$s A vs %2$s A) – cek rasio/skala CT (atau ada beban tap).</string>
+    <string name="warn_fl_pre_polarity">Arus beban pra-gangguan masuk ke saluran di kedua ujung – salah satu polaritas CT kemungkinan terbalik.</string>
+
+    <string name="ttl_fl_info">Metode</string>
+    <string name="msg_fl_info">Metode utama: lokasi gangguan dua ujung tak-tersinkron (IEEE C37.114-2014; Novosel dkk. 1996; Tziouvaras, Roberts &amp; Benmouyal 2001).\n\n1. Record COMTRADE relay saluran di GI A dan GI B dibaca (ASCII, BINARY, BINARY32, FLOAT32, zip) lalu dikonversi ke nilai primer.\n\n2. Awal gangguan (inception) dideteksi otomatis di tiap record dengan detektor superimposed siklus-ke-siklus.\n\n3. Phasor fundamental dihitung dengan least-squares satu siklus (fundamental + harmonisa 2–3 + tren DC), sehingga DC offset arus gangguan tidak membiaskan hasil.\n\n4. Komponen simetris dihitung. Gangguan tidak seimbang memakai urutan negatif (V2, I2); gangguan 3 fasa memakai urutan positif superimposed (gangguan − pra-gangguan).\n\n5. Tegangan titik gangguan dihitung menyusuri model saluran dari tiap ujung: |V2A − m·Z1·I2A| = |V2B − (1−m)·Z1·I2B|. Yang disamakan hanya magnitudo, jadi jam kedua relay TIDAK perlu sinkron, dan hasilnya tidak dipengaruhi tahanan gangguan, arus beban, maupun kopling mutual urutan nol. Saluran panjang bisa memakai model terdistribusi (hiperbolik).\n\n6. Persamaan diselesaikan di beberapa jendela berturut-turut; hasil akhir = median, sebarannya ditampilkan sebagai ± km.\n\n7. Pembanding: dua ujung urutan positif, dua ujung tersinkron waktu (valid hanya bila relay tersinkron GPS), dan Takagi satu ujung dari masing-masing GI. Selisih besar antar metode menandakan data perlu dicek.\n\nSyarat: kedua record dari kejadian yang sama, CT kedua ujung mengukur arus yang masuk ke saluran, dan impedansi saluran benar. Akurasi umumnya 1–2 persen panjang saluran, terutama ditentukan ketelitian Z1.\n\nMetode gelombang berjalan (travelling wave) tidak dipakai: DFR relay hanya sampling 1–4 kHz, jauh terlalu lambat untuk gelombang berjalan.</string>
+
+    <string name="help_ttl_fl">FL Double Ended</string>
+    <string name="help_sum_fl">Tentukan lokasi gangguan saluran dari DFR kedua GI</string>
+    <string name="help_func_fl">Mengambil satu record COMTRADE dari relay saluran di tiap ujung (GI A dan GI B) lalu menghitung jarak gangguan dengan metode dua ujung urutan negatif tak-tersinkron, yang tidak memerlukan sinkronisasi jam antar relay dan tidak terpengaruh tahanan gangguan maupun beban. Takagi satu ujung dan metode lain ditampilkan sebagai pembanding.</string>
+    <string name="help_cmp_fl_1_name">Unduh dari relay</string>
+    <string name="help_cmp_fl_1_desc">Terhubung ke relay yang dipilih untuk ujung tersebut, memindai folder COMTRADE-nya, lalu Anda memilih record. File disimpan di folder DFR yang sama dengan layar Unduh.</string>
+    <string name="help_cmp_fl_2_name">File lokal</string>
+    <string name="help_cmp_fl_2_desc">Memakai record yang sudah ada di HP: dari Riwayat Unduhan, atau .cfg + .dat / .zip yang dipilih dari penyimpanan.</string>
+    <string name="help_cmp_fl_3_name">Mapping kanal</string>
+    <string name="help_cmp_fl_3_desc">Kanal mana yang Va, Vb, Vc, Ia, Ib, Ic, polaritas CT, serta pengali VT/CT tambahan. Terdeteksi otomatis dan diingat per relay.</string>
+    <string name="help_cmp_fl_4_name">Ikon info</string>
+    <string name="help_cmp_fl_4_desc">Menjelaskan metode perhitungan langkah demi langkah.</string>
+    <string name="help_feat_fl_1_title">Menentukan Lokasi Gangguan</string>
+    <string name="help_feat_fl_1_steps">1. Di UJUNG A pilih gardu induk dan relay saluran, lalu ketuk Unduh dari relay (atau File lokal) dan pilih record gangguan.\n2. Lakukan hal yang sama di UJUNG B - record yang waktunya paling dekat dengan UJUNG A diberi tanda bintang.\n3. Isi panjang saluran dan R1/X1 (per km, atau aktifkan nilai total saluran). Tambahkan R0/X0 untuk pembanding gangguan tanah dan B1 untuk saluran panjang.\n4. Ketuk Analisa lokasi gangguan.</string>
+    <string name="help_feat_fl_2_title">Membaca Hasil</string>
+    <string name="help_feat_fl_2_steps">1. Angka besar adalah jarak dari masing-masing GI; nilai ± adalah sebaran dari beberapa jendela gangguan.\n2. Perbandingan metode menampilkan semua hasil sebagai km dari UJUNG A beserta selisihnya terhadap hasil utama.\n3. Grafik menampilkan tegangan titik gangguan yang dihitung dari tiap ujung - perpotongannya adalah lokasi gangguan.\n4. Ketuk Bagikan laporan untuk mengirim hasil sebagai teks.</string>
+    <string name="help_feat_fl_3_title">Jika Hasil Meragukan</string>
+    <string name="help_feat_fl_3_steps">1. Baca peringatan {ic:warning} di bawah hasil.\n2. Jika salah satu ujung melihat gangguan arah REVERSE, ketuk tombol untuk membalik polaritas arus ujung tersebut dan analisa ulang.\n3. Pastikan kedua record dari kejadian yang sama dan impedansi saluran dalam ohm sisi primer.\n4. Buka {ic:settings} Mapping kanal bila ada kanal yang salah terdeteksi atau record bernilai sekunder tanpa rasio.</string>
+
+    <!-- Line Database (LineDatabaseActivity) -->
+    <string name="menu_home_line_db">DATABASE SALURAN</string>
+    <string name="ttl_line_db">Database Saluran</string>
+    <string name="ttl_line_pick">Pilih Konfigurasi Saluran</string>
+    <string name="btn_line_add">Tambah</string>
+    <string name="btn_line_delete_all">Kosongkan</string>
+    <string name="hint_line_search">Cari GI, bay, konduktor…</string>
+    <string name="lbl_line_all_gi">Semua GI</string>
+    <string name="lbl_line_count">%1$d dari %2$d saluran</string>
+    <string name="lbl_line_empty">Belum ada data saluran.\nImpor CSV data konduktor atau tambah saluran secara manual.</string>
+    <string name="lbl_line_match">★ COCOK DENGAN RELAY TERPILIH</string>
+    <string name="msg_line_pick_hint_pair">Saluran antara %1$s dan %2$s ditampilkan paling atas. Tekan lama untuk mengubah data.</string>
+    <string name="msg_line_pick_hint">Ketuk saluran untuk memakainya. Tekan lama untuk mengubah data.</string>
+    <string name="ttl_line_add">Tambah Saluran</string>
+    <string name="ttl_line_edit">Ubah Saluran</string>
+    <string name="hint_line_gi">Gardu Induk (GI)</string>
+    <string name="hint_line_bay">Bay</string>
+    <string name="hint_line_lawan">GI lawan</string>
+    <string name="hint_line_kv">Tegangan (kV)</string>
+    <string name="hint_line_merk">Merk relay</string>
+    <string name="hint_line_tipe">Tipe relay</string>
+    <string name="hint_line_konduktor">Konduktor</string>
+    <string name="hint_line_ccc">CCC (A)</string>
+    <string name="hint_line_upt">UPT</string>
+    <string name="hint_line_ultg">ULTG</string>
+    <string name="msg_line_edit_hint">Nilai sisi primer per km. Urutan negatif dianggap sama dengan urutan positif (Z2 = Z1). Z total saluran dan sudutnya dihitung otomatis.</string>
+    <string name="msg_line_required">Isi gardu induk, panjang saluran, R1 dan X1.</string>
+    <string name="ttl_line_import">Impor Data Saluran</string>
+    <string name="msg_line_import_ok">Selesai: %1$d saluran ditambahkan, %2$d diperbarui (GI + bay + GI lawan sama), %3$d baris dilewati (tanpa GI atau tanpa panjang/R1/X1).</string>
+    <string name="msg_line_import_none">Tidak ada baris saluran yang terbaca (%1$d kolom dikenali).\n\nCSV butuh baris header dengan minimal: GI, BAY, REF GI LAWAN, PANJANG (KM), R1 (OHM/KM), X1 (OHM/KM) – atau Z1 + SUDUT sebagai pengganti R1/X1. Opsional: R0, X0, Z0, TEG (KV), MERK, TIPE, KONDUKTOR, CCC, UPT, ULTG, B1. Pemisah koma atau titik-koma.</string>
+    <string name="msg_line_import_fail">Impor gagal: %s</string>
+    <string name="msg_line_export_ok">%d saluran diekspor ke CSV</string>
+    <string name="ttl_line_delete_all">Kosongkan Database Saluran</string>
+    <string name="msg_line_delete_all">Hapus semua %d saluran? Tidak bisa dibatalkan – ekspor dulu bila perlu salinan.</string>
+
+    <!-- FL Double Ended: line configuration -->
+    <string name="lbl_fl_line_config">Konfigurasi saluran</string>
+    <string name="msg_fl_line_config_manual">Manual – belum dipilih dari Database Saluran</string>
+    <string name="lbl_fl_line_config_auto">Otomatis:</string>
+    <string name="lbl_fl_line_config_edited">(nilai diubah manual)</string>
+    <string name="btn_fl_pick_line">Pilih</string>
+    <string name="help_cmp_fl_5_name">Konfigurasi saluran</string>
+    <string name="help_cmp_fl_5_desc">Mengisi panjang saluran dan R1/X1/R0/X0 dari Database Saluran. Saluran yang menghubungkan kedua GI terpilih dipilih otomatis.</string>
+    <string name="help_ttl_line_db">Database Saluran</string>
+    <string name="help_sum_line_db">Panjang saluran dan impedansi urutan per bay</string>
+    <string name="help_func_line_db">Menyimpan panjang dan impedansi urutan positif/nol (Z2 = Z1) tiap saluran per bay relay, dipakai oleh FL Double Ended. Isi dengan mengimpor spreadsheet data konduktor sebagai CSV atau menambah saluran secara manual. Ikut tersimpan di Ekspor/Impor Konfigurasi.</string>
+    <string name="help_cmp_line_1_name">Impor</string>
+    <string name="help_cmp_line_1_desc">Membaca CSV berdasarkan nama kolom (header satu atau dua baris, pemisah koma atau titik-koma). Baris dengan GI + bay + GI lawan yang sama memperbarui data yang sudah ada.</string>
+    <string name="help_cmp_line_2_name">Ekspor</string>
+    <string name="help_cmp_line_2_desc">Menulis seluruh database ke CSV yang bisa diimpor kembali.</string>
+    <string name="help_cmp_line_3_name">Tambah / ubah</string>
+    <string name="help_cmp_line_3_desc">Ketuk saluran untuk mengubahnya, atau tombol Tambah untuk saluran baru. Z dan sudut dihitung dari R dan X.</string>
+    <string name="help_feat_line_1_title">Mengimpor Data Konduktor</string>
+    <string name="help_feat_line_1_steps">1. Di Excel, simpan sheet data konduktor sebagai CSV.\n2. Buka Database Saluran lalu ketuk {ic:import} Impor.\n3. Pilih file CSV - ringkasan menampilkan jumlah saluran yang ditambahkan atau diperbarui.</string>
+
+    <string name="abt_feat_11_name">FL Double Ended</string>
+    <string name="abt_feat_11_desc">Tentukan lokasi gangguan saluran dari DFR relay di kedua gardu induk, diunduh langsung dari relay. Metode dua ujung urutan negatif tak-tersinkron, lengkap dengan jenis gangguan, tahanan gangguan, dan pembanding satu ujung.</string>
+    <string name="abt_feat_12_name">Database Saluran</string>
+    <string name="abt_feat_12_desc">Panjang saluran dan impedansi urutan positif/nol per bay, sudah terisi data konduktor dan bisa diubah atau diimpor dari CSV. Dipilih otomatis oleh FL Double Ended.</string>
+    <string name="btn_line_load_default">Muat data bawaan</string>
+    <string name="msg_line_load_default_ok">%d saluran dimuat dari data bawaan</string>
 </resources>

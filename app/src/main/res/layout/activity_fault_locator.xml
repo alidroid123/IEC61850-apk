@@ -1,0 +1,628 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/bg_app"
+        android:orientation="vertical">
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_header_layered">
+
+            <View
+                android:layout_width="150dp"
+                android:layout_height="150dp"
+                android:layout_gravity="top|end"
+                android:layout_marginTop="-60dp"
+                android:layout_marginEnd="-40dp"
+                android:background="@drawable/shape_decor_blob_light" />
+
+            <View
+                android:layout_width="90dp"
+                android:layout_height="90dp"
+                android:layout_gravity="bottom|start"
+                android:layout_marginBottom="-30dp"
+                android:layout_marginStart="-20dp"
+                android:alpha="0.18"
+                android:background="@drawable/shape_decor_blob_accent" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingHorizontal="@dimen/spacing_l"
+                android:paddingVertical="@dimen/spacing_s">
+
+                <ImageButton
+                    android:id="@+id/btnBack"
+                    android:layout_width="@dimen/icon_size_xl"
+                    android:layout_height="@dimen/icon_size_xl"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="@string/cd_fl_back"
+                    android:src="@drawable/ic_arrow_back"
+                    app:tint="@color/white" />
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/spacing_m"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:ellipsize="end"
+                        android:fontFamily="sans-serif-medium"
+                        android:maxLines="1"
+                        android:text="@string/ttl_fl_title"
+                        android:textColor="@color/white"
+                        android:textSize="@dimen/text_size_title_small"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="1dp"
+                        android:ellipsize="end"
+                        android:maxLines="1"
+                        android:text="@string/lbl_fl_subtitle"
+                        android:textColor="#CCFFFFFF"
+                        android:textSize="@dimen/text_size_caption" />
+                </LinearLayout>
+
+                <ImageButton
+                    android:id="@+id/btnFlInfo"
+                    android:layout_width="@dimen/icon_size_xl"
+                    android:layout_height="@dimen/icon_size_xl"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="@string/cd_fl_method_info"
+                    android:padding="@dimen/spacing_s"
+                    android:src="@drawable/ic_info"
+                    app:tint="@color/white" />
+            </LinearLayout>
+        </FrameLayout>
+
+        <androidx.core.widget.NestedScrollView
+            android:id="@+id/scrollFl"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingHorizontal="@dimen/spacing_l"
+                android:paddingTop="@dimen/spacing_xs"
+                android:paddingBottom="@dimen/spacing_huge">
+
+                <include
+                    android:id="@+id/endA"
+                    layout="@layout/layout_fl_end_card" />
+
+                <include
+                    android:id="@+id/endB"
+                    layout="@layout/layout_fl_end_card" />
+
+                <!-- Line parameters -->
+                <com.google.android.material.card.MaterialCardView
+                    style="@style/Widget.DFRtools.CardView"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/spacing_m">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="@dimen/spacing_l">
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:letterSpacing="0.1"
+                            android:text="@string/lbl_fl_line_header"
+                            android:textColor="?attr/colorPrimary"
+                            android:textSize="@dimen/text_size_body_small"
+                            android:textStyle="bold" />
+
+                        <!-- Line configuration from the Line Database -->
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="@dimen/spacing_s"
+                            android:background="@color/bg_navy_dim"
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal"
+                            android:paddingVertical="@dimen/spacing_xs"
+                            android:paddingStart="@dimen/spacing_s">
+
+                            <ImageView
+                                android:layout_width="@dimen/icon_size_ms"
+                                android:layout_height="@dimen/icon_size_ms"
+                                android:src="@drawable/ic_line_data"
+                                app:tint="?attr/colorPrimary" />
+
+                            <LinearLayout
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="@dimen/spacing_s"
+                                android:layout_weight="1"
+                                android:orientation="vertical">
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="@string/lbl_fl_line_config"
+                                    android:textColor="?attr/colorPrimary"
+                                    android:textSize="@dimen/text_size_caption"
+                                    android:textStyle="bold" />
+
+                                <TextView
+                                    android:id="@+id/tvFlLineConfig"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:text="@string/msg_fl_line_config_manual"
+                                    android:textColor="@color/text_primary"
+                                    android:textSize="@dimen/text_size_small" />
+                            </LinearLayout>
+
+                            <Button
+                                android:id="@+id/btnFlPickLine"
+                                style="@style/Widget.MaterialComponents.Button.TextButton"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:minWidth="0dp"
+                                android:text="@string/btn_fl_pick_line"
+                                android:textSize="@dimen/text_size_small" />
+                        </LinearLayout>
+
+                        <com.google.android.material.textfield.TextInputLayout
+                            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="@dimen/spacing_s"
+                            android:hint="@string/hint_fl_length"
+                            app:boxStrokeColor="@color/divider"
+                            app:hintTextColor="?attr/colorPrimary">
+
+                            <com.google.android.material.textfield.TextInputEditText
+                                android:id="@+id/etFlLength"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:inputType="numberDecimal"
+                                android:singleLine="true"
+                                android:textColor="@color/text_primary" />
+                        </com.google.android.material.textfield.TextInputLayout>
+
+                        <androidx.appcompat.widget.SwitchCompat
+                            android:id="@+id/swFlTotal"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="@dimen/spacing_s"
+                            android:text="@string/lbl_fl_total_values"
+                            android:textColor="@color/text_secondary"
+                            android:textSize="@dimen/text_size_body_small" />
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="@dimen/spacing_xs"
+                            android:orientation="horizontal">
+
+                            <com.google.android.material.textfield.TextInputLayout
+                                android:id="@+id/tilFlR1"
+                                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:hint="@string/hint_fl_r1"
+                                app:boxStrokeColor="@color/divider"
+                                app:hintTextColor="?attr/colorPrimary">
+
+                                <com.google.android.material.textfield.TextInputEditText
+                                    android:id="@+id/etFlR1"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:inputType="numberDecimal"
+                                    android:singleLine="true"
+                                    android:textColor="@color/text_primary" />
+                            </com.google.android.material.textfield.TextInputLayout>
+
+                            <com.google.android.material.textfield.TextInputLayout
+                                android:id="@+id/tilFlX1"
+                                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="@dimen/spacing_s"
+                                android:layout_weight="1"
+                                android:hint="@string/hint_fl_x1"
+                                app:boxStrokeColor="@color/divider"
+                                app:hintTextColor="?attr/colorPrimary">
+
+                                <com.google.android.material.textfield.TextInputEditText
+                                    android:id="@+id/etFlX1"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:inputType="numberDecimal"
+                                    android:singleLine="true"
+                                    android:textColor="@color/text_primary" />
+                            </com.google.android.material.textfield.TextInputLayout>
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="@dimen/spacing_xs"
+                            android:orientation="horizontal">
+
+                            <com.google.android.material.textfield.TextInputLayout
+                                android:id="@+id/tilFlR0"
+                                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:hint="@string/hint_fl_r0"
+                                app:boxStrokeColor="@color/divider"
+                                app:hintTextColor="?attr/colorPrimary">
+
+                                <com.google.android.material.textfield.TextInputEditText
+                                    android:id="@+id/etFlR0"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:inputType="numberDecimal"
+                                    android:singleLine="true"
+                                    android:textColor="@color/text_primary" />
+                            </com.google.android.material.textfield.TextInputLayout>
+
+                            <com.google.android.material.textfield.TextInputLayout
+                                android:id="@+id/tilFlX0"
+                                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="@dimen/spacing_s"
+                                android:layout_weight="1"
+                                android:hint="@string/hint_fl_x0"
+                                app:boxStrokeColor="@color/divider"
+                                app:hintTextColor="?attr/colorPrimary">
+
+                                <com.google.android.material.textfield.TextInputEditText
+                                    android:id="@+id/etFlX0"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:inputType="numberDecimal"
+                                    android:singleLine="true"
+                                    android:textColor="@color/text_primary" />
+                            </com.google.android.material.textfield.TextInputLayout>
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="@dimen/spacing_xs"
+                            android:orientation="horizontal">
+
+                            <com.google.android.material.textfield.TextInputLayout
+                                android:id="@+id/tilFlB1"
+                                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:hint="@string/hint_fl_b1"
+                                app:boxStrokeColor="@color/divider"
+                                app:hintTextColor="?attr/colorPrimary">
+
+                                <com.google.android.material.textfield.TextInputEditText
+                                    android:id="@+id/etFlB1"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:inputType="numberDecimal"
+                                    android:singleLine="true"
+                                    android:textColor="@color/text_primary" />
+                            </com.google.android.material.textfield.TextInputLayout>
+
+                            <com.google.android.material.textfield.TextInputLayout
+                                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="@dimen/spacing_s"
+                                android:layout_weight="1"
+                                android:hint="@string/hint_fl_offset"
+                                app:boxStrokeColor="@color/divider"
+                                app:hintTextColor="?attr/colorPrimary">
+
+                                <com.google.android.material.textfield.TextInputEditText
+                                    android:id="@+id/etFlOffset"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:inputType="numberDecimal"
+                                    android:singleLine="true"
+                                    android:textColor="@color/text_primary" />
+                            </com.google.android.material.textfield.TextInputLayout>
+                        </LinearLayout>
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="@dimen/spacing_s"
+                            android:lineSpacingExtra="@dimen/spacing_tiny"
+                            android:text="@string/msg_fl_line_hint"
+                            android:textColor="@color/text_secondary"
+                            android:textSize="@dimen/text_size_small" />
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+                <Button
+                    android:id="@+id/btnFlAnalyze"
+                    style="@style/Widget.DFRtools.Button"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/large_button_height"
+                    android:layout_marginTop="@dimen/spacing_l"
+                    android:text="@string/btn_fl_analyze"
+                    android:textSize="@dimen/text_size_body" />
+
+                <!-- Result -->
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/cardFlResult"
+                    style="@style/Widget.DFRtools.CardView"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/spacing_l"
+                    android:visibility="gone"
+                    tools:visibility="visible">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="@dimen/spacing_l">
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:letterSpacing="0.1"
+                            android:text="@string/lbl_fl_result_header"
+                            android:textColor="?attr/colorPrimary"
+                            android:textSize="@dimen/text_size_body_small"
+                            android:textStyle="bold" />
+
+                        <com.alidev.dfrtools.dfr.FaultLineView
+                            android:id="@+id/faultLineView"
+                            android:layout_width="match_parent"
+                            android:layout_height="96dp"
+                            android:layout_marginTop="@dimen/spacing_s" />
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal">
+
+                            <LinearLayout
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:gravity="center"
+                                android:orientation="vertical">
+
+                                <TextView
+                                    android:id="@+id/tvFlFromALabel"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:gravity="center"
+                                    android:textColor="@color/text_secondary"
+                                    android:textSize="@dimen/text_size_small"
+                                    tools:text="Dari GI A" />
+
+                                <TextView
+                                    android:id="@+id/tvFlFromA"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:fontFamily="sans-serif-medium"
+                                    android:textColor="?attr/colorPrimary"
+                                    android:textSize="@dimen/text_size_header"
+                                    android:textStyle="bold"
+                                    tools:text="29.96 km" />
+                            </LinearLayout>
+
+                            <View
+                                android:layout_width="1dp"
+                                android:layout_height="match_parent"
+                                android:background="@color/divider" />
+
+                            <LinearLayout
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:gravity="center"
+                                android:orientation="vertical">
+
+                                <TextView
+                                    android:id="@+id/tvFlFromBLabel"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:gravity="center"
+                                    android:textColor="@color/text_secondary"
+                                    android:textSize="@dimen/text_size_small"
+                                    tools:text="Dari GI B" />
+
+                                <TextView
+                                    android:id="@+id/tvFlFromB"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:fontFamily="sans-serif-medium"
+                                    android:textColor="?attr/colorPrimary"
+                                    android:textSize="@dimen/text_size_header"
+                                    android:textStyle="bold"
+                                    tools:text="70.04 km" />
+                            </LinearLayout>
+                        </LinearLayout>
+
+                        <TextView
+                            android:id="@+id/tvFlSummary"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="@dimen/spacing_s"
+                            android:gravity="center"
+                            android:lineSpacingExtra="@dimen/spacing_tiny"
+                            android:textColor="@color/text_primary"
+                            android:textSize="@dimen/text_size_body_small"
+                            tools:text="± 0.37 km • 30.0 % panjang saluran" />
+
+                        <TextView
+                            android:id="@+id/tvFlFaultType"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_horizontal"
+                            android:layout_marginTop="@dimen/spacing_s"
+                            android:background="@drawable/bg_badge_primary"
+                            android:paddingHorizontal="@dimen/spacing_m"
+                            android:paddingVertical="@dimen/spacing_xs"
+                            android:textColor="@color/white"
+                            android:textSize="@dimen/text_size_body_small"
+                            android:textStyle="bold"
+                            tools:text="GANGGUAN R-N (AG)" />
+
+                        <LinearLayout
+                            android:id="@+id/containerFlWarnings"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="@dimen/spacing_m"
+                            android:orientation="vertical" />
+
+                        <Button
+                            android:id="@+id/btnFlFixPolarity"
+                            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:textColor="@color/status_warning"
+                            android:textSize="@dimen/text_size_small"
+                            android:visibility="gone"
+                            app:strokeColor="@color/status_warning"
+                            tools:text="Balik polaritas arus B &amp; analisa ulang"
+                            tools:visibility="visible" />
+
+                        <TextView
+                            style="@style/SectionLabel"
+                            android:layout_marginTop="@dimen/spacing_m"
+                            android:text="@string/lbl_fl_methods_header" />
+
+                        <LinearLayout
+                            android:id="@+id/containerFlMethods"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="@dimen/spacing_xs"
+                            android:orientation="vertical" />
+
+                        <TextView
+                            style="@style/SectionLabel"
+                            android:layout_marginTop="@dimen/spacing_m"
+                            android:text="@string/lbl_fl_profile_header" />
+
+                        <com.github.mikephil.charting.charts.LineChart
+                            android:id="@+id/chartFlProfile"
+                            android:layout_width="match_parent"
+                            android:layout_height="200dp"
+                            android:layout_marginTop="@dimen/spacing_xs" />
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="@dimen/spacing_xs"
+                            android:text="@string/msg_fl_profile_hint"
+                            android:textColor="@color/text_secondary"
+                            android:textSize="@dimen/text_size_small" />
+
+                        <TextView
+                            style="@style/SectionLabel"
+                            android:layout_marginTop="@dimen/spacing_m"
+                            android:text="@string/lbl_fl_details_header" />
+
+                        <LinearLayout
+                            android:id="@+id/containerFlDetails"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="@dimen/spacing_xs"
+                            android:orientation="vertical" />
+
+                        <TextView
+                            style="@style/SectionLabel"
+                            android:layout_marginTop="@dimen/spacing_m"
+                            android:text="@string/lbl_fl_phasor_header" />
+
+                        <HorizontalScrollView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="@dimen/spacing_xs">
+
+                            <TextView
+                                android:id="@+id/tvFlPhasors"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:background="@color/bg_navy_dim"
+                                android:fontFamily="monospace"
+                                android:padding="@dimen/spacing_s"
+                                android:textColor="@color/text_primary"
+                                android:textSize="@dimen/text_size_small" />
+                        </HorizontalScrollView>
+
+                        <Button
+                            android:id="@+id/btnFlShare"
+                            style="@style/Widget.DFRtools.Button"
+                            android:layout_width="match_parent"
+                            android:layout_height="@dimen/icon_size_xxl"
+                            android:layout_marginTop="@dimen/spacing_l"
+                            android:text="@string/btn_fl_share"
+                            android:textSize="@dimen/text_size_body_small"
+                            app:icon="@drawable/ic_share"
+                            app:iconGravity="textStart" />
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+            </LinearLayout>
+        </androidx.core.widget.NestedScrollView>
+    </LinearLayout>
+
+    <FrameLayout
+        android:id="@+id/overlayFlProgress"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#CC0A0E14"
+        android:clickable="true"
+        android:focusable="true"
+        android:visibility="gone">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:paddingHorizontal="@dimen/spacing_xxl">
+
+            <ProgressBar
+                android:layout_width="@dimen/icon_size_xxl"
+                android:layout_height="@dimen/icon_size_xxl"
+                android:indeterminateTint="?attr/colorPrimary" />
+
+            <TextView
+                android:id="@+id/tvFlProgress"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/spacing_l"
+                android:fontFamily="sans-serif-medium"
+                android:gravity="center"
+                android:textColor="@color/white"
+                android:textSize="@dimen/text_size_medium"
+                tools:text="Mengunduh file..." />
+        </LinearLayout>
+    </FrameLayout>
+</FrameLayout>

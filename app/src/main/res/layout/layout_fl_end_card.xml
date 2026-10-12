@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- One line end (GI A or GI B) of the double-ended fault locator - included twice by
+     activity_fault_locator.xml, the badge/title text is filled in from code. -->
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    style="@style/Widget.DFRtools.CardView"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="@dimen/spacing_m">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="@dimen/spacing_l">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/tvFlEndBadge"
+                android:layout_width="@dimen/icon_size_l"
+                android:layout_height="@dimen/icon_size_l"
+                android:background="@drawable/bg_step_number"
+                android:gravity="center"
+                android:textColor="@color/white"
+                android:textSize="@dimen/text_size_body_large"
+                android:textStyle="bold"
+                tools:text="A" />
+
+            <TextView
+                android:id="@+id/tvFlEndTitle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/spacing_m"
+                android:layout_weight="1"
+                android:letterSpacing="0.1"
+                android:textColor="?attr/colorPrimary"
+                android:textSize="@dimen/text_size_body_small"
+                android:textStyle="bold"
+                tools:text="UJUNG A" />
+
+            <TextView
+                android:id="@+id/tvFlEndStatus"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="@dimen/text_size_small"
+                android:textStyle="bold"
+                android:visibility="gone"
+                tools:text="SIAP"
+                tools:textColor="@color/status_safe"
+                tools:visibility="visible" />
+        </LinearLayout>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_m"
+            android:layout_marginBottom="@dimen/spacing_xs"
+            android:text="@string/lbl_fl_gi"
+            android:textColor="?attr/colorPrimary"
+            android:textSize="@dimen/text_size_caption"
+            android:textStyle="bold" />
+
+        <Spinner
+            android:id="@+id/spFlGi"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/icon_size_xl"
+            android:background="@drawable/bg_spinner" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_s"
+            android:layout_marginBottom="@dimen/spacing_xs"
+            android:text="@string/lbl_fl_relay"
+            android:textColor="?attr/colorPrimary"
+            android:textSize="@dimen/text_size_caption"
+            android:textStyle="bold" />
+
+        <Spinner
+            android:id="@+id/spFlRelay"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/icon_size_xl"
+            android:background="@drawable/bg_spinner" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_m"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/btnFlScan"
+                style="@style/Widget.DFRtools.Button"
+                android:layout_width="0dp"
+                android:layout_height="@dimen/icon_size_xxl"
+                android:layout_weight="1"
+                android:padding="0dp"
+                android:text="@string/btn_fl_download_relay"
+                android:textSize="@dimen/text_size_body_small" />
+
+            <Button
+                android:id="@+id/btnFlLocal"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_width="0dp"
+                android:layout_height="@dimen/icon_size_xxl"
+                android:layout_marginStart="@dimen/spacing_s"
+                android:layout_weight="1"
+                android:padding="0dp"
+                android:text="@string/btn_fl_local_file"
+                android:textColor="@color/text_primary"
+                android:textSize="@dimen/text_size_body_small"
+                app:strokeColor="@color/divider_bold"
+                app:strokeWidth="1.5dp" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/tvFlRecord"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_m"
+            android:lineSpacingExtra="@dimen/spacing_tiny"
+            android:text="@string/msg_fl_no_record"
+            android:textColor="@color/text_secondary"
+            android:textSize="@dimen/text_size_body_small" />
+
+        <LinearLayout
+            android:id="@+id/layoutFlRecordActions"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:visibility="gone"
+            tools:visibility="visible">
+
+            <Button
+                android:id="@+id/btnFlMapping"
+                style="@style/Widget.MaterialComponents.Button.TextButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/btn_fl_mapping"
+                android:textSize="@dimen/text_size_small"
+                app:icon="@drawable/ic_settings"
+                app:iconSize="@dimen/icon_size_s" />
+
+            <Button
+                android:id="@+id/btnFlOpenViewer"
+                style="@style/Widget.MaterialComponents.Button.TextButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/btn_fl_open_viewer"
+                android:textSize="@dimen/text_size_small"
+                app:icon="@drawable/ic_dfr_chart"
+                app:iconSize="@dimen/icon_size_s" />
+        </LinearLayout>
+    </LinearLayout>
+</com.google.android.material.card.MaterialCardView>

@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    style="@style/Widget.DFRtools.CardView"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="@dimen/spacing_s"
+    android:clickable="true"
+    android:focusable="true"
+    app:cardCornerRadius="@dimen/card_corner_radius_medium"
+    app:cardElevation="@dimen/card_elevation_small">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="@dimen/spacing_m">
+
+        <TextView
+            android:id="@+id/tvLineMatch"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/spacing_xs"
+            android:background="@drawable/bg_badge_primary"
+            android:paddingHorizontal="@dimen/spacing_s"
+            android:paddingVertical="@dimen/spacing_tiny"
+            android:text="@string/lbl_line_match"
+            android:textColor="@color/white"
+            android:textSize="@dimen/text_size_tiny"
+            android:textStyle="bold"
+            android:visibility="gone"
+            tools:visibility="visible" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:layout_width="@dimen/icon_size_ms"
+                android:layout_height="@dimen/icon_size_ms"
+                android:src="@drawable/ic_line_data"
+                app:tint="?attr/colorPrimary" />
+
+            <TextView
+                android:id="@+id/tvLineRoute"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/spacing_s"
+                android:layout_weight="1"
+                android:textColor="@color/text_primary"
+                android:textSize="@dimen/text_size_body"
+                android:textStyle="bold"
+                tools:text="ADIPALA 500 KV → KESUGIHAN 500 KV" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/tvLineDetail"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_xs"
+            android:textColor="?attr/colorPrimary"
+            android:textSize="@dimen/text_size_small"
+            android:textStyle="bold"
+            tools:text="KESUGIHAN 1 - MAIN A • 500 kV • NR PCS-931" />
+
+        <TextView
+            android:id="@+id/tvLineImpedance"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_tiny"
+            android:fontFamily="monospace"
+            android:textColor="@color/text_primary"
+            android:textSize="@dimen/text_size_small"
+            tools:text="13.83 km • Z1 3.179∠85.0° • Z0 9.787∠76.1° Ω" />
+
+        <TextView
+            android:id="@+id/tvLineConductor"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_tiny"
+            android:textColor="@color/text_secondary"
+            android:textSize="@dimen/text_size_caption"
+            tools:text="ACSR-ZEBRA 4X484.5mm • CCC 3240 A • ULTG PURWOKERTO" />
+    </LinearLayout>
+</com.google.android.material.card.MaterialCardView>

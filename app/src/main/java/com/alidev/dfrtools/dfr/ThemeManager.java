@@ -80,6 +80,7 @@ public class ThemeManager {
         m.put(HomeActivity.class,                0); // Azure
         m.put(com.alidev.dfrtools.update.NotificationActivity.class, 0);
         m.put(DeviceListActivity.class,          1); // Violet
+        m.put(LineDatabaseActivity.class,        1); // the other database screen
         m.put(RelayTemplateEditActivity.class,   2); // Magenta
         m.put(DfrDownloadActivity.class,         3); // Coral
         m.put(InternalFileManagerActivity.class, 3);
@@ -89,6 +90,7 @@ public class ThemeManager {
         m.put(IEDMonitoringActivity.class,       4); // Teal
         m.put(MmsExplorerActivity.class,         4);
         m.put(NodeDefinitionListActivity.class,  4);
+        m.put(FaultLocatorActivity.class,        4); // red fault marker/warnings, same reasoning
         m.put(SettingsActivity.class,            5); // Green
         m.put(AboutActivity.class,               5);
         m.put(HelpActivity.class,                5);
