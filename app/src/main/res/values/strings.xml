@@ -921,6 +921,15 @@
     <string name="btn_fl_share">Share report</string>
     <string name="btn_fl_fix_polarity">Invert current polarity of %s &amp; re-analyze</string>
     <string name="ttl_fl_report">Double-ended fault location report</string>
+    <string name="ttl_fl_pdf_title">DOUBLE ENDED ANALYSIS</string>
+    <string name="lbl_fl_pdf_dfr">DFR %1$s: %2$s</string>
+    <string name="lbl_fl_pdf_app">%1$s v%2$s</string>
+    <string name="lbl_fl_pdf_analyzed">Analyzed %s</string>
+    <string name="lbl_fl_axis_x">Distance from %s (km)</string>
+    <string name="lbl_fl_axis_y">Fault-point %s (kV)</string>
+    <string name="lbl_fl_col_mag">Magnitude</string>
+    <string name="lbl_fl_col_angle">Angle</string>
+    <string name="msg_fl_restoring">Restoring the last analysis…</string>
     <string name="lbl_fl_record_files">Records:</string>
 
     <string name="msg_fl_connecting">Connecting to %s…</string>

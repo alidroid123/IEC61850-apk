@@ -887,6 +887,15 @@
     <string name="btn_fl_share">Bagikan laporan</string>
     <string name="btn_fl_fix_polarity">Balik polaritas arus %s &amp; analisa ulang</string>
     <string name="ttl_fl_report">Laporan lokasi gangguan dua ujung</string>
+    <string name="ttl_fl_pdf_title">ANALISA DOUBLE ENDED</string>
+    <string name="lbl_fl_pdf_dfr">DFR %1$s: %2$s</string>
+    <string name="lbl_fl_pdf_app">%1$s v%2$s</string>
+    <string name="lbl_fl_pdf_analyzed">Dianalisa %s</string>
+    <string name="lbl_fl_axis_x">Jarak dari %s (km)</string>
+    <string name="lbl_fl_axis_y">%s titik gangguan (kV)</string>
+    <string name="lbl_fl_col_mag">Besaran</string>
+    <string name="lbl_fl_col_angle">Sudut</string>
+    <string name="msg_fl_restoring">Memulihkan analisa terakhir…</string>
     <string name="lbl_fl_record_files">Record:</string>
 
     <string name="msg_fl_connecting">Menghubungkan ke %s…</string>

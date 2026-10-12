@@ -121,6 +121,10 @@ public class FaultLocatorActivity extends BaseActivity {
     private boolean selectedLineAuto, selectedLineEdited, fillingLineFields;
     /** Lone .cfg/.dat files opened with this screen, kept until their partner arrives too. */
     private File inboxDir;
+    /** When the result on screen was computed (PDF footer); 0 = none yet. */
+    private long lastAnalyzedAt;
+    /** sessionInputs() at the time of the last analysis - restore re-runs it only if unchanged. */
+    private String analyzedInputs = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -174,7 +178,16 @@ public class FaultLocatorActivity extends BaseActivity {
         setupSyncControls();
 
         inboxDir = new File(getCacheDir(), "fl_inbox_" + System.currentTimeMillis());
-        if (savedInstanceState == null) handleOpenWith(getIntent());
+        if (savedInstanceState == null) {
+            restoreSession();
+            handleOpenWith(getIntent());
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        saveSession();
     }
 
     /** launchMode singleTask: a file opened with this screen while it is open lands here. */
@@ -1189,10 +1202,13 @@ public class FaultLocatorActivity extends BaseActivity {
                     return;
                 }
                 lastResult = finalRes;
+                lastAnalyzedAt = System.currentTimeMillis();
+                analyzedInputs = sessionInputs();
                 viewingSaved = null;
                 currentAlignment = finalRes.alignment;
                 syncAsMain = false;
                 renderResult(finalRes, endName(endA), endName(endB));
+                saveSession();
             });
         });
     }
@@ -1213,6 +1229,10 @@ public class FaultLocatorActivity extends BaseActivity {
     }
 
     private void renderResult(Result r, String nameA, String nameB) {
+        renderResult(r, nameA, nameB, true);
+    }
+
+    private void renderResult(Result r, String nameA, String nameB, boolean scrollToResult) {
         resultNameA = nameA;
         resultNameB = nameB;
         cardResult.setVisibility(View.VISIBLE);
@@ -1231,8 +1251,9 @@ public class FaultLocatorActivity extends BaseActivity {
         renderSync(r);
         renderChart(r, nameA, nameB);
         renderDetails(r, nameA, nameB);
-        ((TextView) findViewById(R.id.tvFlPhasors)).setText(phasorTable(r, nameA, nameB));
+        renderPhasorTables(r, nameA, nameB);
 
+        if (!scrollToResult) return;
         View scroll = findViewById(R.id.scrollFl);
         scroll.post(() -> ((androidx.core.widget.NestedScrollView) scroll).smoothScrollTo(0, cardResult.getTop()));
     }
@@ -1348,17 +1369,17 @@ public class FaultLocatorActivity extends BaseActivity {
         diagram.setLegend(resultNameA, resultNameB);
         TextView info = findViewById(R.id.tvFlSyncInfo);
         RelayPhasorView relays = findViewById(R.id.relayPhasors);
-        TextView table = findViewById(R.id.tvFlAngleTable);
+        android.widget.TableLayout table = findViewById(R.id.tableFlAngles);
         DoubleEndedFaultLocator.Alignment al = currentAlignment;
         if (al == null || !al.valid || al.a == null || al.b == null) {
             diagram.setVectors(null, null, null, null, false);
             relays.setRelays(null, null, resultNameA, resultNameB);
-            table.setText("");
+            table.removeAllViews();
             info.setText(R.string.msg_fl_sync_out);
             return;
         }
         relays.setRelays(al.a, al.b, resultNameA, resultNameB);
-        table.setText(angleTable(al));
+        renderAngleTable(table, al);
         diagram.setVectors(al.a.v1, al.b.v1, al.a.v0, al.b.v0, al.v0Used);
         StringBuilder sb = new StringBuilder();
         sb.append(getString(R.string.val_fl_sync_ref, resultNameA, fmt(r.alignRefTimeA * 1000, 1), fmt(r.alignRefCurrentA, 0)));
@@ -1389,6 +1410,65 @@ public class FaultLocatorActivity extends BaseActivity {
                     magAngle(x, ref, isV), magAngle(y, ref, isV), wrap180(Math.toDegrees(y.arg() - x.arg()))));
         }
         return sb.toString().trim();
+    }
+
+    /** angleTable() as an on-screen table: |X| and angle per relay, then the B-minus-A angle. */
+    private void renderAngleTable(android.widget.TableLayout table, DoubleEndedFaultLocator.Alignment al) {
+        double ref = al.a.v[0].arg();
+        String mag = getString(R.string.lbl_fl_col_mag), ang = getString(R.string.lbl_fl_col_angle);
+        ValueTable t = new ValueTable(this, table)
+                .header(new String[]{"", resultNameA, resultNameB, "B−A"}, new int[]{1, 2, 2, 1})
+                .header(new String[]{"", mag, ang, mag, ang, ang}, null);
+        String[] names = {"VR", "VS", "VT", "IR", "IS", "IT", "V1", "V0"};
+        for (int k = 0; k < names.length; k++) {
+            if (k == 3 || k == 6) t.divider();
+            Cx x = angleRow(al.a, k), y = angleRow(al.b, k);
+            boolean isV = names[k].startsWith("V");
+            t.row(names[k] + (isV ? " (kV)" : " (A)"),
+                    magText(x, isV), angleText(x, ref), magText(y, isV), angleText(y, ref),
+                    String.format(Locale.US, "%.1f°", wrap180(Math.toDegrees(y.arg() - x.arg()))));
+        }
+    }
+
+    /** phasorTable() as on-screen tables, one per end: pre-fault and fault |X| and angle. */
+    private void renderPhasorTables(Result r, String nameA, String nameB) {
+        LinearLayout box = findViewById(R.id.containerFlPhasors);
+        box.removeAllViews();
+        String mag = getString(R.string.lbl_fl_col_mag), ang = getString(R.string.lbl_fl_col_angle);
+        String[] names = {"Va", "Vb", "Vc", "Ia", "Ib", "Ic", "V1", "V2", "V0", "I1", "I2", "I0"};
+        EndSummary[] ends = {r.endA, r.endB};
+        String[] endNames = {nameA, nameB};
+        for (int e = 0; e < 2; e++) {
+            EndSummary end = ends[e];
+            TextView title = new TextView(this);
+            title.setText(endNames[e]);
+            title.setTypeface(title.getTypeface(), android.graphics.Typeface.BOLD);
+            title.setTextColor(resolveColor(com.google.android.material.R.attr.colorPrimary));
+            title.setPadding(0, dp(e == 0 ? 2 : 10), 0, dp(2));
+            box.addView(title);
+            android.widget.TableLayout table = new android.widget.TableLayout(this);
+            box.addView(table, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+            ValueTable t = new ValueTable(this, table)
+                    .header(new String[]{"", getString(R.string.lbl_fl_prefault), getString(R.string.lbl_fl_fault)}, new int[]{1, 2, 2})
+                    .header(new String[]{"", mag, ang, mag, ang}, null);
+            for (int k = 0; k < names.length; k++) {
+                if (k == 3 || k == 6 || k == 9) t.divider();
+                boolean isV = names[k].startsWith("V");
+                Cx pre = end.hasPrefault && end.pre != null ? pick(end.pre, k) : null;
+                Cx flt = end.flt != null ? pick(end.flt, k) : null;
+                t.row(names[k] + (isV ? " (kV)" : " (A)"),
+                        pre != null ? magText(pre, isV) : "-", pre != null ? angleText(pre, end.displayRefAngle) : "-",
+                        flt != null ? magText(flt, isV) : "-", flt != null ? angleText(flt, end.displayRefAngle) : "-");
+            }
+        }
+    }
+
+    private static String magText(Cx x, boolean isV) {
+        return isV ? String.format(Locale.US, "%.2f", x.abs() / 1000) : String.format(Locale.US, "%.1f", x.abs());
+    }
+
+    private static String angleText(Cx x, double ref) {
+        return String.format(Locale.US, "%.1f°", wrap180(Math.toDegrees(x.arg() - ref)));
     }
 
     private static Cx angleRow(Phasors p, int k) {
@@ -1425,6 +1505,7 @@ public class FaultLocatorActivity extends BaseActivity {
         if (r == null) return;
         FlResultStore.Saved saved = new FlResultStore.Saved();
         saved.savedAt = System.currentTimeMillis();
+        saved.analyzedAt = lastAnalyzedAt > 0 ? lastAnalyzedAt : saved.savedAt;
         saved.id = new SimpleDateFormat("yyyyMMdd_HHmmss_SSS", Locale.US).format(new Date(saved.savedAt));
         saved.nameA = resultNameA;
         saved.nameB = resultNameB;
@@ -1448,35 +1529,39 @@ public class FaultLocatorActivity extends BaseActivity {
         }
     }
 
-    /** The result card as a one-page PDF report, without the on-screen-only controls. */
+    /**
+     * The result card as a one-page PDF report, without the on-screen-only controls, between a
+     * letterhead (title, line, both DFR files) and a footer (logo, app name + version, analysis time).
+     */
     private File writePdf(FlResultStore.Saved saved) throws Exception {
         View card = cardResult;
         TextView banner = findViewById(R.id.tvFlSavedBanner);
         View[] hide = {findViewById(R.id.layoutFlResultActions), findViewById(R.id.layoutFlSyncControls),
-                findViewById(R.id.btnFlFixPolarity), findViewById(R.id.tvFlSyncHint), findViewById(R.id.swFlSyncMain)};
+                findViewById(R.id.btnFlFixPolarity), findViewById(R.id.tvFlSyncHint), findViewById(R.id.swFlSyncMain), banner};
         int[] vis = new int[hide.length];
         for (int i = 0; i < hide.length; i++) { vis[i] = hide[i].getVisibility(); hide[i].setVisibility(View.GONE); }
-        int bannerVis = banner.getVisibility();
-        CharSequence bannerText = banner.getText();
-        banner.setVisibility(View.VISIBLE);
-        banner.setText(getString(R.string.ttl_fl_report) + "\n" + saved.nameA + " – " + saved.nameB + "  •  " + dateText(saved.savedAt)
-                + (saved.lineConfig.isEmpty() ? "" : "\n" + getString(R.string.lbl_fl_line_config) + ": " + saved.lineConfig)
-                + "\n" + getString(R.string.lbl_fl_record_files) + " " + saved.recordA + " / " + saved.recordB);
         android.graphics.pdf.PdfDocument doc = new android.graphics.pdf.PdfDocument();
         try {
             int w = card.getWidth();
+            View header = buildPdfHeader(saved);
+            View footer = buildPdfFooter(saved);
+            int hh = measureDetached(header, w), fh = measureDetached(footer, w);
             card.measure(View.MeasureSpec.makeMeasureSpec(w, View.MeasureSpec.EXACTLY),
                     View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED));
             int h = card.getMeasuredHeight();
             card.layout(card.getLeft(), card.getTop(), card.getLeft() + w, card.getTop() + h);
             float scale = 595f / w;
             android.graphics.pdf.PdfDocument.PageInfo info =
-                    new android.graphics.pdf.PdfDocument.PageInfo.Builder(595, (int) Math.ceil(h * scale) + 1, 1).create();
+                    new android.graphics.pdf.PdfDocument.PageInfo.Builder(595, (int) Math.ceil((hh + h + fh) * scale) + 1, 1).create();
             android.graphics.pdf.PdfDocument.Page page = doc.startPage(info);
             android.graphics.Canvas c = page.getCanvas();
             c.drawColor(ContextCompat.getColor(this, R.color.bg_card));
             c.scale(scale, scale);
+            header.draw(c);
+            c.translate(0, hh);
             card.draw(c);
+            c.translate(0, h);
+            footer.draw(c);
             doc.finishPage(page);
             File dir = new File(new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), "DFR"), "FL_Reports");
             if (!dir.exists() && !dir.mkdirs()) dir = new File(new File(getExternalFilesDir(null), "DFR"), "FL_Reports");
@@ -1490,10 +1575,76 @@ public class FaultLocatorActivity extends BaseActivity {
         } finally {
             doc.close();
             for (int i = 0; i < hide.length; i++) hide[i].setVisibility(vis[i]);
-            banner.setText(bannerText);
-            banner.setVisibility(bannerVis);
             card.requestLayout();
         }
+    }
+
+    /** Lays a view that is not attached to the window out at width w; returns its height. */
+    private static int measureDetached(View v, int w) {
+        v.measure(View.MeasureSpec.makeMeasureSpec(w, View.MeasureSpec.EXACTLY),
+                View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED));
+        v.layout(0, 0, w, v.getMeasuredHeight());
+        return v.getMeasuredHeight();
+    }
+
+    /** ANALISA DOUBLE ENDED / line name / DFR file of GI A / DFR file of GI B. */
+    private View buildPdfHeader(FlResultStore.Saved saved) {
+        int primary = resolveColor(com.google.android.material.R.attr.colorPrimary);
+        LinearLayout box = new LinearLayout(this);
+        box.setOrientation(LinearLayout.VERTICAL);
+        box.setPadding(dp(16), dp(16), dp(16), 0);
+        String line = !saved.lineConfig.isEmpty() ? saved.lineConfig : saved.nameA + " – " + saved.nameB;
+        box.addView(pdfText(getString(R.string.ttl_fl_pdf_title), 18, true, primary));
+        box.addView(pdfText(line, 14, true, ContextCompat.getColor(this, R.color.text_primary)));
+        int secondary = ContextCompat.getColor(this, R.color.text_secondary);
+        box.addView(pdfText(getString(R.string.lbl_fl_pdf_dfr, saved.nameA, saved.recordA.isEmpty() ? "-" : saved.recordA), 11, false, secondary));
+        box.addView(pdfText(getString(R.string.lbl_fl_pdf_dfr, saved.nameB, saved.recordB.isEmpty() ? "-" : saved.recordB), 11, false, secondary));
+        View rule = new View(this);
+        rule.setBackgroundColor(primary);
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(2));
+        lp.topMargin = dp(8);
+        box.addView(rule, lp);
+        return box;
+    }
+
+    /** Bottom right: app logo, "name vX.Y.Z" and when the analysis was run. */
+    private View buildPdfFooter(FlResultStore.Saved saved) {
+        LinearLayout row = new LinearLayout(this);
+        row.setOrientation(LinearLayout.HORIZONTAL);
+        row.setGravity(android.view.Gravity.END | android.view.Gravity.CENTER_VERTICAL);
+        row.setPadding(dp(16), dp(10), dp(16), dp(14));
+        android.widget.ImageView logo = new android.widget.ImageView(this);
+        logo.setImageResource(R.mipmap.ic_launcher);
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(dp(28), dp(28));
+        lp.rightMargin = dp(6);
+        row.addView(logo, lp);
+        LinearLayout text = new LinearLayout(this);
+        text.setOrientation(LinearLayout.VERTICAL);
+        String version = "";
+        try {
+            version = getPackageManager().getPackageInfo(getPackageName(), 0).versionName;
+        } catch (Exception ignored) { }
+        int secondary = ContextCompat.getColor(this, R.color.text_secondary);
+        TextView app = pdfText(getString(R.string.lbl_fl_pdf_app, getString(R.string.app_name), version), 10, true, secondary);
+        TextView when = pdfText(getString(R.string.lbl_fl_pdf_analyzed, dateText(saved.analyzedAt > 0 ? saved.analyzedAt : saved.savedAt)), 10, false, secondary);
+        app.setGravity(android.view.Gravity.END);
+        when.setGravity(android.view.Gravity.END);
+        text.addView(app);
+        text.addView(when);
+        row.addView(text);
+        return row;
+    }
+
+    private TextView pdfText(String s, float sp, boolean bold, int color) {
+        TextView t = new TextView(this);
+        t.setText(s);
+        t.setTextSize(TypedValue.COMPLEX_UNIT_SP, sp);
+        t.setTextColor(color);
+        t.setGravity(android.view.Gravity.CENTER_HORIZONTAL);
+        if (bold) t.setTypeface(t.getTypeface(), android.graphics.Typeface.BOLD);
+        t.setPadding(0, dp(1), 0, dp(1));
+        t.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+        return t;
     }
 
     private void showSavedDialog(File pdf) {
@@ -1574,11 +1725,241 @@ public class FaultLocatorActivity extends BaseActivity {
     }
 
     private void openSaved(FlResultStore.Saved saved) {
+        openSaved(saved, true);
+    }
+
+    private void openSaved(FlResultStore.Saved saved, boolean scrollToResult) {
         viewingSaved = saved;
+        lastAnalyzedAt = saved.analyzedAt;
         lastResult = saved.result;
         currentAlignment = saved.result.alignment;
         syncAsMain = saved.syncAsMain;
-        renderResult(saved.result, saved.nameA, saved.nameB);
+        renderResult(saved.result, saved.nameA, saved.nameB, scrollToResult);
+    }
+
+    // ------------------------------------------------------------------
+    // Last session: the screen reopens as it was left, even after the app was closed
+    // ------------------------------------------------------------------
+
+    private File sessionFile() {
+        return new File(getFilesDir(), "fl_session.json");
+    }
+
+    /** Both ends' records + channel maps, the line fields and the result on screen. */
+    private void saveSession() {
+        try {
+            JSONObject o = new JSONObject();
+            o.put("A", sessionEnd(endA));
+            o.put("B", sessionEnd(endB));
+            o.put("line", lineFieldsJson());
+            o.put("offset", text(etOffset));
+            if (viewingSaved != null) {
+                o.put("savedId", viewingSaved.id);
+            } else if (lastResult != null) {
+                DoubleEndedFaultLocator.Alignment auto = lastResult.alignment;
+                lastResult.alignment = currentAlignment; // the vectors as the user left them
+                try {
+                    o.put("result", FlResultStore.resultToJson(lastResult));
+                } finally {
+                    lastResult.alignment = auto;
+                }
+                o.put("nameA", resultNameA);
+                o.put("nameB", resultNameB);
+                o.put("syncAsMain", syncAsMain);
+                if (currentAlignment != null && !Double.isNaN(currentAlignment.tau)) o.put("tau", currentAlignment.tau);
+                o.put("analyzedAt", lastAnalyzedAt);
+                o.put("analyzedInputs", analyzedInputs);
+            }
+            try (FileOutputStream fos = new FileOutputStream(sessionFile())) {
+                fos.write(o.toString().getBytes(java.nio.charset.StandardCharsets.UTF_8));
+            }
+        } catch (Exception ignored) { }
+    }
+
+    private static JSONObject sessionEnd(EndState st) throws Exception {
+        JSONObject o = new JSONObject();
+        if (st.cfg == null || st.dat == null) return o;
+        o.put("cfg", st.cfg.getAbsolutePath());
+        o.put("dat", st.dat.getAbsolutePath());
+        o.put("remote", st.remoteFileTime);
+        if (st.map != null) {
+            ChannelMap m = st.map;
+            o.put("map", new JSONArray(new int[]{m.va, m.vb, m.vc, m.ia, m.ib, m.ic}));
+            o.put("invert", m.invertCurrent);
+            o.put("vMult", m.vMult);
+            o.put("iMult", m.iMult);
+        }
+        return o;
+    }
+
+    private JSONObject lineFieldsJson() throws Exception {
+        JSONObject line = new JSONObject();
+        line.put("total", swTotal.isChecked());
+        line.put("len", text(etLength));
+        line.put("r1", text(etR1));
+        line.put("x1", text(etX1));
+        line.put("r0", text(etR0));
+        line.put("x0", text(etX0));
+        line.put("b1", text(etB1));
+        if (selectedLine != null) {
+            line.put("lineId", selectedLine.id);
+            line.put("lineAuto", selectedLineAuto);
+            line.put("lineEdited", selectedLineEdited);
+        }
+        return line;
+    }
+
+    /** Everything the analysis depends on, as one comparable string. */
+    private String sessionInputs() {
+        try {
+            JSONObject line = lineFieldsJson();
+            line.remove("lineAuto");
+            line.remove("lineEdited");
+            return sessionEnd(endA) + "|" + sessionEnd(endB) + "|" + line + "|" + text(etOffset);
+        } catch (Exception e) {
+            return "";
+        }
+    }
+
+    private static class RestoredEnd {
+        File cfg, dat;
+        long remote;
+        ComtradeRecord rec;
+        ChannelMap map;
+    }
+
+    /** Reopens the last session: line fields now, records in the background, then the result. */
+    private void restoreSession() {
+        JSONObject o;
+        try {
+            o = new JSONObject(new String(ComtradeRecord.readAll(sessionFile()), java.nio.charset.StandardCharsets.UTF_8));
+        } catch (Exception e) {
+            return;
+        }
+        JSONObject line = o.optJSONObject("line");
+        if (line != null && line.has("len")) {
+            fillLineParams(line);
+            lineParamsRestored = true;
+            setSelectedLine(new LineDataManager(this).get(line.optString("lineId", null)),
+                    line.optBoolean("lineAuto", false), line.optBoolean("lineEdited", false));
+        }
+        etOffset.setText(o.optString("offset", ""));
+        JSONObject ja = o.optJSONObject("A"), jb = o.optJSONObject("B");
+        showProgress(getString(R.string.msg_fl_restoring));
+        executor.execute(() -> {
+            RestoredEnd ra = loadRestoredEnd(ja), rb = loadRestoredEnd(jb);
+            runOnUiThread(() -> {
+                hideProgress();
+                if (isGone()) return;
+                applyRestoredEnd(endA, ra);
+                applyRestoredEnd(endB, rb);
+                restoreResult(o);
+            });
+        });
+    }
+
+    /** Must run on the executor; null when the record files are gone or unreadable. */
+    @Nullable
+    private static RestoredEnd loadRestoredEnd(@Nullable JSONObject j) {
+        if (j == null || !j.has("cfg")) return null;
+        try {
+            RestoredEnd r = new RestoredEnd();
+            r.cfg = new File(j.getString("cfg"));
+            r.dat = new File(j.getString("dat"));
+            if (!r.cfg.isFile() || !r.dat.isFile()) return null;
+            r.rec = ComtradeRecord.load(r.cfg, r.dat);
+            r.remote = j.optLong("remote", 0);
+            JSONArray idx = j.optJSONArray("map");
+            if (idx != null && idx.length() == 6) {
+                ChannelMap m = new ChannelMap();
+                m.va = idx.getInt(0); m.vb = idx.getInt(1); m.vc = idx.getInt(2);
+                m.ia = idx.getInt(3); m.ib = idx.getInt(4); m.ic = idx.getInt(5);
+                m.invertCurrent = j.optBoolean("invert", false);
+                m.vMult = j.optDouble("vMult", 1);
+                m.iMult = j.optDouble("iMult", 1);
+                if (m.complete(r.rec.analogCount())) r.map = m;
+            }
+            if (r.map == null) r.map = DoubleEndedFaultLocator.autoMap(r.rec);
+            return r;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    private void applyRestoredEnd(EndState st, @Nullable RestoredEnd r) {
+        if (r == null) return;
+        st.cfg = r.cfg;
+        st.dat = r.dat;
+        st.rec = r.rec;
+        st.map = r.map;
+        st.remoteFileTime = r.remote;
+        renderEnd(st);
+    }
+
+    /**
+     * Shows the stored result. When both records and every input are still the same, the analysis
+     * is run again first, so the shift slider (whose state isn't stored) works as before.
+     */
+    private void restoreResult(JSONObject o) {
+        String savedId = o.optString("savedId", "");
+        if (!savedId.isEmpty()) {
+            for (FlResultStore.Saved s : new FlResultStore(this).list()) {
+                if (s.id.equals(savedId)) {
+                    openSaved(s, false);
+                    break;
+                }
+            }
+            return;
+        }
+        JSONObject jr = o.optJSONObject("result");
+        if (jr == null) return;
+        Result stored;
+        try {
+            stored = FlResultStore.resultFromJson(jr);
+        } catch (Exception e) {
+            return;
+        }
+        String nameA = o.optString("nameA", ""), nameB = o.optString("nameB", "");
+        boolean sync = o.optBoolean("syncAsMain", false);
+        double tau = o.optDouble("tau", Double.NaN);
+        lastAnalyzedAt = o.optLong("analyzedAt", 0);
+        analyzedInputs = o.optString("analyzedInputs", "");
+        DoubleEndedFaultLocator.LineParams lp = readLineParams();
+        boolean rerun = endA.rec != null && endB.rec != null && lp != null
+                && !analyzedInputs.isEmpty() && analyzedInputs.equals(sessionInputs());
+        if (!rerun) {
+            showRestoredResult(stored, stored.alignment, nameA, nameB, sync);
+            return;
+        }
+        double offset = parseNumber(text(etOffset));
+        ComtradeRecord recA = endA.rec, recB = endB.rec;
+        ChannelMap mapA = endA.map, mapB = endB.map;
+        showProgress(getString(R.string.msg_fl_restoring));
+        executor.execute(() -> {
+            Result fresh = null;
+            try {
+                fresh = DoubleEndedFaultLocator.analyze(recA, mapA, recB, mapB, lp, offset);
+            } catch (Exception ignored) { }
+            Result res = fresh != null && fresh.error == null ? fresh : null;
+            runOnUiThread(() -> {
+                hideProgress();
+                if (isGone()) return;
+                if (res == null) {
+                    showRestoredResult(stored, stored.alignment, nameA, nameB, sync);
+                } else {
+                    showRestoredResult(res, res.session != null && !Double.isNaN(tau) ? res.session.alignAt(tau) : res.alignment,
+                            nameA, nameB, sync);
+                }
+            });
+        });
+    }
+
+    private void showRestoredResult(Result r, @Nullable DoubleEndedFaultLocator.Alignment alignment, String nameA, String nameB, boolean sync) {
+        lastResult = r;
+        viewingSaved = null;
+        currentAlignment = alignment;
+        syncAsMain = sync && alignment != null && alignment.valid;
+        renderResult(r, nameA, nameB, false);
     }
 
     private void confirmDeleteSaved(FlResultStore store, FlResultStore.Saved saved, AlertDialog listDialog) {
@@ -1746,6 +2127,10 @@ public class FaultLocatorActivity extends BaseActivity {
 
     private void renderChart(Result r, String nameA, String nameB) {
         LineChart chart = findViewById(R.id.chartFlProfile);
+        // The curves are the sequence the main method solved with (see DoubleEndedFaultLocator).
+        String quantity = r.sequenceUsed == 2 ? "|V2|" : r.superimposed ? "|ΔV1|" : "|V1|";
+        ((TextView) findViewById(R.id.tvFlProfileYLabel)).setText(getString(R.string.lbl_fl_axis_y, quantity));
+        ((TextView) findViewById(R.id.tvFlProfileXLabel)).setText(getString(R.string.lbl_fl_axis_x, nameA));
         if (r.profileKm == null) {
             chart.clear();
             return;
@@ -1885,7 +2270,7 @@ public class FaultLocatorActivity extends BaseActivity {
         }
         sb.append('\n').append(getString(R.string.lbl_fl_sync_header)).append('\n')
                 .append(((TextView) findViewById(R.id.tvFlSyncInfo)).getText()).append('\n')
-                .append(((TextView) findViewById(R.id.tvFlAngleTable)).getText()).append('\n');
+                .append(currentAlignment != null && currentAlignment.valid ? angleTable(currentAlignment) : "").append('\n');
         String recA = viewingSaved != null ? viewingSaved.recordA : endA.cfg != null ? endA.cfg.getName() : "-";
         String recB = viewingSaved != null ? viewingSaved.recordB : endB.cfg != null ? endB.cfg.getName() : "-";
         sb.append('\n').append(getString(R.string.lbl_fl_record_files)).append('\n');

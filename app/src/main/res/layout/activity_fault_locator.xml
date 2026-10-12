@@ -616,21 +616,11 @@
                             </LinearLayout>
                         </LinearLayout>
 
-                        <HorizontalScrollView
+                        <TableLayout
+                            android:id="@+id/tableFlAngles"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="@dimen/spacing_xs">
-
-                            <TextView
-                                android:id="@+id/tvFlAngleTable"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:background="@color/bg_navy_dim"
-                                android:fontFamily="monospace"
-                                android:padding="@dimen/spacing_s"
-                                android:textColor="@color/text_primary"
-                                android:textSize="@dimen/text_size_small" />
-                        </HorizontalScrollView>
+                            android:layout_marginTop="@dimen/spacing_xs" />
 
                         <com.alidev.dfrtools.dfr.PhasorDiagramView
                             android:id="@+id/phasorDiagram"
@@ -663,11 +653,29 @@
                             android:layout_marginTop="@dimen/spacing_m"
                             android:text="@string/lbl_fl_profile_header" />
 
+                        <!-- MPAndroidChart has no axis titles: Y above the chart, X below it. -->
+                        <TextView
+                            android:id="@+id/tvFlProfileYLabel"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="@dimen/spacing_xs"
+                            android:textColor="@color/text_secondary"
+                            android:textSize="@dimen/text_size_small"
+                            android:textStyle="bold" />
+
                         <com.github.mikephil.charting.charts.LineChart
                             android:id="@+id/chartFlProfile"
                             android:layout_width="match_parent"
-                            android:layout_height="200dp"
-                            android:layout_marginTop="@dimen/spacing_xs" />
+                            android:layout_height="200dp" />
+
+                        <TextView
+                            android:id="@+id/tvFlProfileXLabel"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:gravity="center"
+                            android:textColor="@color/text_secondary"
+                            android:textSize="@dimen/text_size_small"
+                            android:textStyle="bold" />
 
                         <TextView
                             android:layout_width="match_parent"
@@ -694,21 +702,12 @@
                             android:layout_marginTop="@dimen/spacing_m"
                             android:text="@string/lbl_fl_phasor_header" />
 
-                        <HorizontalScrollView
+                        <LinearLayout
+                            android:id="@+id/containerFlPhasors"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="@dimen/spacing_xs">
-
-                            <TextView
-                                android:id="@+id/tvFlPhasors"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:background="@color/bg_navy_dim"
-                                android:fontFamily="monospace"
-                                android:padding="@dimen/spacing_s"
-                                android:textColor="@color/text_primary"
-                                android:textSize="@dimen/text_size_small" />
-                        </HorizontalScrollView>
+                            android:layout_marginTop="@dimen/spacing_xs"
+                            android:orientation="vertical" />
 
                         <LinearLayout
                             android:id="@+id/layoutFlResultActions"

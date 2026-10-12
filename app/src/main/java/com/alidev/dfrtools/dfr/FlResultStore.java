@@ -32,6 +32,8 @@ public class FlResultStore {
     public static class Saved {
         public String id = "";
         public long savedAt;
+        /** When the analysis was run (the PDF footer's timestamp); savedAt for older saves. */
+        public long analyzedAt;
         public String nameA = "", nameB = "", lineConfig = "", recordA = "", recordB = "", pdfPath = "";
         public double tauUsed = Double.NaN;
         public boolean syncAsMain;
@@ -49,6 +51,7 @@ public class FlResultStore {
         JSONObject o = new JSONObject();
         o.put("id", s.id);
         o.put("savedAt", s.savedAt);
+        o.put("analyzedAt", s.analyzedAt);
         o.put("nameA", s.nameA);
         o.put("nameB", s.nameB);
         o.put("lineConfig", s.lineConfig);
@@ -75,6 +78,7 @@ public class FlResultStore {
                 Saved s = new Saved();
                 s.id = o.optString("id", f.getName().replace(".json", ""));
                 s.savedAt = o.optLong("savedAt", f.lastModified());
+                s.analyzedAt = o.optLong("analyzedAt", s.savedAt);
                 s.nameA = o.optString("nameA", "");
                 s.nameB = o.optString("nameB", "");
                 s.lineConfig = o.optString("lineConfig", "");
