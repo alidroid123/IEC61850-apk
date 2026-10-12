@@ -79,6 +79,8 @@ public class FaultLocatorActivity extends BaseActivity {
         TextView tvRecord, tvStatus;
         View actions, btnOpenViewer;
         final List<DeviceListActivity.DeviceItem> relays = new ArrayList<>();
+        /** GI the relay spinner was last filled for. */
+        String relaysForGi;
         File cfg, dat;
         ComtradeRecord rec;
         ChannelMap map;
@@ -214,8 +216,13 @@ public class FaultLocatorActivity extends BaseActivity {
         if (giIdx >= 0 && giIdx < giItems.size()) st.spGi.setSelection(giIdx, false);
         populateRelays(st, lastIp);
 
-        st.spGi.setOnItemSelectedListener(new SimpleSelection(() -> populateRelays(st, null)));
-        st.spRelay.setOnItemSelectedListener(new SimpleSelection(() -> onRelayChanged(st)));
+        // No "skip the first callback" trick here: setSelection(.., false) above already lays the
+        // spinner out and consumes its initial event, so the first callback that arrives is the
+        // user's own pick. Both handlers are instead safe to run on a repeated/identical event.
+        st.spGi.setOnItemSelectedListener(new Selection(() -> {
+            if (!TextUtils.equals(selectedGi(st), st.relaysForGi)) populateRelays(st, null);
+        }));
+        st.spRelay.setOnItemSelectedListener(new Selection(() -> onRelayChanged(st)));
 
         root.findViewById(R.id.btnFlScan).setOnClickListener(v -> onScanClicked(st));
         root.findViewById(R.id.btnFlLocal).setOnClickListener(v -> onLocalClicked(st));
@@ -224,10 +231,16 @@ public class FaultLocatorActivity extends BaseActivity {
         restoreLineParams();
     }
 
+    @Nullable
+    private String selectedGi(EndState st) {
+        int giPos = st.spGi.getSelectedItemPosition();
+        return giPos >= 0 && giPos < giNames.size() ? giNames.get(giPos) : null;
+    }
+
     private void populateRelays(EndState st, @Nullable String preferIp) {
         st.relays.clear();
-        int giPos = st.spGi.getSelectedItemPosition();
-        String gi = giPos >= 0 && giPos < giNames.size() ? giNames.get(giPos) : null;
+        String gi = selectedGi(st);
+        st.relaysForGi = gi;
         for (DeviceListActivity.DeviceItem d : devices) if (gi != null && gi.equalsIgnoreCase(d.gi)) st.relays.add(d);
         List<String> labels = new ArrayList<>();
         int sel = 0;
@@ -1019,7 +1032,7 @@ public class FaultLocatorActivity extends BaseActivity {
             String text = warningText(w, nameA, nameB);
             if (text == null) continue;
             TextView tv = new TextView(this);
-            tv.setText("⚠  " + text);
+            tv.setText("• " + text);
             tv.setTextColor(ContextCompat.getColor(this, R.color.status_warning));
             tv.setTextSize(TypedValue.COMPLEX_UNIT_PX, getResources().getDimension(R.dimen.text_size_small));
             tv.setPadding(0, dp(2), 0, dp(4));
@@ -1232,8 +1245,8 @@ public class FaultLocatorActivity extends BaseActivity {
         double ang = Math.toDegrees(x.arg() - refAngle);
         while (ang > 180) ang -= 360;
         while (ang <= -180) ang += 360;
-        return isV ? String.format(Locale.US, "%9.2f kV ∠%7.1f°", x.abs() / 1000, ang)
-                : String.format(Locale.US, "%9.1f A  ∠%7.1f°", x.abs(), ang);
+        return isV ? String.format(Locale.US, "%9.2f kV %7.1f°", x.abs() / 1000, ang)
+                : String.format(Locale.US, "%9.1f A  %7.1f°", x.abs(), ang);
     }
 
     /** PLN-style R/S/T naming, matching the DFR Viewer's assessment phase options. */
@@ -1366,16 +1379,13 @@ public class FaultLocatorActivity extends BaseActivity {
         };
     }
 
-    /** OnItemSelectedListener that ignores the spurious first callback fired on attach. */
-    private static class SimpleSelection implements AdapterView.OnItemSelectedListener {
+    private static class Selection implements AdapterView.OnItemSelectedListener {
         private final Runnable action;
-        private boolean first = true;
 
-        SimpleSelection(Runnable action) { this.action = action; }
+        Selection(Runnable action) { this.action = action; }
 
         @Override
         public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-            if (first) { first = false; return; }
             action.run();
         }
 

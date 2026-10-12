@@ -335,8 +335,8 @@ public class LineDatabaseActivity extends BaseActivity {
 
     private String computedText(LineData d) {
         StringBuilder sb = new StringBuilder();
-        sb.append("Z1 = ").append(LineData.fmt(d.z1, 4)).append(" Ω ∠ ").append(LineData.fmt(d.ang1, 2)).append("°\n");
-        sb.append("Z0 = ").append(LineData.fmt(d.z0, 4)).append(" Ω ∠ ").append(LineData.fmt(d.ang0, 2)).append("°\n");
+        sb.append("Z1 = ").append(LineData.fmt(d.z1, 4)).append(" Ω / ").append(LineData.fmt(d.ang1, 2)).append("°\n");
+        sb.append("Z0 = ").append(LineData.fmt(d.z0, 4)).append(" Ω / ").append(LineData.fmt(d.ang0, 2)).append("°\n");
         sb.append("Z2 = Z1");
         if (d.hasZ1() && d.hasZ0()) {
             double k0 = Math.hypot(d.r0 - d.r1, d.x0 - d.x1) / (3 * Math.hypot(d.r1, d.x1));

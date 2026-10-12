@@ -53,7 +53,7 @@
                 android:textColor="@color/text_primary"
                 android:textSize="@dimen/text_size_body"
                 android:textStyle="bold"
-                tools:text="ADIPALA 500 KV → KESUGIHAN 500 KV" />
+                tools:text="ADIPALA 500 KV – KESUGIHAN 500 KV" />
         </LinearLayout>
 
         <TextView
@@ -74,7 +74,7 @@
             android:fontFamily="monospace"
             android:textColor="@color/text_primary"
             android:textSize="@dimen/text_size_small"
-            tools:text="13.83 km • Z1 3.179∠85.0° • Z0 9.787∠76.1° Ω" />
+            tools:text="13.83 km • Z1 3.179 Ω / 85.0° • Z0 9.787 Ω / 76.1°" />
 
         <TextView
             android:id="@+id/tvLineConductor"

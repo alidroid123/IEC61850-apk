@@ -48,9 +48,12 @@ public class LineData {
         if (Double.isNaN(ang0) && hasZ0()) ang0 = Math.toDegrees(Math.atan2(x0, r0));
     }
 
-    /** "ADIPALA 500 KV → KESUGIHAN 500 KV" */
+    /**
+     * "ADIPALA 500 KV – KESUGIHAN 500 KV". Only glyphs every phone font has: Infinix's TOS font,
+     * for one, has no arrows/angle/star signs and draws them as garbage.
+     */
     public String routeLabel() {
-        return gi + (giLawan.isEmpty() ? "" : " → " + giLawan);
+        return gi + (giLawan.isEmpty() ? "" : " – " + giLawan);
     }
 
     /** "KESUGIHAN 1 - MAIN A • 500 kV • NR PCS-931" */
@@ -62,13 +65,12 @@ public class LineData {
         return sb.toString();
     }
 
-    /** "13.83 km • Z1 3.179∠85.0° • Z0 9.787∠76.1° Ω" */
+    /** "13.83 km • Z1 3.179 Ω / 85.0° • Z0 9.787 Ω / 76.1°" */
     public String impedanceLabel() {
         StringBuilder sb = new StringBuilder();
         sb.append(fmt(lengthKm, 2)).append(" km");
-        if (!Double.isNaN(z1)) sb.append(" • Z1 ").append(fmt(z1, 3)).append("∠").append(fmt(ang1, 1)).append("°");
-        if (!Double.isNaN(z0)) sb.append(" • Z0 ").append(fmt(z0, 3)).append("∠").append(fmt(ang0, 1)).append("°");
-        sb.append(" Ω");
+        if (!Double.isNaN(z1)) sb.append(" • Z1 ").append(fmt(z1, 3)).append(" Ω / ").append(fmt(ang1, 1)).append("°");
+        if (!Double.isNaN(z0)) sb.append(" • Z0 ").append(fmt(z0, 3)).append(" Ω / ").append(fmt(ang0, 1)).append("°");
         return sb.toString();
     }
 

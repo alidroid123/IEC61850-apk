@@ -884,7 +884,7 @@
     <string name="val_fl_dir_fwd">Forward (into the line)</string>
     <string name="val_fl_dir_rev">Reverse (towards the bus)</string>
     <string name="val_fl_dir_unknown">Undetermined</string>
-    <string name="lbl_fl_det_delta">Phasor alignment angle A↔B</string>
+    <string name="lbl_fl_det_delta">Phasor alignment angle A–B</string>
     <string name="lbl_fl_det_inc_diff">Inception time difference (DFR clocks)</string>
     <string name="lbl_fl_det_window">Fault window</string>
     <string name="val_fl_window">%1$s cycles after inception, %2$d windows</string>
@@ -909,7 +909,7 @@
     <string name="msg_fl_connect_fail">Could not connect to %1$s (%2$s).\n\nMake sure the phone is on the relay network (intranet/VPN) and the IP is correct.</string>
     <string name="msg_fl_no_remote_files">No COMTRADE record found on this relay.</string>
     <string name="ttl_fl_pick_record">Pick record – %s</string>
-    <string name="lbl_fl_closest_match">★ closest in time to the other end\'s record</string>
+    <string name="lbl_fl_closest_match">» closest in time to the other end\'s record</string>
     <string name="msg_fl_download_failed">Download failed.</string>
     <string name="msg_fl_extracting">Extracting %s…</string>
     <string name="msg_fl_reading">Reading %s…</string>
@@ -988,7 +988,7 @@
     <string name="lbl_line_all_gi">All substations</string>
     <string name="lbl_line_count">%1$d of %2$d lines</string>
     <string name="lbl_line_empty">No line data yet.\nImport the conductor-data CSV or add a line by hand.</string>
-    <string name="lbl_line_match">★ MATCHES THE SELECTED RELAYS</string>
+    <string name="lbl_line_match">MATCHES THE SELECTED RELAYS</string>
     <string name="msg_line_pick_hint_pair">Lines between %1$s and %2$s are listed first. Long-press a row to edit it.</string>
     <string name="msg_line_pick_hint">Tap a line to use it. Long-press a row to edit it.</string>
     <string name="ttl_line_add">Add Line</string>

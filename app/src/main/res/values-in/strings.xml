@@ -850,7 +850,7 @@
     <string name="val_fl_dir_fwd">Forward (ke arah saluran)</string>
     <string name="val_fl_dir_rev">Reverse (ke arah bus)</string>
     <string name="val_fl_dir_unknown">Tidak dapat ditentukan</string>
-    <string name="lbl_fl_det_delta">Sudut penyelarasan phasor A↔B</string>
+    <string name="lbl_fl_det_delta">Sudut penyelarasan phasor A–B</string>
     <string name="lbl_fl_det_inc_diff">Selisih waktu inception (jam DFR)</string>
     <string name="lbl_fl_det_window">Jendela gangguan</string>
     <string name="val_fl_window">%1$s siklus setelah inception, %2$d jendela</string>
@@ -875,7 +875,7 @@
     <string name="msg_fl_connect_fail">Gagal terhubung ke %1$s (%2$s).\n\nPastikan HP berada di jaringan relay (intranet/VPN) dan IP sudah benar.</string>
     <string name="msg_fl_no_remote_files">Tidak ada record COMTRADE di relay ini.</string>
     <string name="ttl_fl_pick_record">Pilih record – %s</string>
-    <string name="lbl_fl_closest_match">★ waktunya paling dekat dengan record ujung lain</string>
+    <string name="lbl_fl_closest_match">» waktunya paling dekat dengan record ujung lain</string>
     <string name="msg_fl_download_failed">Unduhan gagal.</string>
     <string name="msg_fl_extracting">Mengekstrak %s…</string>
     <string name="msg_fl_reading">Membaca %s…</string>
@@ -954,7 +954,7 @@
     <string name="lbl_line_all_gi">Semua GI</string>
     <string name="lbl_line_count">%1$d dari %2$d saluran</string>
     <string name="lbl_line_empty">Belum ada data saluran.\nImpor CSV data konduktor atau tambah saluran secara manual.</string>
-    <string name="lbl_line_match">★ COCOK DENGAN RELAY TERPILIH</string>
+    <string name="lbl_line_match">COCOK DENGAN RELAY TERPILIH</string>
     <string name="msg_line_pick_hint_pair">Saluran antara %1$s dan %2$s ditampilkan paling atas. Tekan lama untuk mengubah data.</string>
     <string name="msg_line_pick_hint">Ketuk saluran untuk memakainya. Tekan lama untuk mengubah data.</string>
     <string name="ttl_line_add">Tambah Saluran</string>
