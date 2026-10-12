@@ -52,14 +52,39 @@ public class DeviceListActivity extends BaseActivity {
     private static final int REQUEST_CSV = 123;
     private RecyclerView rvDevices;
     private DeviceAdapter adapter;
-    private Spinner spinnerGi, spinnerBay, spinnerDevice;
     private TextView tvStatTotal, tvStatOnline, tvStatOpen, tvStatClosed, tvStatOffline;
     private View btnExportCsv, btnPingAll, layoutExport;
     private final List<DeviceItem> deviceList = new ArrayList<>();
     private final List<DeviceItem> filteredList = new ArrayList<>();
 
-    private ArrayAdapter<String> adapterGi, adapterBay, adapterDev;
-    private final List<String> listGi = new ArrayList<>(), listBay = new ArrayList<>(), listDev = new ArrayList<>();
+    private interface DeviceField {
+        String of(DeviceItem d);
+    }
+
+    /** One filter spinner: values.get(i) is what option i stands for (null = the "All" option). */
+    private static class Filter {
+        final Spinner spinner;
+        final int allLabel;
+        final DeviceField field;
+        final List<String> labels = new ArrayList<>();
+        final List<String> values = new ArrayList<>();
+        ArrayAdapter<String> adapter;
+
+        Filter(Spinner spinner, int allLabel, DeviceField field) {
+            this.spinner = spinner;
+            this.allLabel = allLabel;
+            this.field = field;
+        }
+
+        @Nullable
+        String selected() {
+            int p = spinner.getSelectedItemPosition();
+            return p > 0 && p < values.size() ? values.get(p) : null;
+        }
+    }
+
+    /** In screen order: UPT, ULTG, GI, BAY, DEVICE. */
+    private Filter[] filters;
 
     private boolean isUpdatingSpinners = false;
 
@@ -87,6 +112,8 @@ public class DeviceListActivity extends BaseActivity {
 
     private void showAddDeviceDialog(String ip) {
         View dialogView = getLayoutInflater().inflate(R.layout.dialog_save_device, null);
+        android.widget.EditText etUpt = dialogView.findViewById(R.id.etDialogUpt);
+        android.widget.EditText etUltg = dialogView.findViewById(R.id.etDialogUltg);
         android.widget.EditText etGi = dialogView.findViewById(R.id.etDialogGi);
         android.widget.EditText etBay = dialogView.findViewById(R.id.etDialogBay);
         android.widget.EditText etDevice = dialogView.findViewById(R.id.etDialogDevice);
@@ -97,17 +124,21 @@ public class DeviceListActivity extends BaseActivity {
                 .setTitle(R.string.ttl_dev_save)
                 .setView(dialogView)
                 .setPositiveButton(R.string.btn_all_save_small, (dialog, which) -> {
-                    String gi = etGi.getText().toString().trim();
-                    String bay = etBay.getText().toString().trim();
-                    String device = etDevice.getText().toString().trim();
-                    String merk = etMerk.getText().toString().trim();
-                    String type = etType.getText().toString().trim();
+                    DeviceItem item = new DeviceItem();
+                    item.upt = etUpt.getText().toString().trim();
+                    item.ultg = etUltg.getText().toString().trim();
+                    item.gi = etGi.getText().toString().trim();
+                    item.bay = etBay.getText().toString().trim();
+                    item.device = etDevice.getText().toString().trim();
+                    item.ip = ip;
+                    item.merk = etMerk.getText().toString().trim();
+                    item.type = etType.getText().toString().trim();
 
-                    if (gi.isEmpty() || bay.isEmpty() || device.isEmpty()) {
+                    if (item.gi.isEmpty() || item.bay.isEmpty() || item.device.isEmpty()) {
                         Toast.makeText(this, R.string.msg_all_fields_required, Toast.LENGTH_SHORT).show();
                         return;
                     }
-                    saveDeviceToList(gi, bay, device, ip, merk, type);
+                    saveDeviceToList(item);
                 })
                 .setNegativeButton(R.string.btn_all_cancel, null)
                 .show();
@@ -126,6 +157,8 @@ public class DeviceListActivity extends BaseActivity {
             dialog.getWindow().setGravity(android.view.Gravity.CENTER);
         }
 
+        android.widget.EditText etUpt = dialogView.findViewById(R.id.etAddUpt);
+        android.widget.EditText etUltg = dialogView.findViewById(R.id.etAddUltg);
         android.widget.EditText etGi = dialogView.findViewById(R.id.etAddGi);
         android.widget.EditText etBay = dialogView.findViewById(R.id.etAddBay);
         android.widget.EditText etDevice = dialogView.findViewById(R.id.etAddDevice);
@@ -140,55 +173,71 @@ public class DeviceListActivity extends BaseActivity {
 
         dialogView.findViewById(R.id.btnAddDeviceCancel).setOnClickListener(v -> dialog.dismiss());
         dialogView.findViewById(R.id.btnAddDeviceSave).setOnClickListener(v -> {
-            String gi = etGi.getText().toString().trim();
-            String bay = etBay.getText().toString().trim();
-            String device = etDevice.getText().toString().trim();
-            String ip = com.alidev.dfrtools.utils.IpAddressHelper.getIpFromInputs(etIp1, etIp2, etIp3, etIp4);
-            String merk = etMerk.getText().toString().trim();
-            String type = etType.getText().toString().trim();
+            DeviceItem item = new DeviceItem();
+            item.upt = etUpt.getText().toString().trim();
+            item.ultg = etUltg.getText().toString().trim();
+            item.gi = etGi.getText().toString().trim();
+            item.bay = etBay.getText().toString().trim();
+            item.device = etDevice.getText().toString().trim();
+            item.ip = com.alidev.dfrtools.utils.IpAddressHelper.getIpFromInputs(etIp1, etIp2, etIp3, etIp4);
+            item.merk = etMerk.getText().toString().trim();
+            item.type = etType.getText().toString().trim();
 
-            if (gi.isEmpty() || bay.isEmpty() || device.isEmpty() || ip.isEmpty() || ip.equals("0.0.0.0")) {
+            if (item.gi.isEmpty() || item.bay.isEmpty() || item.device.isEmpty() || item.ip.isEmpty() || item.ip.equals("0.0.0.0")) {
                 Toast.makeText(this, R.string.msg_all_fields_required, Toast.LENGTH_SHORT).show();
                 return;
             }
-            saveDeviceToList(gi, bay, device, ip, merk, type);
+            saveDeviceToList(item);
             dialog.dismiss();
         });
 
         dialog.show();
     }
 
-    private void saveDeviceToList(String gi, String bay, String device, String ip, String merk, String type) {
-        JSONArray arr = new JSONArray();
-        try {
-            SharedPreferences pref = getSharedPreferences("dfr_prefs", MODE_PRIVATE);
-            arr = new JSONArray(pref.getString("device_list", "[]"));
-            
-            JSONObject obj = new JSONObject();
-            obj.put("gi", gi);
-            obj.put("bay", bay);
-            obj.put("device", device);
-            obj.put("ip", ip);
-            obj.put("merk", merk);
-            obj.put("type", type);
-            arr.put(obj);
+    @Nullable
+    private DeviceItem findByIp(String ip) {
+        for (DeviceItem d : deviceList) if (d.ip.equalsIgnoreCase(ip)) return d;
+        return null;
+    }
 
-            pref.edit().putString("device_list", arr.toString()).apply();
+    /** Adds `item`; when its IP is already in the list, asks before overwriting that device. */
+    private void saveDeviceToList(DeviceItem item) {
+        DeviceItem existing = findByIp(item.ip);
+        if (existing == null) {
+            deviceList.add(item);
+            afterDeviceListChanged();
             Toast.makeText(this, R.string.msg_dl_save_device_ok, Toast.LENGTH_SHORT).show();
-            loadDevices();
-            applyFilters();
-        } catch (Exception e) {
-            e.printStackTrace();
+            return;
         }
+        new AlertDialog.Builder(this, R.style.Theme_Comtrade_Dialog)
+                .setTitle(R.string.ttl_dev_ip_exists)
+                .setMessage(getString(R.string.msg_dev_ip_exists, item.ip, existing.label(), item.label()))
+                .setPositiveButton(R.string.btn_dev_overwrite, (d, w) -> {
+                    for (int f = 0; f < DeviceCsv.HEADER.length; f++) existing.set(f, item.get(f));
+                    afterDeviceListChanged();
+                    Toast.makeText(this, R.string.msg_dl_update_device_ok, Toast.LENGTH_SHORT).show();
+                })
+                .setNegativeButton(R.string.btn_all_cancel, null)
+                .show();
+    }
+
+    private void afterDeviceListChanged() {
+        sortDevices();
+        saveDevices();
+        applyFilters();
     }
 
     private void initViews() {
         rvDevices = findViewById(R.id.rvDevices);
         rvDevices.setLayoutManager(new LinearLayoutManager(this));
 
-        spinnerGi = findViewById(R.id.spinnerGi);
-        spinnerBay = findViewById(R.id.spinnerBay);
-        spinnerDevice = findViewById(R.id.spinnerDevice);
+        filters = new Filter[]{
+                new Filter(findViewById(R.id.spinnerUpt), R.string.lbl_dev_filter_all_upt, d -> d.upt),
+                new Filter(findViewById(R.id.spinnerUltg), R.string.lbl_dev_filter_all_ultg, d -> d.ultg),
+                new Filter(findViewById(R.id.spinnerGi), R.string.lbl_dev_filter_all_gi, d -> d.gi),
+                new Filter(findViewById(R.id.spinnerBay), R.string.lbl_dev_filter_all_bay, d -> d.bay),
+                new Filter(findViewById(R.id.spinnerDevice), R.string.lbl_dev_filter_all_device, d -> d.device),
+        };
 
         tvStatTotal = findViewById(R.id.tvStatTotal);
         tvStatOnline = findViewById(R.id.tvStatOnline);
@@ -204,13 +253,10 @@ public class DeviceListActivity extends BaseActivity {
         btnPingAll = findViewById(R.id.btnPingAll);
         btnPingAll.setOnClickListener(v -> pingAll());
 
-        adapterGi = createSpinnerAdapter(listGi);
-        adapterBay = createSpinnerAdapter(listBay);
-        adapterDev = createSpinnerAdapter(listDev);
-
-        spinnerGi.setAdapter(adapterGi);
-        spinnerBay.setAdapter(adapterBay);
-        spinnerDevice.setAdapter(adapterDev);
+        for (Filter f : filters) {
+            f.adapter = createSpinnerAdapter(f.labels);
+            f.spinner.setAdapter(f.adapter);
+        }
     }
 
     private ArrayAdapter<String> createSpinnerAdapter(List<String> list) {
@@ -424,118 +470,74 @@ public class DeviceListActivity extends BaseActivity {
             public void onNothingSelected(AdapterView<?> parent) {}
         };
 
-        spinnerGi.setOnItemSelectedListener(listener);
-        spinnerBay.setOnItemSelectedListener(listener);
-        spinnerDevice.setOnItemSelectedListener(listener);
+        for (Filter f : filters) f.spinner.setOnItemSelectedListener(listener);
     }
 
     private void applyFilters() {
-        String giSelRaw = spinnerGi.getSelectedItem() != null ? spinnerGi.getSelectedItem().toString() : "";
-        String baySelRaw = spinnerBay.getSelectedItem() != null ? spinnerBay.getSelectedItem().toString() : "";
-        String devSelRaw = spinnerDevice.getSelectedItem() != null ? spinnerDevice.getSelectedItem().toString() : "";
-
-        String giSel = cleanSpinnerLabel(giSelRaw);
-        String baySel = cleanSpinnerLabel(baySelRaw);
-        String devSel = cleanSpinnerLabel(devSelRaw);
+        String[] sel = new String[filters.length];
+        for (int k = 0; k < filters.length; k++) sel[k] = filters[k].selected();
 
         filteredList.clear();
         for (DeviceItem item : deviceList) {
-            boolean matchGi = isAllSelection(giSel, R.string.lbl_dev_filter_all_gi) || item.gi.equals(giSel);
-            boolean matchBay = isAllSelection(baySel, R.string.lbl_dev_filter_all_bay) || item.bay.equals(baySel);
-            boolean matchDev = isAllSelection(devSel, R.string.lbl_dev_filter_all_device) || item.device.equals(devSel);
-
-            if (matchGi && matchBay && matchDev) {
-                filteredList.add(item);
-            }
+            if (matches(item, sel, -1)) filteredList.add(item);
         }
-        
+
         if (adapter != null) adapter.notifyDataSetChanged();
-        updateFilterSpinners(giSel, baySel, devSel);
+        updateFilterSpinners(sel);
         refreshStats();
         if (layoutExport != null) layoutExport.setVisibility(deviceList.isEmpty() ? View.GONE : View.VISIBLE);
     }
 
-    private boolean isAllSelection(String selection, int resourceId) {
-        if (selection == null || selection.isEmpty()) return true;
-        // Check current localized string and English fallback
-        String localizedAll = getString(resourceId);
-        if (selection.equalsIgnoreCase(localizedAll)) return true;
-        
-        // Hardcoded fallbacks to be extremely safe during language transition
-        if (resourceId == R.string.lbl_dev_filter_all_gi) return selection.equalsIgnoreCase("All GI") || selection.equalsIgnoreCase("Semua GI");
-        if (resourceId == R.string.lbl_dev_filter_all_bay) return selection.equalsIgnoreCase("All BAY") || selection.equalsIgnoreCase("Semua BAY");
-        if (resourceId == R.string.lbl_dev_filter_all_device) return selection.equalsIgnoreCase("All Device") || selection.equalsIgnoreCase("Semua Device");
-        
-        return false;
-    }
-
-    private String cleanSpinnerLabel(String raw) {
-        if (raw == null || raw.isEmpty()) return "";
-        int lastParen = raw.lastIndexOf(" (");
-        if (lastParen != -1) return raw.substring(0, lastParen);
-        return raw;
-    }
-
-    private void updateFilterSpinners(String currentGi, String currentBay, String currentDev) {
-        isUpdatingSpinners = true;
-
-        Map<String, Integer> giMap = new HashMap<>();
-        Map<String, Integer> bayMap = new HashMap<>();
-        Map<String, Integer> devMap = new HashMap<>();
-
-        boolean allGi = isAllSelection(currentGi, R.string.lbl_dev_filter_all_gi);
-        boolean allBay = isAllSelection(currentBay, R.string.lbl_dev_filter_all_bay);
-        boolean allDev = isAllSelection(currentDev, R.string.lbl_dev_filter_all_device);
-
-        for (DeviceItem item : deviceList) {
-            // GI count depends on current Bay and Dev selection
-            if ((allBay || item.bay.equals(currentBay)) && (allDev || item.device.equals(currentDev))) {
-                giMap.put(item.gi, giMap.getOrDefault(item.gi, 0) + 1);
-            }
-
-            // Bay count depends on current GI and Dev selection
-            if ((allGi || item.gi.equals(currentGi)) && (allDev || item.device.equals(currentDev))) {
-                bayMap.put(item.bay, bayMap.getOrDefault(item.bay, 0) + 1);
-            }
-
-            // Dev count depends on current GI and Bay selection
-            if ((allGi || item.gi.equals(currentGi)) && (allBay || item.bay.equals(currentBay))) {
-                devMap.put(item.device, devMap.getOrDefault(item.device, 0) + 1);
-            }
+    /** `item` passes every filter's selection, ignoring filter `skip` (-1 = none). */
+    private boolean matches(DeviceItem item, String[] sel, int skip) {
+        for (int k = 0; k < filters.length; k++) {
+            if (k != skip && sel[k] != null && !filters[k].field.of(item).equals(sel[k])) return false;
         }
+        return true;
+    }
 
-        updateSpinnerWithMap(spinnerGi, adapterGi, listGi, getString(R.string.lbl_dev_filter_all_gi), giMap, currentGi);
-        updateSpinnerWithMap(spinnerBay, adapterBay, listBay, getString(R.string.lbl_dev_filter_all_bay), bayMap, currentBay);
-        updateSpinnerWithMap(spinnerDevice, adapterDev, listDev, getString(R.string.lbl_dev_filter_all_device), devMap, currentDev);
-
+    /** Each spinner offers the values (with counts) left over by the other filters' selections. */
+    private void updateFilterSpinners(String[] sel) {
+        isUpdatingSpinners = true;
+        for (int k = 0; k < filters.length; k++) {
+            Map<String, Integer> counts = new HashMap<>();
+            for (DeviceItem item : deviceList) {
+                if (!matches(item, sel, k)) continue;
+                String v = filters[k].field.of(item);
+                counts.put(v, counts.getOrDefault(v, 0) + 1);
+            }
+            updateSpinner(filters[k], counts, sel[k]);
+        }
         isUpdatingSpinners = false;
     }
 
-    private void updateSpinnerWithMap(Spinner spinner, ArrayAdapter<String> adapter, List<String> dataList, String defaultLabel, Map<String, Integer> counts, String selectedValue) {
-        List<String> newOptions = new ArrayList<>();
-        int totalFiltered = 0;
-        for (int c : counts.values()) totalFiltered += c;
-        
-        newOptions.add(defaultLabel + " (" + totalFiltered + ")");
-        
-        List<String> sortedKeys = new ArrayList<>(counts.keySet());
-        Collections.sort(sortedKeys);
-        
+    private void updateSpinner(Filter f, Map<String, Integer> counts, @Nullable String selected) {
+        List<String> labels = new ArrayList<>();
+        List<String> values = new ArrayList<>();
+        int total = 0;
+        for (int c : counts.values()) total += c;
+        labels.add(getString(f.allLabel) + " (" + total + ")");
+        values.add(null);
+
+        List<String> keys = new ArrayList<>(counts.keySet());
+        Collections.sort(keys, String.CASE_INSENSITIVE_ORDER);
         int selectedIndex = 0;
-        for (String key : sortedKeys) {
-            String label = key + " (" + counts.get(key) + ")";
-            newOptions.add(label);
-            if (key.equals(selectedValue)) selectedIndex = newOptions.size() - 1;
+        for (String key : keys) {
+            // Devices saved before UPT/ULTG existed have them blank - still filterable as such.
+            labels.add((key.isEmpty() ? getString(R.string.lbl_dev_filter_blank) : key) + " (" + counts.get(key) + ")");
+            values.add(key);
+            if (key.equals(selected)) selectedIndex = values.size() - 1;
         }
 
-        if (!newOptions.equals(dataList)) {
-            dataList.clear();
-            dataList.addAll(newOptions);
-            adapter.notifyDataSetChanged();
+        f.values.clear();
+        f.values.addAll(values);
+        if (!labels.equals(f.labels)) {
+            f.labels.clear();
+            f.labels.addAll(labels);
+            f.adapter.notifyDataSetChanged();
         }
-        
-        if (spinner.getSelectedItemPosition() != selectedIndex) {
-            spinner.setSelection(selectedIndex);
+        if (f.spinner.getSelectedItemPosition() != selectedIndex) {
+            f.spinner.setSelection(selectedIndex);
         }
     }
 
@@ -577,13 +579,9 @@ public class DeviceListActivity extends BaseActivity {
             File file = new File(exportDir, "device.csv");
             FileOutputStream fos = new FileOutputStream(file);
             
-            // Header
-            fos.write("NAMA GI,BAY,DEVICE,IP,MERK,TYPE\n".getBytes(StandardCharsets.UTF_8));
-            
+            fos.write(DeviceCsv.headerLine().getBytes(StandardCharsets.UTF_8));
             for (DeviceItem item : deviceList) {
-                // Wrap values in quotes to handle commas within names safely
-                String line = String.format("\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\"\n", 
-                    item.gi, item.bay, item.device, item.ip, item.merk, item.type);
+                String line = DeviceCsv.line(item.upt, item.ultg, item.gi, item.bay, item.device, item.ip, item.merk, item.type);
                 fos.write(line.getBytes(StandardCharsets.UTF_8));
             }
             fos.close();
@@ -659,9 +657,9 @@ public class DeviceListActivity extends BaseActivity {
         try {
             File file = new File(getExternalFilesDir(null), "template_devices.csv");
             java.io.FileOutputStream fos = new java.io.FileOutputStream(file);
-            fos.write("NAMA GI,BAY,DEVICE,IP,MERK,TYPE\n".getBytes(java.nio.charset.StandardCharsets.UTF_8));
-            fos.write("GI CONTOH 1,BAY TRAFO 1,RELAY DISTANCE,192.168.1.100,SIEMENS,7SA\n".getBytes(java.nio.charset.StandardCharsets.UTF_8));
-            fos.write("GI CONTOH 2,BAY LINE 1,RELAY DIFF,192.168.1.200,ABB,RED670\n".getBytes(java.nio.charset.StandardCharsets.UTF_8));
+            fos.write(DeviceCsv.headerLine().getBytes(java.nio.charset.StandardCharsets.UTF_8));
+            fos.write("UPT CONTOH,ULTG CONTOH,GI CONTOH 1,BAY TRAFO 1,RELAY DISTANCE,192.168.1.100,SIEMENS,7SA\n".getBytes(java.nio.charset.StandardCharsets.UTF_8));
+            fos.write("UPT CONTOH,ULTG CONTOH,GI CONTOH 2,BAY LINE 1,RELAY DIFF,192.168.1.200,ABB,RED670\n".getBytes(java.nio.charset.StandardCharsets.UTF_8));
             fos.close();
 
             Uri uri = FileProvider.getUriForFile(this, getPackageName() + ".fileprovider", file);
@@ -691,52 +689,109 @@ public class DeviceListActivity extends BaseActivity {
         }
     }
 
+    /**
+     * Reads the CSV, then adds the new IPs right away and asks before overwriting devices whose IP
+     * is already listed with different data. Blank CSV cells (or columns an older CSV lacks, like
+     * UPT/ULTG) never erase what is already stored.
+     */
     private void importCsv(Uri uri) {
-        try {
-            InputStream is = getContentResolver().openInputStream(uri);
-            BufferedReader reader = new BufferedReader(new InputStreamReader(is));
-            String line;
-            int count = 0;
-            boolean firstLine = true;
-            while ((line = reader.readLine()) != null) {
-                if (firstLine) { firstLine = false; if (line.contains("NAMA GI")) continue; }
-                String[] p = line.split(",");
-                if (p.length >= 4) {
-                    String ip = p[3].replace("\"", "").trim();
-                    if (ip.isEmpty()) continue;
-
-                    DeviceItem existing = null;
-                    for (DeviceItem di : deviceList) {
-                        if (di.ip.equalsIgnoreCase(ip)) {
-                            existing = di;
-                            break;
-                        }
-                    }
-
-                    DeviceItem item = (existing != null) ? existing : new DeviceItem();
-                    item.gi = p[0].replace("\"", "").trim();
-                    item.bay = (p.length > 1) ? p[1].replace("\"", "").trim() : "";
-                    item.device = (p.length > 2) ? p[2].replace("\"", "").trim() : "";
-                    item.ip = ip;
-                    item.merk = (p.length > 4) ? p[4].replace("\"", "").trim() : "";
-                    item.type = (p.length > 5) ? p[5].replace("\"", "").trim() : "";
-
-                    if (existing == null) {
-                        deviceList.add(item);
-                    }
-                    count++;
-                }
-            }
-            reader.close();
-            if (count > 0) {
-                saveDevices();
-                applyFilters();
-                layoutExport.setVisibility(deviceList.isEmpty() ? View.GONE : View.VISIBLE);
-                Toast.makeText(this, getString(R.string.msg_dev_import_ok, count), Toast.LENGTH_SHORT).show();
-            }
+        List<DeviceCsv.Row> rows;
+        try (InputStream is = getContentResolver().openInputStream(uri)) {
+            if (is == null) throw new java.io.IOException(uri.toString());
+            rows = DeviceCsv.parse(new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8)));
         } catch (Exception e) {
             Toast.makeText(this, getString(R.string.msg_dev_import_fail, e.getMessage()), Toast.LENGTH_LONG).show();
+            return;
         }
+        if (rows.isEmpty()) {
+            Toast.makeText(this, R.string.msg_dev_import_empty, Toast.LENGTH_LONG).show();
+            return;
+        }
+
+        // An IP listed twice in the file: its last line wins.
+        java.util.LinkedHashMap<String, DeviceCsv.Row> byIp = new java.util.LinkedHashMap<>();
+        for (DeviceCsv.Row r : rows) byIp.put(r.get(DeviceCsv.IP).toLowerCase(java.util.Locale.ROOT), r);
+
+        List<DeviceItem> added = new ArrayList<>();
+        List<DeviceItem> changedExisting = new ArrayList<>();
+        List<DeviceCsv.Row> changedRows = new ArrayList<>();
+        int unchanged = 0;
+        for (DeviceCsv.Row r : byIp.values()) {
+            DeviceItem existing = findByIp(r.get(DeviceCsv.IP));
+            if (existing == null) {
+                DeviceItem item = new DeviceItem();
+                for (int f = 0; f < DeviceCsv.HEADER.length; f++) item.set(f, r.get(f));
+                added.add(item);
+            } else if (differs(existing, r)) {
+                changedExisting.add(existing);
+                changedRows.add(r);
+            } else {
+                unchanged++;
+            }
+        }
+
+        if (changedExisting.isEmpty()) {
+            finishImport(added, changedExisting, changedRows, false, unchanged);
+            return;
+        }
+        int kept = unchanged;
+        StringBuilder msg = new StringBuilder(getString(R.string.msg_dev_import_duplicate,
+                byIp.size(), added.size(), changedExisting.size()));
+        int shown = Math.min(8, changedExisting.size());
+        for (int i = 0; i < shown; i++) {
+            DeviceItem now = changedExisting.get(i);
+            DeviceItem after = new DeviceItem();
+            for (int f = 0; f < DeviceCsv.HEADER.length; f++) after.set(f, merged(now, changedRows.get(i), f));
+            msg.append("\n\n• ").append(now.ip)
+                    .append("\n   ").append(regionLabel(now)).append(now.label())
+                    .append("\n   → ").append(regionLabel(after)).append(after.label());
+        }
+        if (changedExisting.size() > shown) {
+            msg.append("\n\n").append(getString(R.string.msg_dev_import_more, changedExisting.size() - shown));
+        }
+        new AlertDialog.Builder(this, R.style.Theme_Comtrade_Dialog)
+                .setTitle(R.string.ttl_dev_import_duplicate)
+                .setMessage(msg.toString())
+                .setPositiveButton(R.string.btn_dev_overwrite, (d, w) -> finishImport(added, changedExisting, changedRows, true, kept))
+                .setNeutralButton(R.string.btn_dev_skip_duplicates, (d, w) -> finishImport(added, changedExisting, changedRows, false, kept))
+                .setNegativeButton(R.string.btn_all_cancel, null)
+                .show();
+    }
+
+    /** A non-blank CSV value that differs from what is stored. */
+    private static boolean differs(DeviceItem existing, DeviceCsv.Row row) {
+        for (int f = 0; f < DeviceCsv.HEADER.length; f++) {
+            if (f == DeviceCsv.IP) continue;
+            String v = row.get(f);
+            if (!v.isEmpty() && !v.equals(existing.get(f))) return true;
+        }
+        return false;
+    }
+
+    private static String merged(DeviceItem existing, DeviceCsv.Row row, int field) {
+        String v = row.get(field);
+        return v.isEmpty() || field == DeviceCsv.IP ? existing.get(field) : v;
+    }
+
+    private static String regionLabel(DeviceItem d) {
+        if (d.upt.isEmpty() && d.ultg.isEmpty()) return "";
+        return (d.upt.isEmpty() ? "-" : d.upt) + " / " + (d.ultg.isEmpty() ? "-" : d.ultg) + " / ";
+    }
+
+    private void finishImport(List<DeviceItem> added, List<DeviceItem> changedExisting, List<DeviceCsv.Row> changedRows,
+                              boolean overwrite, int unchanged) {
+        deviceList.addAll(added);
+        if (overwrite) {
+            for (int i = 0; i < changedExisting.size(); i++) {
+                DeviceItem d = changedExisting.get(i);
+                DeviceCsv.Row r = changedRows.get(i);
+                for (int f = 0; f < DeviceCsv.HEADER.length; f++) d.set(f, merged(d, r, f));
+            }
+        }
+        int overwritten = overwrite ? changedExisting.size() : 0;
+        int kept = unchanged + (overwrite ? 0 : changedExisting.size());
+        if (!added.isEmpty() || overwritten > 0) afterDeviceListChanged();
+        Toast.makeText(this, getString(R.string.msg_dev_import_result, added.size(), overwritten, kept), Toast.LENGTH_LONG).show();
     }
 
     private void loadDevices() {
@@ -748,6 +803,8 @@ public class DeviceListActivity extends BaseActivity {
             for (int i = 0; i < arr.length(); i++) {
                 JSONObject obj = arr.getJSONObject(i);
                 DeviceItem item = new DeviceItem();
+                item.upt = obj.optString("upt", "").replace("\"", "").trim();
+                item.ultg = obj.optString("ultg", "").replace("\"", "").trim();
                 item.gi = obj.optString("gi", "").replace("\"", "").trim();
                 item.bay = obj.optString("bay", "").replace("\"", "").trim();
                 item.device = obj.optString("device", "").replace("\"", "").trim();
@@ -756,11 +813,22 @@ public class DeviceListActivity extends BaseActivity {
                 item.type = obj.optString("type", "").replace("\"", "").trim();
                 deviceList.add(item);
             }
-            Collections.sort(deviceList, (a, b) -> a.gi.compareToIgnoreCase(b.gi));
+            sortDevices();
             layoutExport.setVisibility(deviceList.isEmpty() ? View.GONE : View.VISIBLE);
         } catch (JSONException e) {
             e.printStackTrace();
         }
+    }
+
+    /** UPT, then ULTG, then GI, then BAY (devices without UPT/ULTG keep their GI order up top). */
+    private void sortDevices() {
+        Collections.sort(deviceList, (a, b) -> {
+            int c = a.upt.compareToIgnoreCase(b.upt);
+            if (c == 0) c = a.ultg.compareToIgnoreCase(b.ultg);
+            if (c == 0) c = a.gi.compareToIgnoreCase(b.gi);
+            if (c == 0) c = a.bay.compareToIgnoreCase(b.bay);
+            return c;
+        });
     }
 
     private void saveDevices() {
@@ -768,6 +836,8 @@ public class DeviceListActivity extends BaseActivity {
         try {
             for (DeviceItem item : deviceList) {
                 JSONObject obj = new JSONObject();
+                obj.put("upt", item.upt);
+                obj.put("ultg", item.ultg);
                 obj.put("gi", item.gi);
                 obj.put("bay", item.bay);
                 obj.put("device", item.device);
@@ -855,6 +925,8 @@ public class DeviceListActivity extends BaseActivity {
 
     private void showEditDeviceDialog(DeviceItem item) {
         View dialogView = getLayoutInflater().inflate(R.layout.dialog_edit_device, null);
+        android.widget.EditText etUpt = dialogView.findViewById(R.id.etDialogUpt);
+        android.widget.EditText etUltg = dialogView.findViewById(R.id.etDialogUltg);
         android.widget.EditText etGi = dialogView.findViewById(R.id.etDialogGi);
         android.widget.EditText etBay = dialogView.findViewById(R.id.etDialogBay);
         android.widget.EditText etDevice = dialogView.findViewById(R.id.etDialogDevice);
@@ -862,6 +934,8 @@ public class DeviceListActivity extends BaseActivity {
         android.widget.EditText etMerk = dialogView.findViewById(R.id.etDialogMerk);
         android.widget.EditText etType = dialogView.findViewById(R.id.etDialogType);
 
+        etUpt.setText(item.upt);
+        etUltg.setText(item.ultg);
         etGi.setText(item.gi);
         etBay.setText(item.bay);
         etDevice.setText(item.device);
@@ -885,6 +959,8 @@ public class DeviceListActivity extends BaseActivity {
                         return;
                     }
 
+                    item.upt = etUpt.getText().toString().trim();
+                    item.ultg = etUltg.getText().toString().trim();
                     item.gi = gi;
                     item.bay = bay;
                     item.device = device;
@@ -892,8 +968,7 @@ public class DeviceListActivity extends BaseActivity {
                     item.merk = merk;
                     item.type = type;
 
-                    saveDevices();
-                    applyFilters();
+                    afterDeviceListChanged();
                     Toast.makeText(this, R.string.msg_dl_update_device_ok, Toast.LENGTH_SHORT).show();
                 })
                 .setNegativeButton(R.string.btn_all_cancel, null)
@@ -924,9 +999,41 @@ public class DeviceListActivity extends BaseActivity {
     }
 
     public static class DeviceItem {
-        public String gi = "", bay = "", device = "", ip = "", merk = "", type = "";
-        public String pingStatus = null; 
+        public String upt = "", ultg = "", gi = "", bay = "", device = "", ip = "", merk = "", type = "";
+        public String pingStatus = null;
         public boolean isPort102Open = false;
+
+        /** Field by DeviceCsv column index (DeviceCsv.UPT .. DeviceCsv.TYPE). */
+        String get(int field) {
+            switch (field) {
+                case DeviceCsv.UPT: return upt;
+                case DeviceCsv.ULTG: return ultg;
+                case DeviceCsv.GI: return gi;
+                case DeviceCsv.BAY: return bay;
+                case DeviceCsv.DEVICE: return device;
+                case DeviceCsv.IP: return ip;
+                case DeviceCsv.MERK: return merk;
+                default: return type;
+            }
+        }
+
+        void set(int field, String value) {
+            switch (field) {
+                case DeviceCsv.UPT: upt = value; break;
+                case DeviceCsv.ULTG: ultg = value; break;
+                case DeviceCsv.GI: gi = value; break;
+                case DeviceCsv.BAY: bay = value; break;
+                case DeviceCsv.DEVICE: device = value; break;
+                case DeviceCsv.IP: ip = value; break;
+                case DeviceCsv.MERK: merk = value; break;
+                default: type = value; break;
+            }
+        }
+
+        /** "GI / BAY / DEVICE", for messages. */
+        String label() {
+            return gi + " / " + bay + " / " + device;
+        }
     }
 
     private static class DeviceAdapter extends RecyclerView.Adapter<DeviceAdapter.VH> {
@@ -956,6 +1063,10 @@ public class DeviceListActivity extends BaseActivity {
         @Override
         public void onBindViewHolder(@NonNull VH holder, int position) {
             DeviceItem item = items.get(position);
+            String region = item.upt.isEmpty() ? item.ultg
+                    : item.ultg.isEmpty() ? item.upt : item.upt + "  •  " + item.ultg;
+            holder.tvUptUltg.setText(region);
+            holder.tvUptUltg.setVisibility(region.isEmpty() ? View.GONE : View.VISIBLE);
             holder.tvGi.setText(item.gi);
             holder.tvBay.setText(item.bay);
             
@@ -1004,11 +1115,12 @@ public class DeviceListActivity extends BaseActivity {
         public int getItemCount() { return items.size(); }
 
         static class VH extends RecyclerView.ViewHolder {
-            TextView tvGi, tvBay, tvDevice, tvIp, tvIec;
+            TextView tvUptUltg, tvGi, tvBay, tvDevice, tvIp, tvIec;
             ImageView ivStatus;
             View viewAccent, layoutStatus;
             VH(View v) {
                 super(v);
+                tvUptUltg = v.findViewById(R.id.tvUptUltg);
                 tvGi = v.findViewById(R.id.tvGiName);
                 tvBay = v.findViewById(R.id.tvBayName);
                 tvDevice = v.findViewById(R.id.tvDeviceName);

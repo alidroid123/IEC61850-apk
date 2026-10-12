@@ -128,6 +128,20 @@
     <string name="lbl_dev_filter_all_bay">Semua BAY</string>
     <string name="lbl_dev_filter_all_device">Semua Device</string>
     <string name="lbl_dev_filter_all_gi">Semua GI</string>
+    <string name="lbl_dev_filter_all_upt">Semua UPT</string>
+    <string name="lbl_dev_filter_all_ultg">Semua ULTG</string>
+    <string name="lbl_dev_filter_blank">(Kosong)</string>
+    <string name="hint_dev_upt">UPT</string>
+    <string name="hint_dev_ultg">ULTG</string>
+    <string name="ttl_dev_ip_exists">IP sudah terdaftar</string>
+    <string name="msg_dev_ip_exists">IP %1$s sudah dipakai oleh:\n%2$s\n\nTimpa dengan:\n%3$s?</string>
+    <string name="btn_dev_overwrite">TIMPA</string>
+    <string name="btn_dev_skip_duplicates">LEWATI</string>
+    <string name="ttl_dev_import_duplicate">IP sudah ada di daftar</string>
+    <string name="msg_dev_import_duplicate">CSV berisi %1$d device: %2$d baru, %3$d IP sudah ada dengan data berbeda.\n\nTIMPA = ganti data device lama dengan data CSV. LEWATI = hanya tambahkan device baru. Kolom CSV yang kosong tidak menghapus data lama.</string>
+    <string name="msg_dev_import_more">… dan %d lainnya</string>
+    <string name="msg_dev_import_result">Impor selesai: %1$d baru, %2$d ditimpa, %3$d tidak diubah</string>
+    <string name="msg_dev_import_empty">Tidak ada baris device ber-IP di file CSV ini.</string>
     <string name="lbl_dev_status_offline">OFFLINE</string>
     <string name="lbl_dev_status_online">ONLINE</string>
     <string name="lbl_dev_status_pinging">PINGING...</string>
@@ -517,8 +531,8 @@
     <string name="val_abt_version_format">Versi %s</string>
     <string name="val_all_dash">---</string>
     <string name="val_all_hyphen">-</string>
-    <string name="val_dev_csv_columns">1. Nama Gardu Induk\n2. Nama Bay\n3. Nama Device\n4. Alamat IP\n5. Merk\n6. Tipe</string>
-    <string name="val_dev_csv_example">Contoh: GI Wonosobo,Bay Trafo 1,OCR GFR LV,192.168.1.10,Siemens,7SJxx</string>
+    <string name="val_dev_csv_columns">1. UPT\n2. ULTG\n3. Nama Gardu Induk\n4. Nama Bay\n5. Nama Device\n6. Alamat IP\n7. Merk\n8. Tipe\n\nCSV lama 6 kolom (tanpa UPT/ULTG) tetap bisa diimpor. Pemisah koma atau titik koma (Excel) sama-sama terbaca.</string>
+    <string name="val_dev_csv_example">Contoh: UPT Contoh,ULTG Contoh,GI Wonosobo,Bay Trafo 1,OCR GFR LV,192.168.1.10,Siemens,7SJxx</string>
     <string name="val_dl_default_ip">192.168.1.10</string>
     <string name="val_dl_default_n">1</string>
     <string name="val_dl_default_port">102</string>
@@ -630,9 +644,9 @@
     <string name="help_cmp_dev_2_name">Ikon Ekspor</string>
     <string name="help_cmp_dev_2_desc">Menyimpan daftar device saat ini sebagai file cadangan CSV.</string>
     <string name="help_cmp_dev_3_name">Ikon Impor</string>
-    <string name="help_cmp_dev_3_desc">Memuat device dari file CSV ke dalam basis data.</string>
-    <string name="help_cmp_dev_4_name">Spinner Filter GI/Bay</string>
-    <string name="help_cmp_dev_4_desc">Menyaring daftar device berdasarkan gardu induk (GI) dan bay.</string>
+    <string name="help_cmp_dev_3_desc">Memuat device dari file CSV (UPT, ULTG, GI, Bay, Device, IP, Merk, Tipe) ke dalam basis data. Bila IP di CSV sudah ada dengan data berbeda, aplikasi bertanya dulu: timpa atau lewati.</string>
+    <string name="help_cmp_dev_4_name">Spinner Filter UPT/ULTG/GI/Bay/Device</string>
+    <string name="help_cmp_dev_4_desc">Menyaring daftar device berurutan: UPT, ULTG, gardu induk (GI), bay, lalu device.</string>
     <string name="help_cmp_dev_5_name">Badge Ringkasan</string>
     <string name="help_cmp_dev_5_desc">Total jumlah device dan berapa yang online, port terbuka, atau offline.</string>
     <string name="help_cmp_dev_6_name">Kartu Device</string>

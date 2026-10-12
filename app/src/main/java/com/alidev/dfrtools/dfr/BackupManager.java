@@ -63,16 +63,28 @@ public class BackupManager {
         JSONArray importedDevices = root.optJSONArray("deviceList");
         if (importedDevices != null) {
             JSONArray merged = new JSONArray(dfrPrefs.getString("device_list", "[]"));
-            Set<String> existingIps = new HashSet<>();
+            java.util.Map<String, JSONObject> existingByIp = new java.util.HashMap<>();
             for (int i = 0; i < merged.length(); i++) {
-                existingIps.add(merged.getJSONObject(i).optString("ip").toLowerCase());
+                JSONObject d = merged.getJSONObject(i);
+                existingByIp.put(d.optString("ip").toLowerCase(), d);
             }
             for (int i = 0; i < importedDevices.length(); i++) {
                 JSONObject d = importedDevices.getJSONObject(i);
                 String ip = d.optString("ip").toLowerCase();
-                if (!ip.isEmpty() && existingIps.add(ip)) {
+                if (ip.isEmpty()) continue;
+                JSONObject existing = existingByIp.get(ip);
+                if (existing == null) {
                     merged.put(d);
+                    existingByIp.put(ip, d);
                     result.devicesAdded++;
+                } else {
+                    // Still never overwrites, but fills in the UPT/ULTG a device saved before those
+                    // fields existed is missing.
+                    for (String key : new String[]{"upt", "ultg"}) {
+                        if (existing.optString(key).trim().isEmpty() && !d.optString(key).trim().isEmpty()) {
+                            existing.put(key, d.optString(key).trim());
+                        }
+                    }
                 }
             }
             dfrPrefs.edit().putString("device_list", merged.toString()).apply();

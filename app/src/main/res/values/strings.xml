@@ -131,6 +131,20 @@
     <string name="lbl_dev_filter_all_bay">All BAY</string>
     <string name="lbl_dev_filter_all_device">All Device</string>
     <string name="lbl_dev_filter_all_gi">All GI</string>
+    <string name="lbl_dev_filter_all_upt">All UPT</string>
+    <string name="lbl_dev_filter_all_ultg">All ULTG</string>
+    <string name="lbl_dev_filter_blank">(Blank)</string>
+    <string name="hint_dev_upt">UPT</string>
+    <string name="hint_dev_ultg">ULTG</string>
+    <string name="ttl_dev_ip_exists">IP already listed</string>
+    <string name="msg_dev_ip_exists">IP %1$s is already used by:\n%2$s\n\nOverwrite with:\n%3$s?</string>
+    <string name="btn_dev_overwrite">OVERWRITE</string>
+    <string name="btn_dev_skip_duplicates">SKIP</string>
+    <string name="ttl_dev_import_duplicate">IPs already in the list</string>
+    <string name="msg_dev_import_duplicate">The CSV holds %1$d devices: %2$d new, %3$d IPs already listed with different data.\n\nOVERWRITE = replace the stored devices with the CSV data. SKIP = only add the new devices. Blank CSV cells never erase stored data.</string>
+    <string name="msg_dev_import_more">… and %d more</string>
+    <string name="msg_dev_import_result">Import done: %1$d new, %2$d overwritten, %3$d unchanged</string>
+    <string name="msg_dev_import_empty">No device lines with an IP found in this CSV.</string>
     <string name="lbl_dev_status_offline">OFFLINE</string>
     <string name="lbl_dev_status_online">ONLINE</string>
     <string name="lbl_dev_status_pinging">PINGING...</string>
@@ -551,8 +565,8 @@
     <string name="val_abt_version_format">Version %s</string>
     <string name="val_all_dash">---</string>
     <string name="val_all_hyphen">-</string>
-    <string name="val_dev_csv_columns">1. Substation Name\n2. Bay Name\n3. Device Name\n4. IP Address\n5. Brand\n6. Type</string>
-    <string name="val_dev_csv_example">Example: GI Wonosobo,Bay Trafo 1,OCR GFR LV,192.168.1.10,Siemens,7SJxx</string>
+    <string name="val_dev_csv_columns">1. UPT\n2. ULTG\n3. Substation Name\n4. Bay Name\n5. Device Name\n6. IP Address\n7. Brand\n8. Type\n\nOlder 6-column CSVs (without UPT/ULTG) still import. Comma or semicolon (Excel) separators both work.</string>
+    <string name="val_dev_csv_example">Example: UPT Example,ULTG Example,GI Wonosobo,Bay Trafo 1,OCR GFR LV,192.168.1.10,Siemens,7SJxx</string>
     <string name="val_dl_default_ip">192.168.1.10</string>
     <string name="val_dl_default_n">1</string>
     <string name="val_dl_default_port">102</string>
@@ -664,9 +678,9 @@
     <string name="help_cmp_dev_2_name">Export icon</string>
     <string name="help_cmp_dev_2_desc">Saves the current device list as a CSV backup file.</string>
     <string name="help_cmp_dev_3_name">Import icon</string>
-    <string name="help_cmp_dev_3_desc">Loads devices from a CSV file into the database.</string>
-    <string name="help_cmp_dev_4_name">GI/Bay filter spinners</string>
-    <string name="help_cmp_dev_4_desc">Filters the device list by substation (GI) and bay.</string>
+    <string name="help_cmp_dev_3_desc">Loads devices from a CSV file (UPT, ULTG, GI, Bay, Device, IP, Brand, Type) into the database. When a CSV IP is already listed with different data, the app asks first: overwrite or skip.</string>
+    <string name="help_cmp_dev_4_name">UPT/ULTG/GI/Bay/Device filter spinners</string>
+    <string name="help_cmp_dev_4_desc">Filters the device list in order: UPT, ULTG, substation (GI), bay, then device.</string>
     <string name="help_cmp_dev_5_name">Summary badges</string>
     <string name="help_cmp_dev_5_desc">Total device count and how many are online, port-open, or offline.</string>
     <string name="help_cmp_dev_6_name">Device card</string>

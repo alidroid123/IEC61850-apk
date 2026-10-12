@@ -755,7 +755,7 @@ public class DfrDownloadActivity extends BaseActivity {
             return;
         }
 
-        String existingGi = "", existingBay = "", existingDevice = "", existingMerk = "", existingType = "";
+        String existingUpt = "", existingUltg = "", existingGi = "", existingBay = "", existingDevice = "", existingMerk = "", existingType = "";
         boolean isUpdate = false;
         SharedPreferences pref = getSharedPreferences("dfr_prefs", MODE_PRIVATE);
         String json = pref.getString("device_list", "[]");
@@ -764,6 +764,8 @@ public class DfrDownloadActivity extends BaseActivity {
             for (int i = 0; i < arr.length(); i++) {
                 JSONObject obj = arr.getJSONObject(i);
                 if (obj.getString("ip").equalsIgnoreCase(host)) {
+                    existingUpt = obj.optString("upt", "").replace("\"", "").trim();
+                    existingUltg = obj.optString("ultg", "").replace("\"", "").trim();
                     existingGi = obj.getString("gi").replace("\"", "").trim();
                     existingBay = obj.getString("bay").replace("\"", "").trim();
                     existingDevice = obj.getString("device").replace("\"", "").trim();
@@ -776,6 +778,8 @@ public class DfrDownloadActivity extends BaseActivity {
         } catch (Exception ignored) {}
 
         View dialogView = getLayoutInflater().inflate(R.layout.dialog_save_device, null);
+        EditText etUpt = dialogView.findViewById(R.id.etDialogUpt);
+        EditText etUltg = dialogView.findViewById(R.id.etDialogUltg);
         EditText etGi = dialogView.findViewById(R.id.etDialogGi);
         EditText etBay = dialogView.findViewById(R.id.etDialogBay);
         EditText etDevice = dialogView.findViewById(R.id.etDialogDevice);
@@ -783,6 +787,8 @@ public class DfrDownloadActivity extends BaseActivity {
         EditText etType = dialogView.findViewById(R.id.etDialogType);
 
         if (isUpdate) {
+            etUpt.setText(existingUpt);
+            etUltg.setText(existingUltg);
             etGi.setText(existingGi);
             etBay.setText(existingBay);
             etDevice.setText(existingDevice);
@@ -794,6 +800,8 @@ public class DfrDownloadActivity extends BaseActivity {
                 .setTitle(isUpdate ? R.string.ttl_dev_update : R.string.ttl_dev_save)
                 .setView(dialogView)
                 .setPositiveButton(isUpdate ? R.string.btn_all_update : R.string.btn_all_save_small, (dialog, which) -> {
+                    String upt = etUpt.getText().toString().trim();
+                    String ultg = etUltg.getText().toString().trim();
                     String gi = etGi.getText().toString().trim();
                     String bay = etBay.getText().toString().trim();
                     String device = etDevice.getText().toString().trim();
@@ -804,13 +812,13 @@ public class DfrDownloadActivity extends BaseActivity {
                         Toast.makeText(this, R.string.msg_all_fields_required, Toast.LENGTH_SHORT).show();
                         return;
                     }
-                    saveDeviceToList(gi, bay, device, host, merk, type);
+                    saveDeviceToList(upt, ultg, gi, bay, device, host, merk, type);
                 })
                 .setNegativeButton(R.string.btn_all_cancel, null)
                 .show();
     }
 
-    private void saveDeviceToList(String gi, String bay, String device, String ip, String merk, String type) {
+    private void saveDeviceToList(String upt, String ultg, String gi, String bay, String device, String ip, String merk, String type) {
         SharedPreferences pref = getSharedPreferences("dfr_prefs", MODE_PRIVATE);
         String json = pref.getString("device_list", "[]");
         try {
@@ -820,6 +828,8 @@ public class DfrDownloadActivity extends BaseActivity {
             for (int i = 0; i < arr.length(); i++) {
                 JSONObject obj = arr.getJSONObject(i);
                 if (obj.getString("ip").equalsIgnoreCase(ip)) {
+                    obj.put("upt", upt);
+                    obj.put("ultg", ultg);
                     obj.put("gi", gi);
                     obj.put("bay", bay);
                     obj.put("device", device);
@@ -832,6 +842,8 @@ public class DfrDownloadActivity extends BaseActivity {
 
             if (!updated) {
                 JSONObject obj = new JSONObject();
+                obj.put("upt", upt);
+                obj.put("ultg", ultg);
                 obj.put("gi", gi);
                 obj.put("bay", bay);
                 obj.put("device", device);
