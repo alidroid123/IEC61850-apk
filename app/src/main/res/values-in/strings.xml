@@ -363,7 +363,7 @@
 
     <string name="tut_7_title">FL Double Ended (Lokasi Gangguan)</string>
     <string name="tut_7_goal">Menghitung jarak gangguan dari rekaman relay di kedua ujung saluran.</string>
-    <string name="tut_7_steps">1. Di UJUNG A pilih GI dan relay saluran, lalu ambil rekaman: Unduh dari relay (rekaman terdekat waktunya dengan ujung lain diberi tanda), atau File lokal - pilih rekaman tersimpan, file .cfg (.dat di folder yang sama ikut otomatis), atau arsip .zip/.rar.\n2. Lakukan hal yang sama di UJUNG B. Dari WhatsApp juga bisa: Buka dengan, FL Double Ended, lalu pilih Ujung A atau B.\n3. Periksa Mapping kanal (Va, Vb, Vc, Ia, Ib, Ic) di tiap ujung. Centang Balik polaritas arus bila CT di ujung itu terbalik.\n4. Pilih saluran dari Database Saluran, atau isi panjang, R1, X1, R0, X0. Lalu ketuk Analisa lokasi gangguan.\n5. Baca hasil: jarak dari tiap GI, jenis gangguan, perbandingan metode, grafik tegangan titik gangguan, dan tabel fasor. Baca juga peringatan yang muncul (polaritas, gangguan di luar saluran, data saluran).\n6. Atur slider Sinkronisasi vektor bila perlu, lalu Simpan hasil (laporan PDF + riwayat) atau Bagikan laporan.</string>
+    <string name="tut_7_steps">1. Di UJUNG A pilih GI dan relay saluran, lalu ambil rekaman: Unduh dari relay (rekaman terdekat waktunya dengan ujung lain diberi tanda), atau File lokal - pilih rekaman tersimpan, file .cfg (.dat di folder yang sama ikut otomatis), atau arsip .zip/.rar. GI atau relay belum ada di Daftar Device? Ketuk Isi manual untuk mengetik nama GI, bay, dan IP relay.\n2. Lakukan hal yang sama di UJUNG B. Dari WhatsApp juga bisa: Buka dengan, FL Double Ended, lalu pilih Ujung A atau B.\n3. Periksa Mapping kanal (Va, Vb, Vc, Ia, Ib, Ic) di tiap ujung. Centang Balik polaritas arus bila CT di ujung itu terbalik.\n4. Pilih saluran dari Database Saluran, atau isi panjang, R1, X1, R0, X0. Lalu ketuk Analisa lokasi gangguan.\n5. Baca hasil: jarak dari tiap GI, jenis gangguan, perbandingan metode, grafik tegangan titik gangguan, dan tabel fasor. Baca juga peringatan yang muncul (polaritas, gangguan di luar saluran, data saluran).\n6. Atur slider Sinkronisasi vektor bila perlu, lalu Simpan hasil (laporan PDF + riwayat) atau Bagikan laporan.</string>
     <string name="tut_7_note">Analisa terakhir tetap tersimpan: saat FL Double Ended dibuka lagi, rekaman, mapping, data saluran, dan hasil kembali seperti semula.</string>
 
     <string name="tut_8_title">Monitoring IED</string>
@@ -953,6 +953,26 @@
     <string name="btn_fl_fix_polarity">Balik polaritas arus %s &amp; analisa ulang</string>
     <string name="ttl_fl_report">Laporan lokasi gangguan dua ujung</string>
     <string name="ttl_fl_pdf_title">ANALISA DOUBLE ENDED</string>
+    <string name="lbl_fl_pdf_fault_time">Waktu gangguan: %s</string>
+    <string name="lbl_fl_line_length_total">Panjang saluran total: %s km</string>
+    <string name="lbl_fl_fault_current">Arus gangguan</string>
+    <string name="btn_fl_manual">Isi manual: nama GI / IP relay</string>
+    <string name="ttl_fl_manual">GI / relay manual – %s</string>
+    <string name="msg_fl_manual_hint">Untuk GI atau relay yang belum ada di Daftar Device. IP relay hanya perlu diisi bila ingin Unduh dari relay.</string>
+    <string name="hint_fl_manual_gi">Nama GI *</string>
+    <string name="hint_fl_manual_bay">Bay / saluran (opsional)</string>
+    <string name="hint_fl_manual_ip">IP relay (opsional)</string>
+    <string name="btn_fl_manual_remove">HAPUS MANUAL</string>
+    <string name="lbl_fl_manual_gi_item">%s (manual)</string>
+    <string name="lbl_fl_manual_relay">Relay manual</string>
+    <string name="lbl_fl_manual_no_ip">tanpa IP</string>
+    <string name="lbl_fl_manual_device">Manual</string>
+    <string name="err_fl_manual_gi">Nama GI wajib diisi</string>
+    <string name="err_fl_manual_ip">Format IP tidak valid (contoh: 10.1.2.3)</string>
+    <string name="msg_fl_manual_need_ip">Isi IP relay untuk mengunduh langsung dari relay.</string>
+    <string name="lbl_fl_local_formats">Format yang didukung:\n• .cfg + .dat (COMTRADE 1991/1999/2013, ASCII atau BINARY) – cukup pilih .cfg, .dat di folder yang sama diambil otomatis\n• Arsip .zip dan .rar (RAR4/RAR5), termasuk arsip di dalam arsip\n• Dari WhatsApp / file manager: Buka dengan → FL Double Ended</string>
+    <string name="lbl_fl_local_name_title">Nama GI ujung ini: %s</string>
+    <string name="lbl_fl_local_name_sub">Ketuk untuk mengubah – bila GI/bay belum ada di Daftar Device</string>
     <string name="lbl_fl_pdf_dfr">DFR %1$s: %2$s</string>
     <string name="lbl_fl_pdf_app">%1$s v%2$s</string>
     <string name="lbl_fl_pdf_analyzed">Dianalisa %s</string>

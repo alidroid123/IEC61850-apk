@@ -24,7 +24,7 @@ final class ValueTable {
 
     private final Context c;
     private final TableLayout table;
-    private final int primary, textPrimary, textSecondary, headerBg, zebraBg, dividerColor;
+    private final int primary, textPrimary, textSecondary, headerBg, zebraBg, dividerColor, highlightBg, highlightText;
     private int bodyRows;
 
     ValueTable(Context c, TableLayout table) {
@@ -41,6 +41,8 @@ final class ValueTable {
         headerBg = ContextCompat.getColor(c, R.color.bg_navy_dim);
         dividerColor = ContextCompat.getColor(c, R.color.divider);
         zebraBg = ColorUtils.setAlphaComponent(dividerColor, 70);
+        highlightText = ContextCompat.getColor(c, R.color.status_danger);
+        highlightBg = ColorUtils.setAlphaComponent(highlightText, 38);
     }
 
     /** A header row; spans[i] is how many columns cells[i] covers (null = 1 each). */
@@ -61,12 +63,27 @@ final class ValueTable {
 
     /** A body row: bold label, then right-aligned values. */
     ValueTable row(String label, String... values) {
+        return row(false, label, values);
+    }
+
+    /** A body row; `highlight` tints it red (e.g. a phase involved in the fault). */
+    ValueTable row(boolean highlight, String label, String... values) {
         TableRow row = new TableRow(c);
-        if (bodyRows++ % 2 == 1) row.setBackgroundColor(zebraBg);
+        bodyRows++;
+        if (highlight) row.setBackgroundColor(highlightBg);
+        else if (bodyRows % 2 == 0) row.setBackgroundColor(zebraBg);
         TextView l = cell(label, Gravity.START);
         l.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
+        if (highlight) l.setTextColor(highlightText);
         row.addView(l);
-        for (String v : values) row.addView(cell(v, Gravity.END));
+        for (String v : values) {
+            TextView t = cell(v, Gravity.END);
+            if (highlight) {
+                t.setTextColor(highlightText);
+                t.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
+            }
+            row.addView(t);
+        }
         table.addView(row);
         return this;
     }

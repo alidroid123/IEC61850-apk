@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- FL Double Ended: GI / bay / relay IP typed by hand for a line end whose relay is not in the
+     Device List (FaultLocatorActivity.showManualDialog). -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:paddingStart="@dimen/spacing_xl"
+    android:paddingTop="@dimen/spacing_s"
+    android:paddingEnd="@dimen/spacing_xl">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/spacing_m"
+        android:text="@string/msg_fl_manual_hint"
+        android:textColor="@color/text_secondary"
+        android:textSize="@dimen/text_size_body_small" />
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/tilFlManualGi"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="@string/hint_fl_manual_gi">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/etFlManualGi"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="textCapCharacters" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.textfield.TextInputLayout
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/spacing_m"
+        android:hint="@string/hint_fl_manual_bay">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/etFlManualBay"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="textCapCharacters" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/tilFlManualIp"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/spacing_m"
+        android:hint="@string/hint_fl_manual_ip">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/etFlManualIp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:digits="0123456789."
+            android:inputType="number" />
+    </com.google.android.material.textfield.TextInputLayout>
+</LinearLayout>

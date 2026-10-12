@@ -454,6 +454,17 @@
                                     android:textSize="@dimen/text_size_header"
                                     android:textStyle="bold"
                                     tools:text="29.96 km" />
+
+                                <TextView
+                                    android:id="@+id/tvFlCurrentA"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginTop="@dimen/spacing_xs"
+                                    android:gravity="center"
+                                    android:textColor="@color/status_danger"
+                                    android:textSize="@dimen/text_size_small"
+                                    android:textStyle="bold"
+                                    tools:text="Arus gangguan\nIR 2249 A · IT 2740 A" />
                             </LinearLayout>
 
                             <View
@@ -486,8 +497,33 @@
                                     android:textSize="@dimen/text_size_header"
                                     android:textStyle="bold"
                                     tools:text="70.04 km" />
+
+                                <TextView
+                                    android:id="@+id/tvFlCurrentB"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginTop="@dimen/spacing_xs"
+                                    android:gravity="center"
+                                    android:textColor="@color/status_danger"
+                                    android:textSize="@dimen/text_size_small"
+                                    android:textStyle="bold"
+                                    tools:text="Arus gangguan\nIR 2258 A · IT 2736 A" />
                             </LinearLayout>
                         </LinearLayout>
+
+                        <TextView
+                            android:id="@+id/tvFlLineLength"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_horizontal"
+                            android:layout_marginTop="@dimen/spacing_s"
+                            android:background="@color/bg_navy_dim"
+                            android:paddingHorizontal="@dimen/spacing_m"
+                            android:paddingVertical="@dimen/spacing_xs"
+                            android:textColor="@color/text_primary"
+                            android:textSize="@dimen/text_size_body_small"
+                            android:textStyle="bold"
+                            tools:text="Panjang saluran total: 35.54 km" />
 
                         <TextView
                             android:id="@+id/tvFlSummary"

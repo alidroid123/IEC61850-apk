@@ -88,6 +88,21 @@
             android:layout_height="@dimen/icon_size_xl"
             android:background="@drawable/bg_spinner" />
 
+        <!-- GI / relay not in the Device List: typed by hand (FaultLocatorActivity.showManualDialog). -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnFlManual"
+            style="@style/Widget.MaterialComponents.Button.TextButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end"
+            android:minHeight="0dp"
+            android:paddingVertical="@dimen/spacing_xs"
+            android:text="@string/btn_fl_manual"
+            android:textAllCaps="false"
+            android:textSize="@dimen/text_size_small"
+            app:icon="@drawable/ic_edit_small"
+            app:iconSize="14dp" />
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

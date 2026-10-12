@@ -26,6 +26,19 @@
             android:gravity="center"
             android:layout_marginBottom="@dimen/spacing_m" />
 
+        <!-- Optional note under the title (e.g. the file formats a local pick accepts). -->
+        <TextView
+            android:id="@+id/tvPickListInfo"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/spacing_s"
+            android:background="@color/bg_navy_dim"
+            android:lineSpacingExtra="2dp"
+            android:padding="@dimen/spacing_s"
+            android:textColor="@color/text_secondary"
+            android:textSize="@dimen/text_size_small"
+            android:visibility="gone" />
+
         <View
             android:layout_width="match_parent"
             android:layout_height="1dp"

@@ -86,6 +86,8 @@ public class FaultLocatorActivity extends BaseActivity {
         ChannelMap map;
         /** MMS directory timestamp of the record picked from the relay, 0 for local files. */
         long remoteFileTime;
+        /** GI / bay / relay IP typed by hand for a relay not in the Device List (null = none). */
+        DeviceListActivity.DeviceItem manual;
 
         EndState(boolean isA) { this.isA = isA; }
     }
@@ -246,24 +248,27 @@ public class FaultLocatorActivity extends BaseActivity {
         ((TextView) root.findViewById(R.id.tvFlEndBadge)).setText(st.isA ? "A" : "B");
         ((TextView) root.findViewById(R.id.tvFlEndTitle)).setText(st.isA ? R.string.lbl_fl_end_a : R.string.lbl_fl_end_b);
 
-        List<String> giItems = new ArrayList<>(giNames);
-        if (giItems.isEmpty()) giItems.add(getString(R.string.lbl_fl_no_devices_item));
-        st.spGi.setAdapter(styledAdapter(giItems));
-
-        String lastIp = getSharedPreferences(PREFS, MODE_PRIVATE).getString(st.isA ? "last_ip_a" : "last_ip_b", "");
-        DeviceListActivity.DeviceItem last = findDevice(lastIp);
-        int giIdx = last != null ? giNames.indexOf(last.gi) : (!st.isA && giNames.size() > 1 ? 1 : 0);
-        if (giIdx >= 0 && giIdx < giItems.size()) st.spGi.setSelection(giIdx, false);
+        st.manual = loadManual(st);
+        android.content.SharedPreferences prefs = getSharedPreferences(PREFS, MODE_PRIVATE);
+        String lastIp = prefs.getString(st.isA ? "last_ip_a" : "last_ip_b", "");
+        if (st.manual != null && prefs.getBoolean(manualSelKey(st), false)) {
+            fillGiSpinner(st, 0);
+        } else {
+            DeviceListActivity.DeviceItem last = findDevice(lastIp);
+            int giIdx = last != null ? giNames.indexOf(last.gi) : (!st.isA && giNames.size() > 1 ? 1 : 0);
+            fillGiSpinner(st, Math.max(0, giIdx) + giOffset(st));
+        }
         populateRelays(st, lastIp);
 
         // No "skip the first callback" trick here: setSelection(.., false) above already lays the
         // spinner out and consumes its initial event, so the first callback that arrives is the
         // user's own pick. Both handlers are instead safe to run on a repeated/identical event.
         st.spGi.setOnItemSelectedListener(new Selection(() -> {
-            if (!TextUtils.equals(selectedGi(st), st.relaysForGi)) populateRelays(st, null);
+            if (!TextUtils.equals(giKey(st), st.relaysForGi)) populateRelays(st, null);
         }));
         st.spRelay.setOnItemSelectedListener(new Selection(() -> onRelayChanged(st)));
 
+        root.findViewById(R.id.btnFlManual).setOnClickListener(v -> showManualDialog(st, null));
         root.findViewById(R.id.btnFlScan).setOnClickListener(v -> onScanClicked(st));
         root.findViewById(R.id.btnFlLocal).setOnClickListener(v -> onLocalClicked(st));
         root.findViewById(R.id.btnFlMapping).setOnClickListener(v -> showMappingDialog(st));
@@ -271,23 +276,53 @@ public class FaultLocatorActivity extends BaseActivity {
         restoreLineParams();
     }
 
+    /** The GI spinner: this end's manual entry (if any) first, then the Device List's GIs. */
+    private void fillGiSpinner(EndState st, int selection) {
+        List<String> items = new ArrayList<>();
+        if (st.manual != null) items.add(getString(R.string.lbl_fl_manual_gi_item, st.manual.gi));
+        items.addAll(giNames);
+        if (items.isEmpty()) items.add(getString(R.string.lbl_fl_no_devices_item));
+        st.spGi.setAdapter(styledAdapter(items));
+        st.spGi.setSelection(Math.max(0, Math.min(selection, items.size() - 1)), false);
+    }
+
+    private int giOffset(EndState st) {
+        return st.manual != null ? 1 : 0;
+    }
+
+    private boolean manualSelected(EndState st) {
+        return st.manual != null && st.spGi.getSelectedItemPosition() == 0;
+    }
+
+    /** What the relay spinner is filled for: the selected GI, or this end's manual entry. */
+    private String giKey(EndState st) {
+        return manualSelected(st) ? "#manual#" : selectedGi(st);
+    }
+
     @Nullable
     private String selectedGi(EndState st) {
-        int giPos = st.spGi.getSelectedItemPosition();
-        return giPos >= 0 && giPos < giNames.size() ? giNames.get(giPos) : null;
+        if (manualSelected(st)) return st.manual.gi;
+        int idx = st.spGi.getSelectedItemPosition() - giOffset(st);
+        return idx >= 0 && idx < giNames.size() ? giNames.get(idx) : null;
     }
 
     private void populateRelays(EndState st, @Nullable String preferIp) {
         st.relays.clear();
-        String gi = selectedGi(st);
-        st.relaysForGi = gi;
-        for (DeviceListActivity.DeviceItem d : devices) if (gi != null && gi.equalsIgnoreCase(d.gi)) st.relays.add(d);
+        st.relaysForGi = giKey(st);
         List<String> labels = new ArrayList<>();
         int sel = 0;
-        for (int i = 0; i < st.relays.size(); i++) {
-            DeviceListActivity.DeviceItem d = st.relays.get(i);
-            labels.add(d.bay + " • " + d.device + "  (" + d.ip + ")");
-            if (d.ip.equals(preferIp)) sel = i;
+        if (manualSelected(st)) {
+            st.relays.add(st.manual);
+            labels.add((st.manual.bay.isEmpty() ? getString(R.string.lbl_fl_manual_relay) : st.manual.bay)
+                    + "  (" + (st.manual.ip.isEmpty() ? getString(R.string.lbl_fl_manual_no_ip) : st.manual.ip) + ")");
+        } else {
+            String gi = selectedGi(st);
+            for (DeviceListActivity.DeviceItem d : devices) if (gi != null && gi.equalsIgnoreCase(d.gi)) st.relays.add(d);
+            for (int i = 0; i < st.relays.size(); i++) {
+                DeviceListActivity.DeviceItem d = st.relays.get(i);
+                labels.add(d.bay + " • " + d.device + "  (" + d.ip + ")");
+                if (d.ip.equals(preferIp)) sel = i;
+            }
         }
         if (labels.isEmpty()) labels.add(getString(R.string.lbl_fl_no_devices_item));
         st.spRelay.setAdapter(styledAdapter(labels));
@@ -300,8 +335,106 @@ public class FaultLocatorActivity extends BaseActivity {
     private void onRelayChanged(EndState st) {
         DeviceListActivity.DeviceItem d = selectedRelay(st);
         if (d == null) return;
-        getSharedPreferences(PREFS, MODE_PRIVATE).edit().putString(st.isA ? "last_ip_a" : "last_ip_b", d.ip).apply();
+        android.content.SharedPreferences.Editor e = getSharedPreferences(PREFS, MODE_PRIVATE).edit()
+                .putBoolean(manualSelKey(st), d == st.manual);
+        if (d != st.manual) e.putString(st.isA ? "last_ip_a" : "last_ip_b", d.ip);
+        e.apply();
         restoreLineParams();
+    }
+
+    // ------------------------------------------------------------------
+    // GI / relay typed by hand (not in the Device List)
+    // ------------------------------------------------------------------
+
+    private String manualKey(EndState st) {
+        return st.isA ? "manual_end_a" : "manual_end_b";
+    }
+
+    private String manualSelKey(EndState st) {
+        return st.isA ? "manual_sel_a" : "manual_sel_b";
+    }
+
+    @Nullable
+    private DeviceListActivity.DeviceItem loadManual(EndState st) {
+        String json = getSharedPreferences(PREFS, MODE_PRIVATE).getString(manualKey(st), null);
+        if (json == null) return null;
+        try {
+            JSONObject o = new JSONObject(json);
+            DeviceListActivity.DeviceItem d = new DeviceListActivity.DeviceItem();
+            d.gi = o.optString("gi", "");
+            d.bay = o.optString("bay", "");
+            d.ip = o.optString("ip", "");
+            d.device = getString(R.string.lbl_fl_manual_device);
+            return d.gi.isEmpty() ? null : d;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    /** Mapping / line memory key of a relay: its IP, or GI + bay for a manual entry without one. */
+    private static String relayKey(DeviceListActivity.DeviceItem d) {
+        return !d.ip.isEmpty() ? d.ip : "manual:" + d.gi + "|" + d.bay;
+    }
+
+    /**
+     * Name (and optionally bay + relay IP) of this end typed by hand, for a GI or relay that
+     * isn't in the Device List yet. `onSaved` runs after it was saved or removed.
+     */
+    private void showManualDialog(EndState st, @Nullable Runnable onSaved) {
+        View v = getLayoutInflater().inflate(R.layout.dialog_fl_manual_end, null);
+        EditText etGi = v.findViewById(R.id.etFlManualGi), etBay = v.findViewById(R.id.etFlManualBay), etIp = v.findViewById(R.id.etFlManualIp);
+        TextInputLayout tilGi = v.findViewById(R.id.tilFlManualGi), tilIp = v.findViewById(R.id.tilFlManualIp);
+        if (st.manual != null) {
+            etGi.setText(st.manual.gi);
+            etBay.setText(st.manual.bay);
+            etIp.setText(st.manual.ip);
+        } else if (st.rec != null && !st.rec.stationName.isEmpty()) {
+            etGi.setText(st.rec.stationName);
+        }
+        AlertDialog.Builder b = new AlertDialog.Builder(this, R.style.Theme_Comtrade_Dialog)
+                .setTitle(getString(R.string.ttl_fl_manual, getString(st.isA ? R.string.lbl_fl_gi_a_short : R.string.lbl_fl_gi_b_short)))
+                .setView(v)
+                .setPositiveButton(R.string.btn_all_save_small, null)
+                .setNegativeButton(R.string.btn_all_cancel, null);
+        if (st.manual != null) {
+            b.setNeutralButton(R.string.btn_fl_manual_remove, (d, w) -> {
+                st.manual = null;
+                getSharedPreferences(PREFS, MODE_PRIVATE).edit().remove(manualKey(st)).putBoolean(manualSelKey(st), false).apply();
+                fillGiSpinner(st, !st.isA && giNames.size() > 1 ? 1 : 0);
+                populateRelays(st, null);
+                if (st.rec != null) renderEnd(st);
+                if (onSaved != null) onSaved.run();
+            });
+        }
+        AlertDialog dialog = b.create();
+        dialog.setOnShowListener(di -> dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(x -> {
+            String gi = etGi.getText().toString().trim();
+            String bay = etBay.getText().toString().trim();
+            String ip = etIp.getText().toString().trim();
+            tilGi.setError(gi.isEmpty() ? getString(R.string.err_fl_manual_gi) : null);
+            tilIp.setError(!ip.isEmpty() && !DeviceCsv.looksLikeIp(ip) ? getString(R.string.err_fl_manual_ip) : null);
+            if (gi.isEmpty() || (!ip.isEmpty() && !DeviceCsv.looksLikeIp(ip))) return;
+            DeviceListActivity.DeviceItem m = new DeviceListActivity.DeviceItem();
+            m.gi = gi;
+            m.bay = bay;
+            m.ip = ip;
+            m.device = getString(R.string.lbl_fl_manual_device);
+            st.manual = m;
+            try {
+                JSONObject o = new JSONObject();
+                o.put("gi", gi);
+                o.put("bay", bay);
+                o.put("ip", ip);
+                getSharedPreferences(PREFS, MODE_PRIVATE).edit().putString(manualKey(st), o.toString())
+                        .putBoolean(manualSelKey(st), true).apply();
+            } catch (Exception ignored) { }
+            fillGiSpinner(st, 0);
+            populateRelays(st, null);
+            if (st.rec != null) renderEnd(st);
+            dialog.dismiss();
+            if (onSaved != null) onSaved.run();
+        }));
+        dialog.show();
     }
 
     @Nullable
@@ -330,8 +463,14 @@ public class FaultLocatorActivity extends BaseActivity {
 
     private void onScanClicked(EndState st) {
         DeviceListActivity.DeviceItem d = selectedRelay(st);
-        if (d == null) {
+        if (d == null) { // nothing in the Device List for this end: type the relay in by hand
             Toast.makeText(this, R.string.msg_fl_pick_relay_first, Toast.LENGTH_SHORT).show();
+            showManualDialog(st, null);
+            return;
+        }
+        if (d.ip.isEmpty()) { // manual GI without a relay IP: ask for it right away
+            Toast.makeText(this, R.string.msg_fl_manual_need_ip, Toast.LENGTH_LONG).show();
+            showManualDialog(st, null);
             return;
         }
         showProgress(getString(R.string.msg_fl_connecting, d.ip));
@@ -638,7 +777,22 @@ public class FaultLocatorActivity extends BaseActivity {
         View v = getLayoutInflater().inflate(R.layout.dialog_pick_list, null);
         AlertDialog dialog = cardDialog(v);
         ((TextView) v.findViewById(R.id.tvPickListTitle)).setText(getString(R.string.ttl_fl_local_pick, getString(st.isA ? R.string.lbl_fl_gi_a_short : R.string.lbl_fl_gi_b_short)));
+        TextView info = v.findViewById(R.id.tvPickListInfo);
+        info.setText(R.string.lbl_fl_local_formats);
+        info.setVisibility(View.VISIBLE);
         LinearLayout container = v.findViewById(R.id.llPickListItems);
+
+        // Top rows kept on every page: this end's GI name (editable for a GI not in the Device
+        // List), then "browse storage".
+        LinearLayout header = new LinearLayout(this);
+        header.setOrientation(LinearLayout.VERTICAL);
+        View nameRow = getLayoutInflater().inflate(R.layout.item_dialog_pick_row, header, false);
+        TextView nameTitle = nameRow.findViewById(R.id.tvPickRowTitle);
+        nameTitle.setText(getString(R.string.lbl_fl_local_name_title, endName(st)));
+        ((TextView) nameRow.findViewById(R.id.tvPickRowSubtitle)).setText(R.string.lbl_fl_local_name_sub);
+        nameRow.setOnClickListener(view -> showManualDialog(st,
+                () -> nameTitle.setText(getString(R.string.lbl_fl_local_name_title, endName(st)))));
+        header.addView(nameRow);
 
         View browse = getLayoutInflater().inflate(R.layout.item_dialog_pick_row, container, false);
         ((TextView) browse.findViewById(R.id.tvPickRowTitle)).setText(R.string.lbl_fl_pick_storage);
@@ -655,8 +809,9 @@ public class FaultLocatorActivity extends BaseActivity {
                 Toast.makeText(this, R.string.msg_view_picker_fail, Toast.LENGTH_SHORT).show();
             }
         });
+        header.addView(browse);
         if (records.isEmpty()) {
-            container.addView(browse);
+            container.addView(header);
             TextView empty = new TextView(this);
             empty.setText(R.string.msg_fl_no_local);
             empty.setTextColor(ContextCompat.getColor(this, R.color.text_secondary));
@@ -664,7 +819,7 @@ public class FaultLocatorActivity extends BaseActivity {
             container.addView(empty);
         } else {
             SimpleDateFormat fmt = new SimpleDateFormat("dd MMM yyyy HH:mm", Locale.getDefault());
-            showPaged(container, browse, records.size(), 0, i -> {
+            showPaged(container, header, records.size(), 0, i -> {
                 File f = records.get(i);
                 View row = getLayoutInflater().inflate(R.layout.item_dialog_pick_row, container, false);
                 ((TextView) row.findViewById(R.id.tvPickRowTitle)).setText(f.getName());
@@ -934,7 +1089,7 @@ public class FaultLocatorActivity extends BaseActivity {
         ChannelMap auto = DoubleEndedFaultLocator.autoMap(rec);
         DeviceListActivity.DeviceItem d = selectedRelay(st);
         if (d == null) return auto;
-        String json = getSharedPreferences(PREFS, MODE_PRIVATE).getString("map_" + d.ip, null);
+        String json = getSharedPreferences(PREFS, MODE_PRIVATE).getString("map_" + relayKey(d), null);
         if (json == null) return auto;
         try {
             JSONObject o = new JSONObject(json);
@@ -969,7 +1124,7 @@ public class FaultLocatorActivity extends BaseActivity {
             o.put("invert", st.map.invertCurrent);
             o.put("vMult", st.map.vMult);
             o.put("iMult", st.map.iMult);
-            getSharedPreferences(PREFS, MODE_PRIVATE).edit().putString("map_" + d.ip, o.toString()).apply();
+            getSharedPreferences(PREFS, MODE_PRIVATE).edit().putString("map_" + relayKey(d), o.toString()).apply();
         } catch (Exception ignored) { }
     }
 
@@ -1088,7 +1243,7 @@ public class FaultLocatorActivity extends BaseActivity {
     private String linePairKey() {
         DeviceListActivity.DeviceItem a = selectedRelay(endA), b = selectedRelay(endB);
         if (a == null || b == null) return null;
-        String x = a.ip, y = b.ip;
+        String x = relayKey(a), y = relayKey(b);
         return "line_" + (x.compareTo(y) <= 0 ? x + "|" + y : y + "|" + x);
     }
 
@@ -1271,7 +1426,9 @@ public class FaultLocatorActivity extends BaseActivity {
                 analyzedInputs = sessionInputs();
                 viewingSaved = null;
                 currentAlignment = finalRes.alignment;
-                syncAsMain = false;
+                // The voltage-only synchronised location is the main result by default; the
+                // switch under the vector diagram still turns it back to the unsynchronised one.
+                syncAsMain = finalRes.alignment != null && finalRes.alignment.valid;
                 renderResult(finalRes, endName(endA), endName(endB));
                 saveSession();
             });
@@ -1343,6 +1500,9 @@ public class FaultLocatorActivity extends BaseActivity {
         ((TextView) findViewById(R.id.tvFlFromBLabel)).setText(getString(R.string.lbl_fl_from, resultNameB));
         ((TextView) findViewById(R.id.tvFlFromA)).setText(fmt(kmA, 2) + " km");
         ((TextView) findViewById(R.id.tvFlFromB)).setText(fmt(kmB, 2) + " km");
+        ((TextView) findViewById(R.id.tvFlCurrentA)).setText(faultCurrentText(r.endA, r.faultType));
+        ((TextView) findViewById(R.id.tvFlCurrentB)).setText(faultCurrentText(r.endB, r.faultType));
+        ((TextView) findViewById(R.id.tvFlLineLength)).setText(getString(R.string.lbl_fl_line_length_total, fmt(r.lengthKm, 2)));
         String summary = getString(R.string.msg_fl_pct, fmt(kmA / r.lengthKm * 100, 1), fmt(r.lengthKm, 2));
         if (useSpread) summary = getString(R.string.msg_fl_spread, fmt(r.spreadKm, 2), r.windowsUsed) + "  •  " + summary;
         if (syncAsMain) summary = getString(R.string.lbl_fl_method_sync_v) + "  •  " + summary;
@@ -1485,11 +1645,12 @@ public class FaultLocatorActivity extends BaseActivity {
                 .header(new String[]{"", resultNameA, resultNameB, "B−A"}, new int[]{1, 2, 2, 1})
                 .header(new String[]{"", mag, ang, mag, ang, ang}, null);
         String[] names = {"VR", "VS", "VT", "IR", "IS", "IT", "V1", "V0"};
+        boolean[] faulted = faultedPhases(lastResult);
         for (int k = 0; k < names.length; k++) {
             if (k == 3 || k == 6) t.divider();
             Cx x = angleRow(al.a, k), y = angleRow(al.b, k);
             boolean isV = names[k].startsWith("V");
-            t.row(names[k] + (isV ? " (kV)" : " (A)"),
+            t.row(k < 6 && faulted[k % 3], names[k] + (isV ? " (kV)" : " (A)"),
                     magText(x, isV), angleText(x, ref), magText(y, isV), angleText(y, ref),
                     String.format(Locale.US, "%.1f°", wrap180(Math.toDegrees(y.arg() - x.arg()))));
         }
@@ -1503,6 +1664,7 @@ public class FaultLocatorActivity extends BaseActivity {
         String[] names = {"Va", "Vb", "Vc", "Ia", "Ib", "Ic", "V1", "V2", "V0", "I1", "I2", "I0"};
         EndSummary[] ends = {r.endA, r.endB};
         String[] endNames = {nameA, nameB};
+        boolean[] faulted = faultedPhases(r);
         for (int e = 0; e < 2; e++) {
             EndSummary end = ends[e];
             TextView title = new TextView(this);
@@ -1521,11 +1683,50 @@ public class FaultLocatorActivity extends BaseActivity {
                 boolean isV = names[k].startsWith("V");
                 Cx pre = end.hasPrefault && end.pre != null ? pick(end.pre, k) : null;
                 Cx flt = end.flt != null ? pick(end.flt, k) : null;
-                t.row(names[k] + (isV ? " (kV)" : " (A)"),
+                t.row(k < 6 && faulted[k % 3], names[k] + (isV ? " (kV)" : " (A)"),
                         pre != null ? magText(pre, isV) : "-", pre != null ? angleText(pre, end.displayRefAngle) : "-",
                         flt != null ? magText(flt, isV) : "-", flt != null ? angleText(flt, end.displayRefAngle) : "-");
             }
         }
+    }
+
+    /**
+     * "Arus gangguan" + the fault-window current of each faulted phase at this end (IN = 3·I0
+     * added for earth faults); the highest phase current when the fault type is unknown.
+     */
+    private String faultCurrentText(EndSummary e, String faultType) {
+        if (e == null || e.flt == null) return "";
+        String[] rst = {"IR", "IS", "IT"};
+        boolean[] faulted = faultedPhases(faultType);
+        StringBuilder sb = new StringBuilder();
+        int strongest = 0;
+        for (int p = 0; p < 3; p++) {
+            if (e.flt.i[p].abs() > e.flt.i[strongest].abs()) strongest = p;
+        }
+        for (int p = 0; p < 3; p++) {
+            boolean show = faulted[0] || faulted[1] || faulted[2] ? faulted[p] : p == strongest;
+            if (!show) continue;
+            if (sb.length() > 0) sb.append(" · ");
+            sb.append(rst[p]).append(' ').append(fmt(e.flt.i[p].abs(), 0)).append(" A");
+        }
+        if (faultType != null && faultType.endsWith("G") && e.flt.i0 != null) {
+            sb.append(" · IN ").append(fmt(3 * e.flt.i0.abs(), 0)).append(" A");
+        }
+        return getString(R.string.lbl_fl_fault_current) + "\n" + sb;
+    }
+
+    /** Phases (0 = R/A, 1 = S/B, 2 = T/C) the classified fault involves; none when unknown. */
+    private static boolean[] faultedPhases(@Nullable Result r) {
+        return faultedPhases(r != null ? r.faultType : null);
+    }
+
+    private static boolean[] faultedPhases(@Nullable String faultType) {
+        boolean[] f = new boolean[3];
+        if (faultType == null || faultType.equals("?")) return f;
+        f[0] = faultType.contains("A");
+        f[1] = faultType.contains("B");
+        f[2] = faultType.contains("C");
+        return f;
     }
 
     private static String magText(Cx x, boolean isV) {
@@ -1582,9 +1783,9 @@ public class FaultLocatorActivity extends BaseActivity {
         DoubleEndedFaultLocator.Alignment auto = r.alignment;
         r.alignment = currentAlignment; // the vectors as the user left them
         try {
+            saved.result = r; // the PDF header reads each end's fault time from it
             File pdf = writePdf(saved);
             saved.pdfPath = pdf.getAbsolutePath();
-            saved.result = r;
             new FlResultStore(this).save(saved);
             showSavedDialog(pdf);
         } catch (Exception e) {
@@ -1644,6 +1845,17 @@ public class FaultLocatorActivity extends BaseActivity {
         }
     }
 
+    /** The cfg trigger stamp "dd/mm/yyyy,hh:mm:ss.ssssss" as "dd/mm/yyyy hh:mm:ss.sss". */
+    private static String faultTimeText(@Nullable String trigger) {
+        if (trigger == null || trigger.trim().isEmpty()) return "-";
+        String[] p = trigger.split(",");
+        if (p.length < 2) return trigger.trim();
+        String time = p[1].trim();
+        int dot = time.indexOf('.');
+        if (dot >= 0 && time.length() > dot + 4) time = time.substring(0, dot + 4);
+        return p[0].trim() + " " + time;
+    }
+
     /** Lays a view that is not attached to the window out at width w; returns its height. */
     private static int measureDetached(View v, int w) {
         v.measure(View.MeasureSpec.makeMeasureSpec(w, View.MeasureSpec.EXACTLY),
@@ -1662,8 +1874,14 @@ public class FaultLocatorActivity extends BaseActivity {
         box.addView(pdfText(getString(R.string.ttl_fl_pdf_title), 18, true, primary));
         box.addView(pdfText(line, 14, true, ContextCompat.getColor(this, R.color.text_primary)));
         int secondary = ContextCompat.getColor(this, R.color.text_secondary);
-        box.addView(pdfText(getString(R.string.lbl_fl_pdf_dfr, saved.nameA, saved.recordA.isEmpty() ? "-" : saved.recordA), 11, false, secondary));
-        box.addView(pdfText(getString(R.string.lbl_fl_pdf_dfr, saved.nameB, saved.recordB.isEmpty() ? "-" : saved.recordB), 11, false, secondary));
+        Result r = saved.result;
+        String[] names = {saved.nameA, saved.nameB}, records = {saved.recordA, saved.recordB};
+        EndSummary[] ends = {r != null ? r.endA : null, r != null ? r.endB : null};
+        for (int k = 0; k < 2; k++) {
+            String text = getString(R.string.lbl_fl_pdf_dfr, names[k], records[k].isEmpty() ? "-" : records[k]);
+            if (ends[k] != null) text += "\n" + getString(R.string.lbl_fl_pdf_fault_time, faultTimeText(ends[k].triggerText));
+            box.addView(pdfText(text, 11, false, secondary));
+        }
         View rule = new View(this);
         rule.setBackgroundColor(primary);
         LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(2));
