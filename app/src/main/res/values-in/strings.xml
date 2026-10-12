@@ -677,7 +677,7 @@
     <string name="help_cmp_view_2_name">Ikon Cursor</string>
     <string name="help_cmp_view_2_desc">Mengunci posisi kursor T1/T2 di semua channel.</string>
     <string name="help_cmp_view_3_name">Ikon Folder</string>
-    <string name="help_cmp_view_3_desc">Membuka file COMTRADE (.cfg) lain secara manual.</string>
+    <string name="help_cmp_view_3_desc">Membuka file COMTRADE (.cfg) lain secara manual, atau arsip .zip/.rar berisi .cfg + .dat (+ .hdr). File .cfg/.dat/.zip/.rar juga bisa dibuka langsung dari WhatsApp / file manager lewat \"Buka dengan\" → DFR Viewer.</string>
     <string name="help_cmp_view_4_name">Ikon Setting</string>
     <string name="help_cmp_view_4_desc">Membuka menu konfigurasi channel untuk mengganti nama, mengelompokkan, atau menyembunyikan channel.</string>
     <string name="help_feat_view_1_title">Membuka File</string>
@@ -883,7 +883,18 @@
     <string name="msg_fl_load_fail">Gagal membaca record: %s</string>
     <string name="ttl_fl_local_pick">Record lokal – %s</string>
     <string name="lbl_fl_pick_storage">Pilih dari penyimpanan…</string>
-    <string name="lbl_fl_pick_storage_sub">Pilih .cfg dan .dat sekaligus, atau satu file .zip</string>
+    <string name="lbl_fl_pick_storage_sub">Pilih .cfg dan .dat sekaligus, atau satu file .zip/.rar</string>
+    <string name="ttl_fl_open_with">File diterima</string>
+    <string name="msg_fl_waiting_pair">%1$s sudah diterima.\n\nSekarang buka juga pasangannya, %2$s, dengan FL Double Ended – atau kirim keduanya dalam satu .zip/.rar.</string>
+    <string name="ttl_fl_load_as">Muat %s sebagai</string>
+    <string name="lbl_fl_end_replace">Mengganti %s</string>
+    <string name="ttl_import_pick_record">Pilih record – %s</string>
+    <string name="msg_import_no_record">Pasangan .cfg + .dat tidak ditemukan di %s.</string>
+    <string name="msg_import_unsupported">%s bukan file COMTRADE (.cfg/.dat) atau arsip .zip/.rar.</string>
+    <string name="msg_import_too_large">Arsip terlalu besar untuk diekstrak (lebih dari 512 MB).</string>
+    <string name="msg_import_rar_password">Arsip RAR ini dikunci password – kirim ulang tanpa password.</string>
+    <string name="msg_import_rar_damaged">Arsip RAR rusak atau tidak lengkap.</string>
+    <string name="msg_import_failed">Gagal membuka arsip: %s</string>
     <string name="msg_fl_no_local">Belum ada record hasil unduhan.</string>
     <string name="msg_fl_pick_relay_first">Pilih relay terlebih dulu.</string>
     <string name="msg_fl_no_devices">Database relay kosong – tambahkan relay di Daftar Relay, atau gunakan File lokal.</string>
@@ -932,7 +943,7 @@
     <string name="help_cmp_fl_1_name">Unduh dari relay</string>
     <string name="help_cmp_fl_1_desc">Terhubung ke relay yang dipilih untuk ujung tersebut, memindai folder COMTRADE-nya, lalu Anda memilih record. File disimpan di folder DFR yang sama dengan layar Unduh.</string>
     <string name="help_cmp_fl_2_name">File lokal</string>
-    <string name="help_cmp_fl_2_desc">Memakai record yang sudah ada di HP: dari Riwayat Unduhan, atau .cfg + .dat / .zip yang dipilih dari penyimpanan.</string>
+    <string name="help_cmp_fl_2_desc">Memakai record yang sudah ada di HP: dari Riwayat Unduhan, atau .cfg + .dat / .zip / .rar yang dipilih dari penyimpanan. Dari WhatsApp / file manager, file juga bisa dibuka lewat \"Buka dengan\" → FL Double Ended: dari satu arsip berisi record kedua GI, pilih record untuk Ujung A lalu Ujung B; .cfg dan .dat yang dikirim terpisah dibuka satu per satu dan dipasangkan otomatis.</string>
     <string name="help_cmp_fl_3_name">Mapping kanal</string>
     <string name="help_cmp_fl_3_desc">Kanal mana yang Va, Vb, Vc, Ia, Ib, Ic, polaritas CT, serta pengali VT/CT tambahan. Terdeteksi otomatis dan diingat per relay.</string>
     <string name="help_cmp_fl_4_name">Ikon info</string>

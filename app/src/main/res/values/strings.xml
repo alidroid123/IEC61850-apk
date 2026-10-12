@@ -711,7 +711,7 @@
     <string name="help_cmp_view_2_name">Cursor icon</string>
     <string name="help_cmp_view_2_desc">Locks the T1/T2 cursor position across all channels.</string>
     <string name="help_cmp_view_3_name">Folder icon</string>
-    <string name="help_cmp_view_3_desc">Opens a different COMTRADE (.cfg) file manually.</string>
+    <string name="help_cmp_view_3_desc">Opens a different COMTRADE (.cfg) file manually, or a .zip/.rar archive holding .cfg + .dat (+ .hdr). .cfg/.dat/.zip/.rar files can also be opened straight from WhatsApp or a file manager with \"Open with\" → DFR Viewer.</string>
     <string name="help_cmp_view_4_name">Setting icon</string>
     <string name="help_cmp_view_4_desc">Opens the channel configuration menu to rename, group, or show/hide channels.</string>
     <string name="help_feat_view_1_title">Opening a File</string>
@@ -917,7 +917,18 @@
     <string name="msg_fl_load_fail">Failed to read the record: %s</string>
     <string name="ttl_fl_local_pick">Local record – %s</string>
     <string name="lbl_fl_pick_storage">Browse storage…</string>
-    <string name="lbl_fl_pick_storage_sub">Select the .cfg and .dat together, or one .zip</string>
+    <string name="lbl_fl_pick_storage_sub">Select the .cfg and .dat together, or one .zip/.rar</string>
+    <string name="ttl_fl_open_with">File received</string>
+    <string name="msg_fl_waiting_pair">%1$s has been received.\n\nNow open its partner %2$s with FL Double Ended as well – or send both in one .zip/.rar.</string>
+    <string name="ttl_fl_load_as">Load %s as</string>
+    <string name="lbl_fl_end_replace">Replaces %s</string>
+    <string name="ttl_import_pick_record">Choose a record – %s</string>
+    <string name="msg_import_no_record">No .cfg + .dat pair found in %s.</string>
+    <string name="msg_import_unsupported">%s is not a COMTRADE file (.cfg/.dat) or a .zip/.rar archive.</string>
+    <string name="msg_import_too_large">The archive is too large to unpack (over 512 MB).</string>
+    <string name="msg_import_rar_password">This RAR archive is password-protected – send it again without a password.</string>
+    <string name="msg_import_rar_damaged">The RAR archive is damaged or incomplete.</string>
+    <string name="msg_import_failed">Failed to open the archive: %s</string>
     <string name="msg_fl_no_local">No downloaded records found yet.</string>
     <string name="msg_fl_pick_relay_first">Pick a relay first.</string>
     <string name="msg_fl_no_devices">The relay database is empty – add relays in Relay List, or use Local file.</string>
@@ -966,7 +977,7 @@
     <string name="help_cmp_fl_1_name">Download from relay</string>
     <string name="help_cmp_fl_1_desc">Connects to the relay selected for that end, scans its COMTRADE folders and lets you pick a record. The file is saved in the same DFR folder as the Download screen.</string>
     <string name="help_cmp_fl_2_name">Local file</string>
-    <string name="help_cmp_fl_2_desc">Uses a record already on the phone: from Download History, or any .cfg + .dat / .zip picked from storage.</string>
+    <string name="help_cmp_fl_2_desc">Uses a record already on the phone: from Download History, or any .cfg + .dat / .zip / .rar picked from storage. From WhatsApp or a file manager, use \"Open with\" → FL Double Ended: from one archive holding both substations\' records, pick the record for end A, then end B; a .cfg and .dat sent separately are opened one after the other and paired automatically.</string>
     <string name="help_cmp_fl_3_name">Channel mapping</string>
     <string name="help_cmp_fl_3_desc">Which channels are Va, Vb, Vc, Ia, Ib, Ic, CT polarity, and extra VT/CT multipliers. Detected automatically and remembered per relay.</string>
     <string name="help_cmp_fl_4_name">Info icon</string>

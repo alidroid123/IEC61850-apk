@@ -3,10 +3,8 @@ package com.alidev.dfrtools.dfr;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
@@ -14,8 +12,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
 
 /**
  * Full IEEE C37.111 (COMTRADE 1991 / 1999 / 2013) reader used by the double-ended fault locator.
@@ -138,32 +134,6 @@ public class ComtradeRecord {
             if (f.getName().equalsIgnoreCase(base + ".dat")) return f;
         }
         return null;
-    }
-
-    /**
-     * Extracts every entry of a vendor .zip DFR archive into `outDir` (flattened, zip-slip safe)
-     * and returns the extracted .cfg files - the caller pairs each with its .dat via findDatFor().
-     */
-    public static List<File> extractZip(File zip, File outDir) throws IOException {
-        List<File> cfgs = new ArrayList<>();
-        if (!outDir.exists() && !outDir.mkdirs()) throw new IOException("Cannot create " + outDir);
-        try (ZipInputStream zis = new ZipInputStream(new FileInputStream(zip))) {
-            ZipEntry e;
-            byte[] buf = new byte[16384];
-            while ((e = zis.getNextEntry()) != null) {
-                if (e.isDirectory()) continue;
-                String entryName = e.getName().replace('\\', '/');
-                String flat = entryName.substring(entryName.lastIndexOf('/') + 1);
-                if (flat.isEmpty() || flat.equals(".") || flat.equals("..")) continue;
-                File out = new File(outDir, flat);
-                try (OutputStream os = new FileOutputStream(out)) {
-                    int n;
-                    while ((n = zis.read(buf)) > 0) os.write(buf, 0, n);
-                }
-                if (flat.toLowerCase(Locale.ROOT).endsWith(".cfg")) cfgs.add(out);
-            }
-        }
-        return cfgs;
     }
 
     static byte[] readAll(File f) throws IOException {

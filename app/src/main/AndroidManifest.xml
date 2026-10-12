@@ -73,6 +73,9 @@
             android:exported="true"
             android:label="DFR Viewer"
             android:theme="@style/Theme.DFRtools.Viewer">
+            <!-- "Open with" from file managers that put the file name in the URI. Android's
+                 pathPattern stops ".*" at the first dot, hence the variants for names/folders with
+                 extra dots. -->
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
@@ -82,13 +85,67 @@
                 <data android:host="*" />
                 <data android:mimeType="*/*" />
                 <data android:pathPattern=".*\\.cfg" />
+                <data android:pathPattern=".*\\..*\\.cfg" />
+                <data android:pathPattern=".*\\..*\\..*\\.cfg" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\.cfg" />
                 <data android:pathPattern=".*\\.CFG" />
+                <data android:pathPattern=".*\\..*\\.CFG" />
+                <data android:pathPattern=".*\\..*\\..*\\.CFG" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\.CFG" />
                 <data android:pathPattern=".*\\.dat" />
+                <data android:pathPattern=".*\\..*\\.dat" />
+                <data android:pathPattern=".*\\..*\\..*\\.dat" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\.dat" />
                 <data android:pathPattern=".*\\.DAT" />
+                <data android:pathPattern=".*\\..*\\.DAT" />
+                <data android:pathPattern=".*\\..*\\..*\\.DAT" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\.DAT" />
                 <data android:pathPattern=".*\\.hdr" />
+                <data android:pathPattern=".*\\..*\\.hdr" />
+                <data android:pathPattern=".*\\..*\\..*\\.hdr" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\.hdr" />
                 <data android:pathPattern=".*\\.HDR" />
+                <data android:pathPattern=".*\\..*\\.HDR" />
+                <data android:pathPattern=".*\\..*\\..*\\.HDR" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\.HDR" />
                 <data android:pathPattern=".*\\.inf" />
+                <data android:pathPattern=".*\\..*\\.inf" />
+                <data android:pathPattern=".*\\..*\\..*\\.inf" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\.inf" />
                 <data android:pathPattern=".*\\.INF" />
+                <data android:pathPattern=".*\\..*\\.INF" />
+                <data android:pathPattern=".*\\..*\\..*\\.INF" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\.INF" />
+                <data android:pathPattern=".*\\.zip" />
+                <data android:pathPattern=".*\\..*\\.zip" />
+                <data android:pathPattern=".*\\..*\\..*\\.zip" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\.zip" />
+                <data android:pathPattern=".*\\.ZIP" />
+                <data android:pathPattern=".*\\..*\\.ZIP" />
+                <data android:pathPattern=".*\\..*\\..*\\.ZIP" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\.ZIP" />
+                <data android:pathPattern=".*\\.rar" />
+                <data android:pathPattern=".*\\..*\\.rar" />
+                <data android:pathPattern=".*\\..*\\..*\\.rar" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\.rar" />
+                <data android:pathPattern=".*\\.RAR" />
+                <data android:pathPattern=".*\\..*\\.RAR" />
+                <data android:pathPattern=".*\\..*\\..*\\.RAR" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\.RAR" />
+            </intent-filter>
+            <!-- Chat/cloud apps (WhatsApp, Telegram, Drive, ...) hand out content://.../<id> URIs with no
+                 extension, so match by type: archives, and octet-stream for .cfg/.dat (no registered
+                 type). The real file name is checked once opened. -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="application/zip" />
+                <data android:mimeType="application/x-zip" />
+                <data android:mimeType="application/x-zip-compressed" />
+                <data android:mimeType="application/vnd.rar" />
+                <data android:mimeType="application/x-rar" />
+                <data android:mimeType="application/x-rar-compressed" />
+                <data android:mimeType="application/octet-stream" />
             </intent-filter>
         </activity>
 
@@ -150,12 +207,75 @@
 
         <!-- configChanges: the two loaded DFR records + result live only in memory, a rotation
              must not throw them away. -->
+        <!-- singleTask: a second file opened with FL Double Ended (the other line end, sent
+             separately) must reach the open screen through onNewIntent instead of starting a
+             fresh one that has forgotten the first end. -->
         <activity
             android:name=".dfr.FaultLocatorActivity"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
-            android:exported="false"
+            android:exported="true"
             android:label="FL Double Ended"
-            android:windowSoftInputMode="adjustResize" />
+            android:launchMode="singleTask"
+            android:windowSoftInputMode="adjustResize">
+            <!-- "Open with" from file managers that put the file name in the URI. Android's
+                 pathPattern stops ".*" at the first dot, hence the variants for names/folders with
+                 extra dots. -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="content" />
+                <data android:scheme="file" />
+                <data android:host="*" />
+                <data android:mimeType="*/*" />
+                <data android:pathPattern=".*\\.cfg" />
+                <data android:pathPattern=".*\\..*\\.cfg" />
+                <data android:pathPattern=".*\\..*\\..*\\.cfg" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\.cfg" />
+                <data android:pathPattern=".*\\.CFG" />
+                <data android:pathPattern=".*\\..*\\.CFG" />
+                <data android:pathPattern=".*\\..*\\..*\\.CFG" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\.CFG" />
+                <data android:pathPattern=".*\\.dat" />
+                <data android:pathPattern=".*\\..*\\.dat" />
+                <data android:pathPattern=".*\\..*\\..*\\.dat" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\.dat" />
+                <data android:pathPattern=".*\\.DAT" />
+                <data android:pathPattern=".*\\..*\\.DAT" />
+                <data android:pathPattern=".*\\..*\\..*\\.DAT" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\.DAT" />
+                <data android:pathPattern=".*\\.zip" />
+                <data android:pathPattern=".*\\..*\\.zip" />
+                <data android:pathPattern=".*\\..*\\..*\\.zip" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\.zip" />
+                <data android:pathPattern=".*\\.ZIP" />
+                <data android:pathPattern=".*\\..*\\.ZIP" />
+                <data android:pathPattern=".*\\..*\\..*\\.ZIP" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\.ZIP" />
+                <data android:pathPattern=".*\\.rar" />
+                <data android:pathPattern=".*\\..*\\.rar" />
+                <data android:pathPattern=".*\\..*\\..*\\.rar" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\.rar" />
+                <data android:pathPattern=".*\\.RAR" />
+                <data android:pathPattern=".*\\..*\\.RAR" />
+                <data android:pathPattern=".*\\..*\\..*\\.RAR" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\.RAR" />
+            </intent-filter>
+            <!-- Chat/cloud apps (WhatsApp, Telegram, Drive, ...) hand out content://.../<id> URIs with no
+                 extension, so match by type: archives, and octet-stream for .cfg/.dat (no registered
+                 type). The real file name is checked once opened. -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="application/zip" />
+                <data android:mimeType="application/x-zip" />
+                <data android:mimeType="application/x-zip-compressed" />
+                <data android:mimeType="application/vnd.rar" />
+                <data android:mimeType="application/x-rar" />
+                <data android:mimeType="application/x-rar-compressed" />
+                <data android:mimeType="application/octet-stream" />
+            </intent-filter>
+        </activity>
 
         <activity
             android:name=".dfr.LineDatabaseActivity"

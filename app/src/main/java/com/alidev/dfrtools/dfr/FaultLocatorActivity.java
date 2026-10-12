@@ -47,8 +47,6 @@ import org.json.JSONObject;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -121,6 +119,8 @@ public class FaultLocatorActivity extends BaseActivity {
     /** Line Database row the line fields were filled from (null = typed by hand). */
     private LineData selectedLine;
     private boolean selectedLineAuto, selectedLineEdited, fillingLineFields;
+    /** Lone .cfg/.dat files opened with this screen, kept until their partner arrives too. */
+    private File inboxDir;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -172,6 +172,17 @@ public class FaultLocatorActivity extends BaseActivity {
         findViewById(R.id.btnFlSave).setOnClickListener(v -> saveResult());
         findViewById(R.id.btnFlHistory).setOnClickListener(v -> showHistory());
         setupSyncControls();
+
+        inboxDir = new File(getCacheDir(), "fl_inbox_" + System.currentTimeMillis());
+        if (savedInstanceState == null) handleOpenWith(getIntent());
+    }
+
+    /** launchMode singleTask: a file opened with this screen while it is open lands here. */
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        setIntent(intent);
+        handleOpenWith(intent);
     }
 
     @Override
@@ -434,33 +445,107 @@ public class FaultLocatorActivity extends BaseActivity {
                 });
                 return;
             }
-            File[] pair = resolveRecord(saved);
-            loadRecordInBackground(st, pair, target.lastModifiedEpochMillis);
+            List<ComtradeImport.Record> recs = resolveRecords(saved, null);
+            loadRecordInBackground(st, recs.isEmpty() ? null : pairOf(recs.get(0)), target.lastModifiedEpochMillis);
         });
     }
 
-    /** Picks the .cfg/.dat pair out of a downloaded/imported file set, unzipping vendor archives. */
-    @Nullable
-    private File[] resolveRecord(List<File> files) {
+    /**
+     * The .cfg/.dat records in a downloaded/imported file set, plain pairs first, then those in
+     * .zip/.rar archives (unpacked into a folder beside each). The first archive failure, if any,
+     * goes to error[0]. Must run on the executor.
+     */
+    private List<ComtradeImport.Record> resolveRecords(List<File> files, @Nullable Exception[] error) {
+        List<File> all = new ArrayList<>();
+        for (File f : files) if (!ComtradeImport.isArchive(f.getName())) all.add(f);
         for (File f : files) {
-            if (f.getName().toLowerCase(Locale.ROOT).endsWith(".cfg")) {
-                File dat = ComtradeRecord.findDatFor(f);
-                if (dat != null) return new File[]{f, dat};
-            }
-        }
-        for (File f : files) {
-            String lower = f.getName().toLowerCase(Locale.ROOT);
-            if (!lower.endsWith(".zip")) continue;
+            if (!ComtradeImport.isArchive(f.getName())) continue;
             try {
                 showProgress(getString(R.string.msg_fl_extracting, f.getName()));
-                File dir = new File(f.getParentFile(), f.getName().substring(0, f.getName().length() - 4));
-                for (File cfg : ComtradeRecord.extractZip(f, dir)) {
-                    File dat = ComtradeRecord.findDatFor(cfg);
-                    if (dat != null) return new File[]{cfg, dat};
-                }
-            } catch (Exception ignored) { }
+                all.addAll(ComtradeImport.unpack(f, new File(f.getParentFile(), ComtradeImport.baseName(f.getName()))));
+            } catch (Exception e) {
+                if (error != null && error[0] == null) error[0] = e;
+            }
         }
-        return null;
+        return ComtradeImport.findRecords(all);
+    }
+
+    private static File[] pairOf(ComtradeImport.Record rec) {
+        return new File[]{rec.cfg, rec.dat};
+    }
+
+    /**
+     * Loads `recs` into `st`: the only one directly, otherwise the one the user picks. Must run on
+     * the executor.
+     */
+    private void deliverRecords(EndState st, List<ComtradeImport.Record> recs, @Nullable Exception error) {
+        if (recs.isEmpty()) {
+            runOnUiThread(() -> {
+                hideProgress();
+                showInfoDialog(getString(R.string.ttl_fl_error), error != null
+                        ? ComtradeImport.describeError(this, error) : getString(R.string.msg_fl_no_cfg_in_files));
+            });
+        } else if (recs.size() == 1) {
+            loadRecordInBackground(st, pairOf(recs.get(0)), 0);
+        } else {
+            runOnUiThread(() -> {
+                hideProgress();
+                pickImportedRecord(endShortName(st), recs, null, rec -> loadInto(st, rec));
+            });
+        }
+    }
+
+    private void loadInto(EndState st, ComtradeImport.Record rec) {
+        if (isGone()) return; // a pick list's dismiss listener also fires when the screen closes
+        showProgress(getString(R.string.msg_fl_reading, rec.cfg.getName()));
+        executor.execute(() -> loadRecordInBackground(st, pairOf(rec), 0));
+    }
+
+    private String endShortName(EndState st) {
+        return getString(st.isA ? R.string.lbl_fl_gi_a_short : R.string.lbl_fl_gi_b_short);
+    }
+
+    private interface RecordChoice {
+        void onChosen(ComtradeImport.Record rec);
+    }
+
+    /**
+     * Lists the records found in an archive/file set for one end. `onSkip` (when non-null) is run
+     * if the list is closed without a pick.
+     */
+    private void pickImportedRecord(String endLabel, List<ComtradeImport.Record> recs, @Nullable Runnable onSkip, RecordChoice choice) {
+        if (isGone()) return;
+        View v = getLayoutInflater().inflate(R.layout.dialog_pick_list, null);
+        AlertDialog dialog = cardDialog(v);
+        ((TextView) v.findViewById(R.id.tvPickListTitle)).setText(getString(R.string.ttl_fl_pick_record, endLabel));
+        LinearLayout container = v.findViewById(R.id.llPickListItems);
+        File root = commonParent(recs);
+        final boolean[] picked = {false};
+        for (ComtradeImport.Record rec : recs) {
+            View row = getLayoutInflater().inflate(R.layout.item_dialog_pick_row, container, false);
+            ((TextView) row.findViewById(R.id.tvPickRowTitle)).setText(rec.relativeName(root));
+            ((TextView) row.findViewById(R.id.tvPickRowSubtitle)).setText(rec.station.isEmpty() ? "-" : rec.station);
+            row.setOnClickListener(view -> {
+                picked[0] = true;
+                dialog.dismiss();
+                choice.onChosen(rec);
+            });
+            container.addView(row);
+        }
+        v.findViewById(R.id.btnPickListCancel).setOnClickListener(view -> dialog.dismiss());
+        if (onSkip != null) dialog.setOnDismissListener(di -> { if (!picked[0]) onSkip.run(); });
+        dialog.show();
+    }
+
+    /** Deepest folder holding every record's .cfg, so the pick list can show short paths. */
+    private static File commonParent(List<ComtradeImport.Record> recs) {
+        File root = recs.get(0).cfg.getParentFile();
+        for (ComtradeImport.Record r : recs) {
+            while (root != null && !r.cfg.getAbsolutePath().startsWith(root.getAbsolutePath() + File.separator)) {
+                root = root.getParentFile();
+            }
+        }
+        return root != null ? root : new File("/");
     }
 
     /** Must run on the executor. */
@@ -478,6 +563,7 @@ public class FaultLocatorActivity extends BaseActivity {
             ChannelMap map = restoreMapping(st, rec);
             runOnUiThread(() -> {
                 hideProgress();
+                if (isGone()) return;
                 st.cfg = pair[0];
                 st.dat = pair[1];
                 st.rec = rec;
@@ -554,7 +640,10 @@ public class FaultLocatorActivity extends BaseActivity {
             row.setOnClickListener(view -> {
                 dialog.dismiss();
                 showProgress(getString(R.string.msg_fl_reading, f.getName()));
-                executor.execute(() -> loadRecordInBackground(st, resolveRecord(Collections.singletonList(f)), 0));
+                executor.execute(() -> {
+                    Exception[] error = new Exception[1];
+                    deliverRecords(st, resolveRecords(Collections.singletonList(f), error), error[0]);
+                });
             });
             container.addView(row);
         }
@@ -562,7 +651,7 @@ public class FaultLocatorActivity extends BaseActivity {
         dialog.show();
     }
 
-    /** .cfg files that have a .dat next to them, plus vendor .zip archives (not their "h.zip" pair). */
+    /** .cfg files that have a .dat next to them, plus .zip/.rar archives (not a vendor's "h.zip" pair). */
     private void collectRecords(File dir, List<File> out, int depth) {
         File[] files = dir.listFiles();
         if (files == null) return;
@@ -573,7 +662,7 @@ public class FaultLocatorActivity extends BaseActivity {
             }
             String lower = f.getName().toLowerCase(Locale.ROOT);
             if (lower.endsWith(".cfg") && ComtradeRecord.findDatFor(f) != null) out.add(f);
-            else if (lower.endsWith(".zip") && !lower.endsWith("h.zip")) out.add(f);
+            else if (lower.endsWith(".rar") || (lower.endsWith(".zip") && !lower.endsWith("h.zip"))) out.add(f);
         }
     }
 
@@ -601,29 +690,106 @@ public class FaultLocatorActivity extends BaseActivity {
             dir.mkdirs();
             List<File> copied = new ArrayList<>();
             for (Uri uri : uris) {
-                String name = displayName(uri);
-                File out = new File(dir, name.replaceAll("[\\\\/:*?\"<>|]", "_"));
-                try (InputStream is = getContentResolver().openInputStream(uri); OutputStream os = new FileOutputStream(out)) {
-                    if (is == null) continue;
-                    byte[] buf = new byte[16384];
-                    int n;
-                    while ((n = is.read(buf)) > 0) os.write(buf, 0, n);
+                File out = new File(dir, ComtradeImport.safeName(ComtradeImport.displayName(this, uri)));
+                try {
+                    ComtradeImport.copy(this, uri, out);
                     copied.add(out);
                 } catch (Exception ignored) { }
             }
-            loadRecordInBackground(st, resolveRecord(copied), 0);
+            Exception[] error = new Exception[1];
+            deliverRecords(st, resolveRecords(copied, error), error[0]);
         });
     }
 
-    private String displayName(Uri uri) {
-        try (android.database.Cursor c = getContentResolver().query(uri, null, null, null, null)) {
-            if (c != null && c.moveToFirst()) {
-                int idx = c.getColumnIndex(android.provider.OpenableColumns.DISPLAY_NAME);
-                if (idx >= 0 && c.getString(idx) != null) return c.getString(idx);
+    // ------------------------------------------------------------------
+    // "Open with" from other apps (manifest intent filters)
+    // ------------------------------------------------------------------
+
+    /**
+     * A .zip/.rar, .cfg or .dat opened with this screen from a file manager or chat app. Archives
+     * are unpacked into DFR/Imported. A lone .cfg/.dat waits in this screen's inbox until its
+     * partner is opened too (chat apps send them as two separate files).
+     */
+    private void handleOpenWith(@Nullable Intent intent) {
+        if (intent == null || !Intent.ACTION_VIEW.equals(intent.getAction()) || intent.getData() == null) return;
+        Uri uri = intent.getData();
+        showProgress(getString(R.string.msg_fl_reading, ""));
+        executor.execute(() -> {
+            String name = ComtradeImport.displayName(this, uri);
+            String lower = name.toLowerCase(Locale.ROOT);
+            try {
+                if (ComtradeImport.isArchive(lower)) {
+                    showProgress(getString(R.string.msg_fl_extracting, name));
+                    List<ComtradeImport.Record> recs = ComtradeImport.importArchive(this, uri, name);
+                    runOnUiThread(() -> {
+                        hideProgress();
+                        if (recs.isEmpty()) showInfoDialog(getString(R.string.ttl_fl_error), getString(R.string.msg_import_no_record, name));
+                        else assignOpenedRecords(recs);
+                    });
+                } else if (lower.endsWith(".cfg") || lower.endsWith(".dat")) {
+                    File out = new File(inboxDir, ComtradeImport.safeName(name));
+                    ComtradeImport.copy(this, uri, out);
+                    ComtradeImport.Record rec = ComtradeImport.pairFor(out);
+                    runOnUiThread(() -> {
+                        hideProgress();
+                        if (rec != null) {
+                            assignOpenedRecords(Collections.singletonList(rec));
+                        } else {
+                            String partner = ComtradeImport.baseName(name) + (lower.endsWith(".cfg") ? ".dat" : ".cfg");
+                            showInfoDialog(getString(R.string.ttl_fl_open_with), getString(R.string.msg_fl_waiting_pair, name, partner));
+                        }
+                    });
+                } else {
+                    runOnUiThread(() -> {
+                        hideProgress();
+                        showInfoDialog(getString(R.string.ttl_fl_error), getString(R.string.msg_import_unsupported, name));
+                    });
+                }
+            } catch (Exception e) {
+                runOnUiThread(() -> {
+                    hideProgress();
+                    showInfoDialog(getString(R.string.ttl_fl_error), ComtradeImport.describeError(this, e));
+                });
             }
-        } catch (Exception ignored) { }
-        String seg = uri.getLastPathSegment();
-        return seg != null ? seg.substring(seg.lastIndexOf('/') + 1) : "file";
+        });
+    }
+
+    /** One record: ask which end it is. Several: pick the record for end A, then for end B. */
+    private void assignOpenedRecords(List<ComtradeImport.Record> recs) {
+        if (recs.size() == 1) {
+            askEndFor(recs.get(0));
+            return;
+        }
+        pickImportedRecord(endShortName(endA), recs, null, recA -> {
+            List<ComtradeImport.Record> rest = new ArrayList<>(recs);
+            rest.remove(recA);
+            // Closing the second list loads end A alone.
+            pickImportedRecord(endShortName(endB), rest, () -> loadInto(endA, recA), recB -> {
+                loadInto(endA, recA);
+                loadInto(endB, recB);
+            });
+        });
+    }
+
+    private void askEndFor(ComtradeImport.Record rec) {
+        if (isGone()) return;
+        View v = getLayoutInflater().inflate(R.layout.dialog_pick_list, null);
+        AlertDialog dialog = cardDialog(v);
+        ((TextView) v.findViewById(R.id.tvPickListTitle)).setText(getString(R.string.ttl_fl_load_as, rec.cfg.getName()));
+        LinearLayout container = v.findViewById(R.id.llPickListItems);
+        for (EndState st : new EndState[]{endA, endB}) {
+            View row = getLayoutInflater().inflate(R.layout.item_dialog_pick_row, container, false);
+            ((TextView) row.findViewById(R.id.tvPickRowTitle)).setText(st.isA ? R.string.lbl_fl_end_a : R.string.lbl_fl_end_b);
+            ((TextView) row.findViewById(R.id.tvPickRowSubtitle)).setText(st.cfg != null
+                    ? getString(R.string.lbl_fl_end_replace, st.cfg.getName()) : getString(R.string.msg_fl_no_record));
+            row.setOnClickListener(view -> {
+                dialog.dismiss();
+                loadInto(st, rec);
+            });
+            container.addView(row);
+        }
+        v.findViewById(R.id.btnPickListCancel).setOnClickListener(view -> dialog.dismiss());
+        dialog.show();
     }
 
     // ------------------------------------------------------------------
@@ -1751,6 +1917,7 @@ public class FaultLocatorActivity extends BaseActivity {
     }
 
     private void showInfoDialog(String title, String body) {
+        if (isGone()) return; // background work finishing after the screen closed
         View v = getLayoutInflater().inflate(R.layout.dialog_fl_info, null);
         AlertDialog dialog = cardDialog(v);
         ((TextView) v.findViewById(R.id.tvFlInfoTitle)).setText(title);

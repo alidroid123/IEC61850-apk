@@ -16,7 +16,8 @@ set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,-z,max-page-size
 # Vendors mz-automation/libiec61850 (v1.6, GPLv3 - see libiec61850/COPYING)
 # as a client-only static library, then builds a small JNI bridge
 # (dfr_jni.c) on top of it that exposes just what the Android app needs:
-# connect / disconnect / list directory / download file over MMS.
+# connect / disconnect / list directory / download file over MMS. A separate
+# libunrar_jni.so (bottom of this file) adds .rar extraction.
 #
 # GOOSE, Sampled Values (L2 raw-ethernet) and TLS are intentionally
 # disabled: they need CAP_NET_RAW / mbedtls which add complexity this
@@ -70,3 +71,26 @@ target_link_libraries(dfr_jni
     iec61850
     ${log-lib}
 )
+
+# .rar support for opening DFR archives (RarExtractor.java -> unrar_jni.cpp -> unrar_extract.cpp,
+# which has no JNI so it can also be built and tested off-device): RARLAB's UnRAR
+# 7.3.1, vendored unchanged in unrar/ (freeware licence - see unrar/license.txt), built like its
+# makefile's "lib" target. Only the files that makefile compiles are listed; the remaining .cpp
+# files in unrar/ are #included by these.
+set(UNRAR_SOURCES
+    rar strlist strfn pathfn smallfn global file filefn filcreat archive arcread unicode system
+    crypt crc rawread encname resource match timefn rdwrfn consio options errhnd rarvm
+    secpassword rijndael getbits sha1 sha256 blake2s hash extinfo extract volume list find unpack
+    headers threadpool rs16 cmddata ui largepage filestr scantree dll qopen
+)
+list(TRANSFORM UNRAR_SOURCES PREPEND unrar/)
+list(TRANSFORM UNRAR_SOURCES APPEND .cpp)
+set_source_files_properties(${UNRAR_SOURCES} PROPERTIES
+    COMPILE_OPTIONS "-w;-include;${CMAKE_CURRENT_SOURCE_DIR}/unrar_android_compat.h")
+
+add_library(unrar_jni SHARED unrar_jni.cpp unrar_extract.cpp ${UNRAR_SOURCES})
+set_target_properties(unrar_jni PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON)
+target_compile_definitions(unrar_jni PRIVATE RARDLL RAR_SMP _FILE_OFFSET_BITS=64 _LARGEFILE_SOURCE)
+target_compile_options(unrar_jni PRIVATE
+    -fexceptions -frtti -fvisibility=hidden -ffunction-sections -fdata-sections)
+target_link_options(unrar_jni PRIVATE -Wl,--gc-sections)

@@ -211,20 +211,36 @@ public class DfrViewerActivity extends BaseActivity {
 
             if (intent.getData() != null) {
                 Uri uri = intent.getData();
-                String lowUri = uri.toString().toLowerCase();
-                if (lowUri.endsWith(".cfg")) {
+                // Chat/cloud apps hand out content://.../<id> URIs with no extension, so go by the
+                // file's display name and only fall back to the URI itself.
+                String name = null;
+                try { name = getFileName(uri); } catch (Exception ignored) {}
+                String lowName = (name != null ? name : uri.toString()).toLowerCase();
+                if (ComtradeImport.isArchive(lowName)) {
+                    openArchive(uri, name != null ? name : "archive" + lowName.substring(lowName.length() - 4));
+                } else if (lowName.endsWith(".cfg")) {
                     loadCfg(uri);
                 } else {
                     // Opened via an external VIEW intent on a .dat/.hdr/.inf/.xml companion file
                     // rather than the .cfg itself - locate the sibling .cfg and load that instead.
                     Uri cfgUri = null;
+                    String openedExt = null;
                     for (String ext : new String[]{".dat", ".hdr", ".inf", ".xml"}) {
-                        if (lowUri.endsWith(ext)) { cfgUri = findSiblingFile(uri, ext, ".cfg"); break; }
+                        if (lowName.endsWith(ext)) {
+                            openedExt = ext;
+                            cfgUri = findSiblingFile(uri, ext, ".cfg");
+                            break;
+                        }
                     }
                     if (cfgUri != null) {
                         loadCfg(cfgUri);
-                    } else {
+                    } else if (openedExt != null) {
+                        // A lone .dat stays pending, so the .cfg picked next is paired with it.
+                        if (".dat".equals(openedExt)) pendingDatUri = uri;
                         Toast.makeText(this, R.string.msg_view_needs_cfg_pair, Toast.LENGTH_LONG).show();
+                        pickCfgFile();
+                    } else {
+                        Toast.makeText(this, getString(R.string.msg_import_unsupported, name != null ? name : uri.toString()), Toast.LENGTH_LONG).show();
                         pickCfgFile();
                     }
                 }
@@ -502,6 +518,8 @@ public class DfrViewerActivity extends BaseActivity {
             if (requestCode == PICK_CFG_FILE) {
                 if (lowName.endsWith(".cfg")) {
                     loadCfg(uri);
+                } else if (ComtradeImport.isArchive(lowName)) {
+                    openArchive(uri, fileName);
                 } else {
                     Toast.makeText(this, getString(R.string.msg_view_wrong_file_cfg, fileName), Toast.LENGTH_LONG).show();
                     pickCfgFile();
@@ -625,6 +643,62 @@ public class DfrViewerActivity extends BaseActivity {
         }
     }
 
+    /**
+     * A .zip/.rar holding COMTRADE files (opened with this app, or picked): unpacked into
+     * DFR/Imported by ComtradeImport, then its only record is loaded, or the one the user picks.
+     */
+    private void openArchive(Uri uri, String name) {
+        if (isFinishing()) return;
+        progressBar.setVisibility(View.VISIBLE);
+        safeExecute(() -> {
+            try {
+                List<ComtradeImport.Record> recs = ComtradeImport.importArchive(this, uri, name);
+                runOnUiThread(() -> {
+                    if (isFinishing()) return;
+                    progressBar.setVisibility(View.GONE);
+                    if (recs.isEmpty()) {
+                        Toast.makeText(this, getString(R.string.msg_import_no_record, name), Toast.LENGTH_LONG).show();
+                    } else if (recs.size() == 1) {
+                        openRecord(recs.get(0), name);
+                    } else {
+                        showArchiveRecordPicker(recs, name);
+                    }
+                });
+            } catch (Exception e) {
+                runOnUiThread(() -> {
+                    if (isFinishing()) return;
+                    progressBar.setVisibility(View.GONE);
+                    Toast.makeText(this, ComtradeImport.describeError(this, e), Toast.LENGTH_LONG).show();
+                });
+            }
+        });
+    }
+
+    private void showArchiveRecordPicker(List<ComtradeImport.Record> recs, String archiveName) {
+        File root = recs.get(0).cfg.getParentFile();
+        for (ComtradeImport.Record r : recs) {
+            while (root != null && !r.cfg.getAbsolutePath().startsWith(root.getAbsolutePath() + File.separator)) root = root.getParentFile();
+        }
+        String[] labels = new String[recs.size()];
+        for (int i = 0; i < recs.size(); i++) {
+            ComtradeImport.Record r = recs.get(i);
+            String rel = root != null ? r.relativeName(root) : r.cfg.getName();
+            labels[i] = r.station.isEmpty() ? rel : rel + "\n" + r.station;
+        }
+        new AlertDialog.Builder(this, R.style.Theme_Comtrade_Dialog)
+                .setTitle(getString(R.string.ttl_import_pick_record, archiveName))
+                .setItems(labels, (d, which) -> openRecord(recs.get(which), archiveName))
+                .setNegativeButton(R.string.btn_all_cancel, null)
+                .show();
+    }
+
+    private void openRecord(ComtradeImport.Record rec, String archiveName) {
+        txtFolderHeader.setText(archiveName);
+        txtFolderHeader.setVisibility(View.VISIBLE);
+        pendingDatUri = Uri.fromFile(rec.dat);
+        loadCfg(Uri.fromFile(rec.cfg));
+    }
+
     private void loadCfg(Uri uri) {
         if (isFinishing()) return;
         runOnUiThread(() -> progressBar.setVisibility(View.VISIBLE));
@@ -705,15 +779,11 @@ public class DfrViewerActivity extends BaseActivity {
 
     private void updateFileNameDisplay(Uri uri) {
         String name = "Unknown File";
-        try (android.database.Cursor cursor = getContentResolver().query(uri, null, null, null, null)) {
-            if (cursor != null && cursor.moveToFirst()) {
-                int nameIndex = cursor.getColumnIndex(android.provider.OpenableColumns.DISPLAY_NAME);
-                if (nameIndex != -1) {
-                    String found = cursor.getString(nameIndex);
-                    if (found != null) name = found;
-                }
-            }
-        } catch (Exception e) { 
+        try {
+            // getFileName() also covers file:// URIs (records unpacked from a .zip/.rar).
+            String found = getFileName(uri);
+            if (found != null && !found.isEmpty()) name = found;
+        } catch (Exception e) {
             String segment = uri.getLastPathSegment();
             if (segment != null) name = segment;
         }
