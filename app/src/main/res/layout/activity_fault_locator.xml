@@ -581,7 +581,7 @@
                             android:layout_marginTop="@dimen/spacing_xs"
                             android:orientation="vertical" />
 
-                        <!-- Voltage-only vector synchronisation: A fixed, B shifted in time -->
+                        <!-- Record time alignment: A fixed, B shifted by tau (auto = sync angle of the main method) -->
                         <TextView
                             style="@style/SectionLabel"
                             android:layout_marginTop="@dimen/spacing_m"
@@ -639,6 +639,17 @@
                                     android:layout_marginHorizontal="@dimen/spacing_xs"
                                     android:layout_weight="1"
                                     android:text="@string/btn_fl_shift_auto"
+                                    android:textSize="@dimen/text_size_small" />
+
+                                <!-- Voltage-only V1/V0 angle match (biased by the load angle) -->
+                                <Button
+                                    android:id="@+id/btnFlShiftVolt"
+                                    style="@style/Widget.MaterialComponents.Button.TextButton"
+                                    android:layout_width="0dp"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginEnd="@dimen/spacing_xs"
+                                    android:layout_weight="1"
+                                    android:text="@string/btn_fl_shift_volt"
                                     android:textSize="@dimen/text_size_small" />
 
                                 <Button

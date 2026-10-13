@@ -72,6 +72,13 @@ public class DoubleEndedFaultLocator {
         Cx z1PerKm() { return new Cx(r1, x1); }
         Cx z0PerKm() { return new Cx(r0, x0); }
         Cx z1Total() { return z1PerKm().mul(lengthKm); }
+
+        /** Copy with another Z1 per km (same length, Z0 and B1). */
+        LineParams withZ1(Cx z1) {
+            LineParams p = new LineParams();
+            p.lengthKm = lengthKm; p.r1 = z1.re; p.x1 = z1.im; p.r0 = r0; p.x0 = x0; p.b1 = b1;
+            return p;
+        }
         Cx z0Total() { return z0PerKm().mul(lengthKm); }
     }
 
@@ -177,8 +184,25 @@ public class DoubleEndedFaultLocator {
         public double[] profileKm, profileA, profileB; // |V_F| (kV) walked from each end
         public final List<Warning> warnings = new ArrayList<>();
 
-        /** Record time shift found by the voltage-only synchronisation (B time = A time + tau), s. */
+        /** Circular spread (half range) of the sync angle over the fault windows used, degrees. */
+        public double syncAngleSpreadDeg = Double.NaN;
+        /**
+         * Sync angle from the pre-fault load flow alone: A's pre-fault V1/I1 walked over the whole
+         * line must give B's pre-fault V1. Independent of the fault equation (NaN without pre-fault).
+         */
+        public double syncAnglePreDeg = Double.NaN;
+        /** Z1 per km measured from the pre-fault load flow, rotated by the fault sync angle (NaN if unusable). */
+        public double z1MeasR = Double.NaN, z1MeasX = Double.NaN;
+        /** Relative 1-sigma uncertainty of that measurement (VT/CT + sync angle errors over the line voltage drop). */
+        public double z1MeasUnc = Double.NaN;
+
+        /**
+         * Record time shift (B time = A time + tau), s, from the sync angle of the main method:
+         * tau = delta / omega + k * T, k picking the period nearest the inception alignment.
+         */
         public double tauAuto = Double.NaN;
+        /** Same from the pre-fault sync angle, and from the voltage-only V1/V0 angle match, s. */
+        public double tauPre = Double.NaN, tauVoltage = Double.NaN;
         /** Shift that lines up the detected inceptions / the cfg timestamps (NaN if unknown), s. */
         public double tauInception = Double.NaN, tauTimestamp = Double.NaN;
         /** Fixed reference instant at end A (record time, s) and A's fault current there (A rms). */
@@ -300,13 +324,32 @@ public class DoubleEndedFaultLocator {
             return Math.min(pa.v0.abs(), pb.v0.abs()) > 0.02 * ref;
         }
 
+        /** Coarse shift both records agree on: detected inceptions, else the cfg timestamps. */
+        private double coarseTau(boolean inceptionsFromSignals) {
+            return inceptionsFromSignals || Double.isNaN(tauTimestamp) ? tauInception : tauTimestamp;
+        }
+
+        /**
+         * Record time shift implied by a sync angle (rad, rotation taking B's record-frame phasors
+         * into A's). Phasors are referenced to each record's own t = 0, so the angle is omega*tau
+         * modulo one period; the period nearest the coarse inception alignment is taken. The
+         * off-nominal frequency term cancels because both ends are read at the same instant.
+         */
+        public double tauFromSyncAngle(double deltaRad, boolean inceptionsFromSignals) {
+            if (Double.isNaN(deltaRad)) return Double.NaN;
+            double t = deltaRad / (2 * Math.PI) * period;
+            return t + Math.round((coarseTau(inceptionsFromSignals) - t) / period) * period;
+        }
+
         /**
          * "Voltage only" synchronisation: within half a cycle either side of the shift that lines
          * the two detected fault inceptions up (so both windows really are the same moment of the
          * fault), finds the shift whose V1 and V0 angles agree best between the two records.
+         * Biased by the real V1 angle across the line (load angle + fault drop), so it is only
+         * offered as a manual alternative to tauFromSyncAngle().
          */
         public double autoAlignVoltage(boolean inceptionsFromSignals) {
-            double c = inceptionsFromSignals || Double.isNaN(tauTimestamp) ? tauInception : tauTimestamp;
+            double c = coarseTau(inceptionsFromSignals);
             double lo = Math.max(tauMin, c - period / 2), hi = Math.min(tauMax, c + period / 2);
             if (!(hi > lo)) return Math.max(tauMin, Math.min(tauMax, c));
             int steps = 240;
@@ -715,6 +758,13 @@ public class DoubleEndedFaultLocator {
             Cx gx = gamma.mul(xKm);
             return v.mul(gx.cosh()).sub(zc.mul(i).mul(gx.sinh()));
         }
+
+        /** Exact pi equivalent of xKm of line: {series Z, shunt Y at each end}. */
+        Cx[] pi(double xKm) {
+            if (!distributed) return new Cx[]{z.mul(xKm), Cx.ZERO};
+            Cx gx = gamma.mul(xKm), h = gx.mul(0.5);
+            return new Cx[]{zc.mul(gx.sinh()), h.sinh().div(h.cosh()).div(zc)};
+        }
     }
 
     private interface Fn { double f(double m); }
@@ -876,6 +926,8 @@ public class DoubleEndedFaultLocator {
         // a single noisy window and the spread is an honest "+/- km" for the user.
         List<Double> estimates = new ArrayList<>();
         estimates.add(chosen);
+        List<Phasors[]> used = new ArrayList<>();
+        used.add(new Phasors[]{fa, fb});
         Phasors refA = faultPhasors(a, off), refB = faultPhasors(b, off);
         for (int j = 1; j <= 8 && !sol.noRoot; j++) {
             double o = off + 0.125 * j;
@@ -887,6 +939,7 @@ public class DoubleEndedFaultLocator {
             Solution sj = solvePrimary(pa, pb, a, b, s, superimposed, lm, L);
             if (sj.noRoot || Math.abs(sj.m - chosen) > 0.15) continue;
             estimates.add(sj.m);
+            used.add(new Phasors[]{pa, pb});
         }
         java.util.Collections.sort(estimates);
         int ne = estimates.size();
@@ -902,9 +955,23 @@ public class DoubleEndedFaultLocator {
         res.distB = (1 - mc) * L;
 
         final Cx vA = sol.vA, iA = sol.iA, vB = sol.vB, iB = sol.iB;
-        Cx vfA = lm.walk(vA, iA, chosen * L), vfB = lm.walk(vB, iB, (1 - chosen) * L);
-        double delta = vfA.arg() - vfB.arg();
+        // Sync angle = arg V_F(from A) - arg V_F(from B) at the solved fault point, circular mean
+        // over the same windows as the median. Every window is referenced to its record's t = 0,
+        // so they all estimate the one record-to-record rotation.
+        double[] deltas = new double[used.size()];
+        Cx dSum = Cx.ZERO;
+        for (int j = 0; j < deltas.length; j++) {
+            Phasors[] w = used.get(j);
+            Cx[] q = seqPair(w[0], w[1], a, b, s, superimposed);
+            Cx vfAj = lm.walk(q[0], q[1], chosen * L), vfBj = lm.walk(q[2], q[3], (1 - chosen) * L);
+            deltas[j] = vfAj.arg() - vfBj.arg();
+            dSum = dSum.add(Cx.polar(1, deltas[j]));
+        }
+        double delta = dSum.arg();
+        double dSpread = 0;
+        for (double d : deltas) dSpread = Math.max(dSpread, angDiff(Math.toDegrees(d), Math.toDegrees(delta)));
         res.syncAngleDeg = wrapDeg(Math.toDegrees(delta));
+        res.syncAngleSpreadDeg = deltas.length > 1 ? dSpread : Double.NaN;
         Cx rot = Cx.polar(1, delta); // takes end-B phasors into end-A's frame
 
         // ---- cross-check: positive sequence, same unsynchronised principle ----
@@ -940,6 +1007,9 @@ public class DoubleEndedFaultLocator {
         // ---- pre-fault plausibility checks (CT/VT ratio, polarity, phase rotation) ----
         prefaultChecks(res, a, b, rot);
 
+        // ---- pre-fault load flow: independent sync angle and measured Z1 ----
+        loadFlowChecks(res, a, b, lm, line, delta, used, s, superimposed);
+
         // ---- |V_F| profile for the chart ----
         int steps = 100;
         res.profileKm = new double[steps + 1];
@@ -956,8 +1026,14 @@ public class DoubleEndedFaultLocator {
         Session session = new Session(a, b, lm, s, off, L);
         res.session = session;
         boolean signals = !"T".equals(a.incSource) && !"T".equals(b.incSource);
-        res.tauAuto = session.autoAlignVoltage(signals);
+        res.tauVoltage = session.autoAlignVoltage(signals);
+        res.tauPre = session.tauFromSyncAngle(Math.toRadians(res.syncAnglePreDeg), signals);
+        res.tauAuto = session.tauFromSyncAngle(delta, signals);
         res.alignment = session.alignAt(res.tauAuto);
+        if (!res.alignment.valid) { // B's record does not cover that instant - fall back
+            res.tauAuto = res.tauVoltage;
+            res.alignment = session.alignAt(res.tauAuto);
+        }
         res.tauInception = session.tauInception;
         res.tauTimestamp = session.tauTimestamp;
         res.alignRefTimeA = session.refTimeA;
@@ -974,10 +1050,8 @@ public class DoubleEndedFaultLocator {
     /** Solves |V_F walked from A| = |V_F walked from B| for one pair of fault windows. */
     private static Solution solvePrimary(Phasors fa, Phasors fb, End a, End b, int s, boolean superimposed, LineModel lm, double L) {
         Solution sol = new Solution();
-        sol.vA = superimposed ? fa.v1.sub(a.pre.v1) : fa.v(s);
-        sol.iA = superimposed ? fa.i1.sub(a.pre.i1) : fa.i(s);
-        sol.vB = superimposed ? fb.v1.sub(b.pre.v1) : fb.v(s);
-        sol.iB = superimposed ? fb.i1.sub(b.pre.i1) : fb.i(s);
+        Cx[] q = seqPair(fa, fb, a, b, s, superimposed);
+        sol.vA = q[0]; sol.iA = q[1]; sol.vB = q[2]; sol.iB = q[3];
         final Cx vA = sol.vA, iA = sol.iA, vB = sol.vB, iB = sol.iB;
         Fn f = m -> lm.walk(vA, iA, m * L).abs() - lm.walk(vB, iB, (1 - m) * L).abs();
         List<Double> rts = roots(f, -0.25, 1.25, 1500);
@@ -999,6 +1073,14 @@ public class DoubleEndedFaultLocator {
             sol.noRoot = true;
         }
         return sol;
+    }
+
+    /** {vA, iA, vB, iB} of the sequence the primary method walks (superimposed V1/I1 or V(s)/I(s)). */
+    private static Cx[] seqPair(Phasors fa, Phasors fb, End a, End b, int s, boolean superimposed) {
+        if (superimposed) {
+            return new Cx[]{fa.v1.sub(a.pre.v1), fa.i1.sub(a.pre.i1), fb.v1.sub(b.pre.v1), fb.i1.sub(b.pre.i1)};
+        }
+        return new Cx[]{fa.v(s), fa.i(s), fb.v(s), fb.i(s)};
     }
 
     private static double distOutside(double m) {
@@ -1158,6 +1240,96 @@ public class DoubleEndedFaultLocator {
         }
         double r = ratio.re;
         return Double.isNaN(r) ? Double.NaN : Math.max(0, r);
+    }
+
+    /** Ratio + phase error of one VT/CT chain (class 0.5: 0.5 %, ~0.5 deg) - per end, independent. */
+    private static final double SIGMA_CHAIN = Math.hypot(0.005, Math.toRadians(0.5));
+
+    /**
+     * Pre-fault positive-sequence load flow against the line model.
+     *
+     * Sync angle: before the fault there is no fault point, so A's V1/I1 walked over the whole
+     * line must reproduce B's V1. The angle between the two is a record-to-record rotation that
+     * owes nothing to the fault equation; disagreement with the fault sync angle points at the
+     * record pairing, a CT polarity or the line data.
+     *
+     * Z1: with B rotated into A's frame by the fault sync angle, the pi-equivalent series branch
+     * is (V_A - V_B) / I_series. The fault sync angle itself leans slightly on the Z1 it was
+     * solved with, so the measurement is iterated (re-solve the fault with the measured Z1,
+     * re-measure) to its fixed point, which is the true Z1 whatever was entered. Only the drop
+     * across the line carries information, so the result is accepted only when VT/CT and
+     * sync-angle errors are small compared with that drop.
+     */
+    private static void loadFlowChecks(Result res, End a, End b, LineModel lm, LineParams lp, double delta,
+                                       List<Phasors[]> used, int s, boolean superimposed) {
+        if (!a.hasPre || !b.hasPre) return;
+        double L = lp.lengthKm;
+        Cx vA = a.pre.v1, iA = a.pre.i1, vB = b.pre.v1, iB = b.pre.i1;
+        if (!(vA.abs() > 0) || !(vB.abs() > 0)) return;
+
+        double pre = wrapDeg(Math.toDegrees(lm.walk(vA, iA, L).arg() - vB.arg()));
+        res.syncAnglePreDeg = pre;
+        double spread = Double.isNaN(res.syncAngleSpreadDeg) ? 0 : res.syncAngleSpreadDeg;
+        double diff = wrapDeg(pre - Math.toDegrees(delta));
+        if (Math.abs(diff) > 4 + 2 * spread) {
+            res.warnings.add(new Warning("SYNC_PRE_MISMATCH", diff, diff / 360 * a.T * 1000));
+        }
+
+        double sDelta = Math.toRadians(Math.max(spread, 0.2));
+        Cx z = lp.z1PerKm();
+        LineModel lmIt = lm;
+        double dIt = delta, unc = Double.NaN;
+        for (int it = 0; it < 12; it++) {
+            Cx rot = Cx.polar(1, dIt);
+            Cx vBa = vB.mul(rot), iBa = iB.mul(rot);
+            Cx[] pi = lmIt.pi(L);
+            Cx dV = vA.sub(vBa);
+            Cx iSeries = iA.sub(iBa).sub(pi[1].mul(dV)).mul(0.5);
+            if (!(iSeries.abs() > 0) || !(dV.abs() > 0)) return;
+            unc = Math.sqrt(2 * SIGMA_CHAIN * SIGMA_CHAIN + sDelta * sDelta) * vA.abs() / dV.abs();
+            if (unc > 0.5) break; // light load: the drop is lost in transformer errors
+            Cx zNew = z.mul(dV.div(iSeries).div(pi[0]));
+            if (!(zNew.im > 0)) break;
+            boolean done = zNew.sub(z).abs() < 1e-4 * z.abs();
+            z = zNew;
+            if (done) break;
+            LineParams lpIt = lp.withZ1(z);
+            lmIt = new LineModel(lpIt);
+            double dNext = windowsSyncAngle(used, a, b, s, superimposed, lmIt, L);
+            if (Double.isNaN(dNext)) break;
+            dIt = dNext;
+        }
+        res.z1MeasUnc = unc;
+        if (!(unc <= 0.5)) return;
+        res.z1MeasR = z.re;
+        res.z1MeasX = z.im;
+        double devX = (z.im - lp.x1) / lp.x1;
+        if (unc <= 0.10 && Math.abs(devX) > Math.max(0.10, 2 * unc)) {
+            res.warnings.add(new Warning("Z1_MISMATCH", z.im, lp.x1, devX * 100));
+        }
+    }
+
+    /**
+     * Re-solves the primary equation on the given windows with another line model and returns
+     * the circular-mean sync angle at their median location (NaN when a window has no root).
+     */
+    private static double windowsSyncAngle(List<Phasors[]> used, End a, End b, int s, boolean superimposed,
+                                           LineModel lm, double L) {
+        List<Double> ms = new ArrayList<>();
+        for (Phasors[] w : used) {
+            Solution sj = solvePrimary(w[0], w[1], a, b, s, superimposed, lm, L);
+            if (sj.noRoot) return Double.NaN;
+            ms.add(sj.m);
+        }
+        java.util.Collections.sort(ms);
+        int n = ms.size();
+        double m = n % 2 == 1 ? ms.get(n / 2) : (ms.get(n / 2 - 1) + ms.get(n / 2)) / 2;
+        Cx sum = Cx.ZERO;
+        for (Phasors[] w : used) {
+            Cx[] q = seqPair(w[0], w[1], a, b, s, superimposed);
+            sum = sum.add(Cx.polar(1, lm.walk(q[0], q[1], m * L).arg() - lm.walk(q[2], q[3], (1 - m) * L).arg()));
+        }
+        return sum.arg();
     }
 
     private static void prefaultChecks(Result res, End a, End b, Cx rot) {

@@ -870,7 +870,7 @@
     <!-- FL Double Ended (FaultLocatorActivity) -->
     <string name="menu_home_fl">FL DOUBLE ENDED</string>
     <string name="ttl_fl_title">FL Double Ended</string>
-    <string name="lbl_fl_subtitle">Lokasi gangguan dua ujung dari 2 DFR relay</string>
+    <string name="lbl_fl_subtitle">Fault location double-ended dari DFR relay saluran di kedua GI</string>
     <string name="cd_fl_back">Kembali</string>
     <string name="cd_fl_method_info">Info metode</string>
     <string name="lbl_fl_end_a">UJUNG A (GI A)</string>
@@ -905,50 +905,55 @@
     <string name="hint_fl_r0_total">R0 saluran (Ω) – opsional</string>
     <string name="hint_fl_x0_total">X0 saluran (Ω) – opsional</string>
     <string name="hint_fl_b1_total">B1 saluran (µS) – opsional</string>
-    <string name="hint_fl_offset">Jendela (siklus) – auto</string>
-    <string name="msg_fl_line_hint">Impedansi saluran sisi primer. Metode dua ujung hanya butuh Z1 (R1, X1); Z0 dipakai untuk pembanding single-ended dan tahanan gangguan pada gangguan tanah. Isi B1 untuk saluran panjang (di atas ±150 km) agar memakai model saluran terdistribusi (hiperbolik). Kosongkan jendela agar jendela gangguan paling stabil dipilih otomatis.</string>
+    <string name="hint_fl_offset">Data window (cycle setelah inception) – auto</string>
+    <string name="msg_fl_line_hint">Impedansi saluran sisi primer. Metode double-ended hanya membutuhkan Z1 (R1, X1); Z0 dipakai untuk cross-check single-ended (Takagi) dan estimasi Rf gangguan tanah. Isi B1 untuk saluran panjang (> ±150 km) agar memakai model distributed-parameter (hiperbolik). Kosongkan data window agar dipilih otomatis window dengan fasor paling steady.</string>
     <string name="btn_fl_analyze">Analisa lokasi gangguan</string>
 
     <string name="lbl_fl_result_header">HASIL LOKASI GANGGUAN</string>
     <string name="lbl_fl_from">Dari %s</string>
     <string name="msg_fl_pct">%1$s %% dari panjang saluran %2$s km</string>
-    <string name="msg_fl_spread">±%1$s km (sebaran %2$d jendela)</string>
+    <string name="msg_fl_spread">±%1$s km (sebaran %2$d data window)</string>
     <string name="lbl_fl_fault_type">GANGGUAN %1$s (%2$s)</string>
     <string name="lbl_fl_methods_header">Perbandingan metode</string>
-    <string name="lbl_fl_method_de_neg">Dua ujung, urutan negatif (utama)</string>
-    <string name="lbl_fl_method_de_pos_sup">Dua ujung, urutan positif superimposed (utama)</string>
-    <string name="lbl_fl_method_de_pos_total">Dua ujung, urutan positif (utama)</string>
-    <string name="lbl_fl_method_de_pos">Dua ujung, urutan positif</string>
-    <string name="lbl_fl_method_sync">Dua ujung, tersinkron waktu</string>
-    <string name="lbl_fl_method_takagi">Satu ujung (Takagi) dari %s</string>
-    <string name="lbl_fl_sync_untrusted">jam relay tidak sinkron – abaikan</string>
+    <string name="lbl_fl_method_de_neg">Double-ended tak tersinkron, urutan negatif V2/I2 (utama)</string>
+    <string name="lbl_fl_method_de_pos_sup">Double-ended tak tersinkron, urutan positif superimposed ΔV1/ΔI1 (utama)</string>
+    <string name="lbl_fl_method_de_pos_total">Double-ended tak tersinkron, urutan positif V1/I1 (utama)</string>
+    <string name="lbl_fl_method_de_pos">Double-ended tak tersinkron, urutan positif V1/I1</string>
+    <string name="lbl_fl_method_sync">Double-ended tersinkron timestamp DFR</string>
+    <string name="lbl_fl_method_takagi">Single-ended Takagi (polarisasi I2) dari %s</string>
+    <string name="lbl_fl_sync_untrusted">clock DFR tidak tersinkron (selisih inception > 2 ms) – abaikan</string>
     <string name="val_fl_method">%1$s km (Δ %2$s)</string>
     <string name="val_fl_from_end">= %1$s km dari %2$s</string>
     <string name="val_fl_na">tidak tersedia</string>
-    <string name="lbl_fl_profile_header">Tegangan titik gangguan sepanjang saluran</string>
-    <string name="msg_fl_profile_hint">|V| (urutan yang dipakai metode utama, kV) dihitung menyusuri saluran dari tiap ujung memakai tegangan dan arus ujung itu sendiri. Kedua kurva hanya bisa sama di titik gangguan sebenarnya – perpotongannya adalah lokasi gangguan.</string>
+    <string name="lbl_fl_profile_header">Profil |V| titik gangguan sepanjang saluran</string>
+    <string name="msg_fl_profile_hint">|V| di titik gangguan (urutan yang dipakai metode utama, kV), dihitung dengan propagasi model saluran dari tiap ujung memakai V dan I ujung tersebut. Kedua kurva hanya bisa sama di titik gangguan sebenarnya – titik potongnya adalah lokasi gangguan.</string>
     <string name="lbl_fl_curve_from">Dari %s</string>
     <string name="lbl_fl_details_header">Detail analisa</string>
-    <string name="lbl_fl_det_rf">Tahanan gangguan (estimasi)</string>
-    <string name="lbl_fl_det_dir">Arah dilihat %s</string>
-    <string name="val_fl_dir_fwd">Forward (ke arah saluran)</string>
-    <string name="val_fl_dir_rev">Reverse (ke arah bus)</string>
-    <string name="val_fl_dir_unknown">Tidak dapat ditentukan</string>
-    <string name="lbl_fl_det_delta">Sudut penyelarasan phasor A–B</string>
-    <string name="lbl_fl_det_inc_diff">Selisih waktu inception (jam DFR)</string>
-    <string name="lbl_fl_det_window">Jendela gangguan</string>
-    <string name="val_fl_window">%1$s siklus setelah inception, %2$d jendela</string>
+    <string name="lbl_fl_det_rf">Rf (estimasi resistansi gangguan)</string>
+    <string name="lbl_fl_det_dir">Directional (urutan negatif) %s</string>
+    <string name="val_fl_dir_fwd">Forward (arah saluran)</string>
+    <string name="val_fl_dir_rev">Reverse (arah bus)</string>
+    <string name="val_fl_dir_unknown">Indeterminate (torsi di batas karakteristik)</string>
+    <string name="lbl_fl_det_delta">Sudut sinkronisasi δ (fault)</string>
+    <string name="lbl_fl_det_delta_pre">Sudut sinkronisasi δ (load flow prefault)</string>
+    <string name="val_fl_delta_pre">%1$s° (Δ terhadap δ fault %2$s°)</string>
+    <string name="lbl_fl_det_z1_meas">Z1 terukur (load flow prefault)</string>
+    <string name="val_fl_z1_meas">%1$s + j%2$s Ω/km (±%3$s %%, 1σ)</string>
+    <string name="val_fl_z1_meas_na">tidak valid – drop tegangan akibat arus beban prefault terlalu kecil terhadap error VT/CT</string>
+    <string name="lbl_fl_det_inc_diff">Selisih waktu fault inception (timestamp DFR)</string>
+    <string name="lbl_fl_det_window">Data window</string>
+    <string name="val_fl_window">Mulai %1$s cycle setelah inception, %2$d window (median)</string>
     <string name="lbl_fl_det_model">Model saluran</string>
-    <string name="val_fl_model_lumped">Terpusat (saluran pendek/menengah)</string>
-    <string name="val_fl_model_dist">Terdistribusi / hiperbolik (saluran panjang)</string>
+    <string name="val_fl_model_lumped">Lumped-parameter (saluran pendek/menengah)</string>
+    <string name="val_fl_model_dist">Distributed-parameter / hiperbolik (saluran panjang)</string>
     <string name="lbl_fl_det_record">Record %s</string>
-    <string name="val_fl_record">%1$s Hz (%2$d/siklus) %3$s\ninception t=%4$s ms (%5$s)</string>
-    <string name="val_fl_src_i">arus</string>
-    <string name="val_fl_src_v">tegangan</string>
-    <string name="val_fl_src_t">waktu trigger</string>
-    <string name="lbl_fl_phasor_header">Phasor (primer, sudut ref. Va pra-gangguan)</string>
-    <string name="lbl_fl_prefault">Pra-gangguan</string>
-    <string name="lbl_fl_fault">Gangguan</string>
+    <string name="val_fl_record">%1$s Hz (%2$d sampel/cycle) %3$s\ninception t=%4$s ms (deteksi %5$s)</string>
+    <string name="val_fl_src_i">superimposed arus</string>
+    <string name="val_fl_src_v">superimposed tegangan</string>
+    <string name="val_fl_src_t">waktu trigger cfg</string>
+    <string name="lbl_fl_phasor_header">Fasor (primer, referensi sudut Va prefault)</string>
+    <string name="lbl_fl_prefault">Prefault</string>
+    <string name="lbl_fl_fault">Fault</string>
     <string name="btn_fl_share">Bagikan laporan</string>
     <string name="btn_fl_fix_polarity">Balik polaritas arus %s &amp; analisa ulang</string>
     <string name="ttl_fl_report">Laporan lokasi gangguan dua ujung</string>
@@ -978,7 +983,7 @@
     <string name="lbl_fl_pdf_analyzed">Dianalisa %s</string>
     <string name="lbl_fl_axis_x">Jarak dari %s (km)</string>
     <string name="lbl_fl_axis_y">%s titik gangguan (kV)</string>
-    <string name="lbl_fl_col_mag">Besaran</string>
+    <string name="lbl_fl_col_mag">Magnitude</string>
     <string name="lbl_fl_col_angle">Sudut</string>
     <string name="msg_fl_restoring">Memulihkan analisa terakhir…</string>
     <string name="lbl_fl_record_files">Record:</string>
@@ -1028,30 +1033,32 @@
     <string name="msg_fl_analyzing">Menganalisa…</string>
     <string name="ttl_fl_error">Tidak dapat dilanjutkan</string>
     <string name="err_fl_mapping">Mapping kanal %s belum lengkap – tentukan Va, Vb, Vc, Ia, Ib, Ic.</string>
-    <string name="err_fl_rate">Sampling rate %1$s terlalu rendah (%2$s Hz) – minimal 8 sampel per siklus.</string>
-    <string name="err_fl_short">Record %s terlalu pendek di sekitar gangguan (butuh minimal ±1 siklus sebelum dan 2 siklus sesudah inception).</string>
+    <string name="err_fl_rate">Sampling rate %1$s terlalu rendah (%2$s Hz) – minimal 8 sampel per cycle.</string>
+    <string name="err_fl_short">Record %s terlalu pendek di sekitar gangguan (butuh minimal ±1 cycle prefault dan 2 cycle setelah inception).</string>
     <string name="err_fl_no_signal">Tidak ada sinyal tegangan/arus yang bisa dipakai – cek mapping kanal dan skala.</string>
     <string name="err_fl_exception">Analisa gagal: %s</string>
 
     <string name="warn_fl_sec_no_ratio">%s: nilai sekunder tanpa rasio di cfg – hasil km salah kecuali pengali VT/CT diisi di Mapping kanal.</string>
     <string name="warn_fl_freq_diff">Frekuensi nominal kedua record berbeda (%1$s vs %2$s Hz).</string>
-    <string name="warn_fl_inc_trigger">%s: awal gangguan tidak terdeteksi dari sinyal – dipakai waktu trigger.</string>
-    <string name="warn_fl_no_prefault">%s: data pra-gangguan kurang – pengecekan superimposed dilewati.</string>
-    <string name="warn_fl_short_fault">Gangguan cepat padam – jendela digeser agar muat, akurasi bisa berkurang.</string>
-    <string name="warn_fl_unstable">Phasor berubah selama jendela (%1$s %%) – CT jenuh, gangguan berkembang, atau PMT membuka; verifikasi hasilnya.</string>
-    <string name="warn_fl_no_root">Kedua kurva |V| tidak berpotongan – dipakai titik terdekat. Cek pasangan record, polaritas CT, dan data saluran.</string>
-    <string name="warn_fl_two_roots">Persamaan punya solusi kedua di %1$s km dari %2$s; dipilih yang konsisten dengan urutan positif.</string>
-    <string name="warn_fl_out_of_line">Hasil di luar saluran (%1$s %%) – gangguan eksternal, pasangan record salah, polaritas CT, atau data saluran?</string>
-    <string name="warn_fl_dir_rev">%s melihat gangguan arah REVERSE – polaritas CT kemungkinan terbalik (atau gangguan bukan di saluran ini).</string>
-    <string name="warn_fl_no_z0">Isi Z0 (R0, X0) untuk pembanding single-ended dan tahanan gangguan pada gangguan tanah.</string>
-    <string name="warn_fl_time_gap">Kedua record berselisih %s detik – pastikan keduanya dari kejadian yang sama.</string>
-    <string name="warn_fl_phase_rot">%s: tegangan urutan negatif lebih besar dari positif sebelum gangguan – urutan fasa atau mapping salah (S dan T tertukar?).</string>
-    <string name="warn_fl_pre_v_mismatch">Tegangan pra-gangguan berbeda (%1$s kV vs %2$s kV) – cek rasio/skala VT.</string>
-    <string name="warn_fl_pre_i_mismatch">Arus beban pra-gangguan berbeda (%1$s A vs %2$s A) – cek rasio/skala CT (atau ada beban tap).</string>
-    <string name="warn_fl_pre_polarity">Arus beban pra-gangguan masuk ke saluran di kedua ujung – salah satu polaritas CT kemungkinan terbalik.</string>
+    <string name="warn_fl_inc_trigger">%s: fault inception tidak terdeteksi dari sinyal – dipakai waktu trigger cfg.</string>
+    <string name="warn_fl_no_prefault">%s: data prefault kurang – quantity superimposed dan validasi load flow dilewati.</string>
+    <string name="warn_fl_short_fault">Durasi gangguan pendek (clearing cepat) – data window digeser agar muat dalam record, akurasi bisa turun.</string>
+    <string name="warn_fl_unstable">Fasor tidak steady selama data window (perubahan %1$s %%) – indikasi saturasi CT, evolving fault, atau PMT mulai membuka; verifikasi hasil.</string>
+    <string name="warn_fl_no_root">Kurva |V| dari kedua ujung tidak berpotongan – dipakai titik selisih minimum. Cek pasangan record, polaritas CT, dan parameter saluran.</string>
+    <string name="warn_fl_two_roots">Persamaan |V| punya root kedua di %1$s km dari %2$s; dipilih root yang konsisten dengan urutan positif.</string>
+    <string name="warn_fl_out_of_line">Hasil di luar saluran (%1$s %%) – gangguan eksternal, pasangan record salah, polaritas CT, atau parameter saluran?</string>
+    <string name="warn_fl_dir_rev">%s melihat gangguan arah REVERSE – polaritas CT kemungkinan terbalik (atau gangguan di luar saluran ini).</string>
+    <string name="warn_fl_no_z0">Isi Z0 (R0, X0) untuk cross-check Takagi dan estimasi Rf pada gangguan tanah.</string>
+    <string name="warn_fl_time_gap">Timestamp kedua record berselisih %s detik – pastikan keduanya dari event yang sama.</string>
+    <string name="warn_fl_phase_rot">%s: V2 > V1 pada kondisi prefault – urutan fasa atau mapping kanal salah (S dan T tertukar?).</string>
+    <string name="warn_fl_pre_v_mismatch">V1 prefault kedua ujung berbeda (%1$s kV vs %2$s kV) – cek rasio/skala VT.</string>
+    <string name="warn_fl_pre_i_mismatch">Arus beban prefault berbeda (%1$s A vs %2$s A) – cek rasio/skala CT (atau ada beban tap).</string>
+    <string name="warn_fl_pre_polarity">Arus beban prefault masuk ke saluran di kedua ujung – polaritas salah satu CT kemungkinan terbalik.</string>
+    <string name="warn_fl_sync_pre_mismatch">δ dari load flow prefault berbeda %1$s° (%2$s ms) dari δ metode utama – cek Z1/B1 saluran, polaritas CT, atau pasangan record.</string>
+    <string name="warn_fl_z1_mismatch">X1 terukur dari load flow prefault %1$s Ω/km vs input %2$s Ω/km (%3$s %%) – cek parameter saluran; error Z1 langsung menggeser hasil km.</string>
 
     <string name="ttl_fl_info">Metode</string>
-    <string name="msg_fl_info">Metode utama: lokasi gangguan dua ujung tak-tersinkron (IEEE C37.114-2014; Novosel dkk. 1996; Tziouvaras, Roberts &amp; Benmouyal 2001).\n\n1. Record COMTRADE relay saluran di GI A dan GI B dibaca (ASCII, BINARY, BINARY32, FLOAT32, zip) lalu dikonversi ke nilai primer.\n\n2. Awal gangguan (inception) dideteksi otomatis di tiap record dengan detektor superimposed siklus-ke-siklus.\n\n3. Phasor fundamental dihitung dengan least-squares satu siklus (fundamental + harmonisa 2–3 + tren DC), sehingga DC offset arus gangguan tidak membiaskan hasil.\n\n4. Komponen simetris dihitung. Gangguan tidak seimbang memakai urutan negatif (V2, I2); gangguan 3 fasa memakai urutan positif superimposed (gangguan − pra-gangguan).\n\n5. Tegangan titik gangguan dihitung menyusuri model saluran dari tiap ujung: |V2A − m·Z1·I2A| = |V2B − (1−m)·Z1·I2B|. Yang disamakan hanya magnitudo, jadi jam kedua relay TIDAK perlu sinkron, dan hasilnya tidak dipengaruhi tahanan gangguan, arus beban, maupun kopling mutual urutan nol. Saluran panjang bisa memakai model terdistribusi (hiperbolik).\n\n6. Persamaan diselesaikan di beberapa jendela berturut-turut; hasil akhir = median, sebarannya ditampilkan sebagai ± km.\n\n7. Pembanding: dua ujung urutan positif, dua ujung tersinkron waktu (valid hanya bila relay tersinkron GPS), dan Takagi satu ujung dari masing-masing GI. Selisih besar antar metode menandakan data perlu dicek.\n\n8. Sinkronisasi vektor (voltage only): GI A dikunci di titik arus gangguan tertinggi dan rekaman GI B digeser waktunya sampai sudut V1 dan V0 kedua ujung sama, dimulai dari awal gangguan yang terdeteksi agar kedua rekaman menunjukkan momen yang sama. Pergeseran bisa disesuaikan dengan slider; lokasi dua ujung tersinkron dihitung ulang dengan vektor yang sudah diselaraskan. Metode ini mengasumsikan sudut tegangan kedua ujung berdekatan saat gangguan, sehingga metode tak-tersinkron tetap menjadi hasil utama bawaan.\n\nSyarat: kedua record dari kejadian yang sama, CT kedua ujung mengukur arus yang masuk ke saluran, dan impedansi saluran benar. Akurasi umumnya 1–2 persen panjang saluran, terutama ditentukan ketelitian Z1.\n\nMetode gelombang berjalan (travelling wave) tidak dipakai: DFR relay hanya sampling 1–4 kHz, jauh terlalu lambat untuk gelombang berjalan.</string>
+    <string name="msg_fl_info">Metode utama: fault location double-ended tak tersinkron (IEEE C37.114-2014 §6.2; Novosel dkk. 1996; Tziouvaras, Roberts &amp; Benmouyal 2001).\n\n1. Record COMTRADE relay saluran di GI A dan GI B dibaca (ASCII, BINARY, BINARY32, FLOAT32, zip/rar) dan dikonversi ke nilai primer.\n\n2. Fault inception dideteksi di tiap record dengan detektor superimposed cycle-to-cycle (arus; tegangan untuk ujung weak infeed).\n\n3. Fasor fundamental diestimasi dengan least-squares fit satu cycle (fundamental + harmonisa ke-2/ke-3 + tren DC), sehingga DC offset arus gangguan tidak membiaskan fasor.\n\n4. Komponen simetris dihitung. Gangguan tak seimbang memakai urutan negatif (V2, I2); gangguan 3 fasa memakai urutan positif superimposed (fault − prefault).\n\n5. Tegangan titik gangguan dihitung dengan propagasi model saluran dari tiap ujung: |V2A − m·Z1·I2A| = |V2B − (1−m)·Z1·I2B|. Hanya magnitude yang disamakan, sehingga clock kedua relay TIDAK perlu tersinkron, dan hasilnya tidak dipengaruhi Rf, arus beban, maupun kopling mutual urutan nol. Saluran panjang memakai model distributed-parameter (hiperbolik).\n\n6. Persamaan diselesaikan pada beberapa data window berurutan (step 1/8 cycle); hasil akhir = median, sebarannya ditampilkan sebagai ± km.\n\n7. Cross-check: double-ended urutan positif, double-ended tersinkron timestamp DFR (valid hanya bila relay tersinkron GPS/PTP), dan single-ended Takagi dari masing-masing GI. Selisih besar antar metode menandakan data perlu dicek.\n\n8. Sudut sinkronisasi δ: solusi metode utama sekaligus memberi rotasi fasor B→A, δ = arg VF(A) − arg VF(B) (circular mean seluruh data window). Time alignment record: τ = δ/ω + k·T, dengan k dipilih terdekat ke selisih fault inception. Pada τ ini fasor kedua ujung terbaca di instant yang sama dan lokasi tersinkron identik dengan metode utama. Time alignment voltage-only (menyamakan sudut V1/V0 kedua ujung, tombol V1/V0) hanya pembanding: hasilnya bias sebesar sudut beban + drop tegangan saluran (tipikal 0,2–3 ms, bisa puluhan km pada gangguan 3 fasa berbeban).\n\n9. Validasi load flow prefault: V1/I1 prefault GI A dipropagasikan sepanjang saluran harus menghasilkan V1 prefault GI B, sehingga diperoleh δ yang independen dari persamaan gangguan. Selisih lebih dari 4° menandakan parameter saluran, polaritas CT, atau pasangan record bermasalah. Dengan δ tersebut Z1 saluran juga diukur dari load flow: Z1 = (VA − VB·e^jδ) / I_seri (ekuivalen π), diiterasi sampai konvergen (fixed point = Z1 aktual, independen dari Z1 input). Ketidakpastian 1σ dihitung dari error VT/CT kelas 0,5 (0,5 persen, 0,5°) dan sebaran δ relatif terhadap drop tegangan saluran; hasil ditolak bila σ di atas 50 persen, peringatan muncul bila σ ≤ 10 persen dan X1 terukur berbeda lebih dari maks(10 persen, 2σ) dari input.\n\nSyarat: kedua record dari event yang sama, CT kedua ujung mengukur arus yang masuk ke saluran, dan impedansi saluran benar. Akurasi tipikal 1–2 persen panjang saluran, terutama ditentukan akurasi Z1.\n\nMetode travelling wave tidak dipakai: DFR relay hanya sampling 1–4 kHz, jauh terlalu lambat untuk travelling wave.</string>
 
     <string name="help_ttl_fl">FL Double Ended</string>
     <string name="help_sum_fl">Tentukan lokasi gangguan saluran dari DFR kedua GI</string>
@@ -1067,7 +1074,7 @@
     <string name="help_feat_fl_1_title">Menentukan Lokasi Gangguan</string>
     <string name="help_feat_fl_1_steps">1. Di UJUNG A pilih gardu induk dan relay saluran, lalu ketuk Unduh dari relay (atau File lokal) dan pilih record gangguan.\n2. Lakukan hal yang sama di UJUNG B - record yang waktunya paling dekat dengan UJUNG A diberi tanda bintang.\n3. Isi panjang saluran dan R1/X1 (per km, atau aktifkan nilai total saluran). Tambahkan R0/X0 untuk pembanding gangguan tanah dan B1 untuk saluran panjang.\n4. Ketuk Analisa lokasi gangguan.</string>
     <string name="help_feat_fl_2_title">Membaca Hasil</string>
-    <string name="help_feat_fl_2_steps">1. Angka besar adalah jarak dari masing-masing GI; nilai ± adalah sebaran dari beberapa jendela gangguan.\n2. Perbandingan metode menampilkan semua hasil sebagai km dari UJUNG A beserta selisihnya terhadap hasil utama.\n3. Grafik menampilkan tegangan titik gangguan yang dihitung dari tiap ujung - perpotongannya adalah lokasi gangguan.\n4. Ketuk Bagikan laporan untuk mengirim hasil sebagai teks.</string>
+    <string name="help_feat_fl_2_steps">1. Angka besar adalah jarak dari masing-masing GI; nilai ± adalah sebaran hasil dari beberapa data window.\n2. Perbandingan metode menampilkan semua hasil sebagai km dari UJUNG A beserta selisihnya terhadap hasil utama.\n3. Grafik menampilkan profil |V| titik gangguan yang dihitung dari tiap ujung – titik potongnya adalah lokasi gangguan.\n4. Detail analisa memuat sudut sinkronisasi δ, validasi δ dari load flow prefault, dan Z1 terukur – bandingkan dengan parameter saluran yang diinput.\n5. Ketuk Bagikan laporan untuk mengirim hasil sebagai teks.</string>
     <string name="help_feat_fl_3_title">Jika Hasil Meragukan</string>
     <string name="help_feat_fl_3_steps">1. Baca peringatan {ic:warning} di bawah hasil.\n2. Jika salah satu ujung melihat gangguan arah REVERSE, ketuk tombol untuk membalik polaritas arus ujung tersebut dan analisa ulang.\n3. Pastikan kedua record dari kejadian yang sama dan impedansi saluran dalam ohm sisi primer.\n4. Buka {ic:settings} Mapping kanal bila ada kanal yang salah terdeteksi atau record bernilai sekunder tanpa rasio.</string>
 
@@ -1134,20 +1141,22 @@
     <string name="msg_line_load_default_ok">%d saluran dimuat dari data bawaan</string>
 
     <!-- FL Double Ended: voltage-only vector synchronisation, saving -->
-    <string name="lbl_fl_sync_header">Sinkronisasi vektor (voltage only)</string>
-    <string name="msg_fl_sync_hint">GI A dikunci di titik arus gangguan tertinggi; rekaman GI B digeser waktunya sampai vektor V1 dan V0-nya berimpit dengan GI A (voltage only). Auto mencari dalam setengah siklus dari awal gangguan, sehingga kedua rekaman menunjukkan momen gangguan yang sama. Geser slider untuk menggeser GI B secara manual - phasor kedua relay digambar berjajar dengan referensi sudut yang sama (VR GI A), sehingga sudut antar kedua relay terlihat.</string>
+    <string name="lbl_fl_sync_header">Time alignment record A–B (sinkronisasi fasor)</string>
+    <string name="msg_fl_sync_hint">Record GI A dikunci di titik arus gangguan maksimum (window steady); record GI B digeser sebesar τ. Auto δ: τ = δ/ω dari sudut sinkronisasi metode utama, kelipatan periode dipilih yang terdekat ke selisih fault inception – tanpa asumsi sudut tegangan. V1/V0: τ yang menyamakan sudut V1 (dan V0) kedua ujung (voltage-only) – bias sebesar sudut beban + drop tegangan saluran, hanya sebagai pembanding. Slider / B ±0,1 ms untuk koreksi manual; fasor kedua relay digambar dengan referensi sudut yang sama (VR GI A).</string>
     <string name="val_fl_sync_ref">Referensi %1$s: t = %2$s ms, arus gangguan %3$s A</string>
-    <string name="val_fl_sync_shift_ts">Geser %1$s: %2$s ms dari timestamp DFR (auto %3$s ms)</string>
-    <string name="val_fl_sync_shift_inc">Geser %1$s: %2$s ms dari awal gangguan (auto %3$s ms)</string>
-    <string name="val_fl_sync_angles">Selisih sudut: V1 %1$s°, V0 %2$s°</string>
-    <string name="val_fl_sync_angles_nov0">Selisih sudut: V1 %1$s° (V0 ~ 0, bukan gangguan tanah)</string>
-    <string name="val_fl_sync_loc">Lokasi (sinkron voltage only): %1$s km dari %2$s</string>
-    <string name="msg_fl_sync_out">Pada pergeseran ini rekaman GI B tidak punya data - geser slider kembali.</string>
+    <string name="val_fl_sync_shift_ts">τ %1$s: %2$s ms terhadap timestamp DFR (auto δ %3$s ms)</string>
+    <string name="val_fl_sync_shift_inc">τ %1$s: %2$s ms terhadap fault inception (auto δ %3$s ms)</string>
+    <string name="val_fl_sync_tau_sources">τ δ prefault %1$s ms • τ V1/V0 %2$s ms</string>
+    <string name="val_fl_sync_angles">Selisih sudut B−A: V1 %1$s°, V0 %2$s°</string>
+    <string name="val_fl_sync_angles_nov0">Selisih sudut B−A: V1 %1$s° (V0 ≈ 0, bukan gangguan tanah)</string>
+    <string name="val_fl_sync_loc">Lokasi double-ended tersinkron pada τ ini: %1$s km dari %2$s</string>
+    <string name="msg_fl_sync_out">Pada τ ini record GI B tidak punya data – geser slider kembali.</string>
     <string name="btn_fl_shift_minus">B -0,1 ms</string>
     <string name="btn_fl_shift_plus">B +0,1 ms</string>
-    <string name="btn_fl_shift_auto">Auto</string>
-    <string name="lbl_fl_sync_main">Jadikan lokasi tersinkron sebagai hasil utama</string>
-    <string name="lbl_fl_method_sync_v">Dua ujung, sinkron vektor (voltage only)</string>
+    <string name="btn_fl_shift_auto">Auto δ</string>
+    <string name="btn_fl_shift_volt">V1/V0</string>
+    <string name="lbl_fl_sync_main">Jadikan lokasi tersinkron (τ) sebagai hasil utama</string>
+    <string name="lbl_fl_method_sync_v">Double-ended tersinkron (time alignment τ)</string>
     <string name="btn_fl_save">Simpan hasil</string>
     <string name="btn_fl_open_pdf">Buka PDF</string>
     <string name="cd_fl_history">Hasil tersimpan</string>
@@ -1155,11 +1164,11 @@
     <string name="msg_fl_history_empty">Belum ada hasil analisa tersimpan. Ketuk Simpan hasil setelah analisa.\n\nTekan lama hasil tersimpan untuk menghapusnya.</string>
     <string name="msg_fl_saved">Hasil disimpan di riwayat (ikon jam di atas) dan sebagai laporan PDF:\n%s</string>
     <string name="msg_fl_save_fail">Gagal menyimpan: %s</string>
-    <string name="lbl_fl_saved_banner">Hasil tersimpan • %1$s (rekaman tidak dimuat, pergeseran vektor sesuai saat disimpan)</string>
+    <string name="lbl_fl_saved_banner">Hasil tersimpan • %1$s (record tidak dimuat, τ sesuai saat disimpan)</string>
     <string name="ttl_fl_delete_saved">Hapus Hasil Tersimpan</string>
     <string name="msg_fl_delete_saved">Hapus hasil analisa %s? Laporan PDF tetap ada di Download/DFR/FL_Reports.</string>
-    <string name="help_feat_fl_4_title">Sinkronisasi Vektor &amp; Menyimpan Hasil</string>
-    <string name="help_feat_fl_4_steps">1. Di bagian Sinkronisasi vektor, GI A dikunci di titik arus gangguan tertinggi dan GI B digeser otomatis sampai sudut V1/V0 sama.\n2. Geser slider atau ketuk B -0,1 / +0,1 ms untuk menyesuaikan GI B secara manual - vektor dan lokasi tersinkron langsung ter-update.\n3. Aktifkan "Jadikan lokasi tersinkron sebagai hasil utama" bila lebih dipercaya.\n4. Ketuk {ic:save} Simpan hasil untuk menyimpan analisa dan membuat laporan PDF; buka lagi lewat ikon {ic:history} di atas.</string>
+    <string name="help_feat_fl_4_title">Time Alignment &amp; Menyimpan Hasil</string>
+    <string name="help_feat_fl_4_steps">1. Di bagian Time alignment, record GI A dikunci di titik arus gangguan maksimum dan GI B digeser otomatis sebesar τ = δ/ω dari sudut sinkronisasi metode utama.\n2. Geser slider atau ketuk B -0,1 / +0,1 ms untuk koreksi manual; tombol V1/V0 menerapkan τ voltage-only sebagai pembanding – fasor dan lokasi tersinkron langsung ter-update.\n3. Aktifkan \"Jadikan lokasi tersinkron (τ) sebagai hasil utama\" bila diperlukan.\n4. Ketuk {ic:save} Simpan hasil untuk menyimpan analisa dan membuat laporan PDF; buka lagi lewat ikon {ic:history} di atas.</string>
 
     <string name="lbl_fl_values_primary">Nilai: primer, sesaat (instantaneous) dari DFR</string>
     <string name="lbl_fl_values_no_ratio">Nilai: SEKUNDER - cfg tidak punya rasio VT/CT, isi di Mapping kanal</string>

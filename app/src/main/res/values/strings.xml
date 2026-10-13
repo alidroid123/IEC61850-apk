@@ -968,7 +968,12 @@
     <string name="val_fl_dir_fwd">Forward (into the line)</string>
     <string name="val_fl_dir_rev">Reverse (towards the bus)</string>
     <string name="val_fl_dir_unknown">Undetermined</string>
-    <string name="lbl_fl_det_delta">Phasor alignment angle A–B</string>
+    <string name="lbl_fl_det_delta">Sync angle δ (fault)</string>
+    <string name="lbl_fl_det_delta_pre">Sync angle δ (pre-fault load flow)</string>
+    <string name="val_fl_delta_pre">%1$s° (Δ vs fault δ %2$s°)</string>
+    <string name="lbl_fl_det_z1_meas">Z1 measured (pre-fault load flow)</string>
+    <string name="val_fl_z1_meas">%1$s + j%2$s Ω/km (±%3$s %%, 1σ)</string>
+    <string name="val_fl_z1_meas_na">not valid – the voltage drop of the pre-fault load current is too small against VT/CT errors</string>
     <string name="lbl_fl_det_inc_diff">Inception time difference (DFR clocks)</string>
     <string name="lbl_fl_det_window">Fault window</string>
     <string name="val_fl_window">%1$s cycles after inception, %2$d windows</string>
@@ -1070,7 +1075,7 @@
     <string name="warn_fl_sec_no_ratio">%s: secondary values without a ratio in the cfg – the km result is wrong unless the VT/CT multipliers are set in Channel mapping.</string>
     <string name="warn_fl_freq_diff">Nominal frequency differs between the records (%1$s vs %2$s Hz).</string>
     <string name="warn_fl_inc_trigger">%s: fault inception not detected in the signals – the trigger time was used.</string>
-    <string name="warn_fl_no_prefault">%s: not enough pre-fault data – superimposed checks skipped.</string>
+    <string name="warn_fl_no_prefault">%s: not enough pre-fault data – superimposed quantities and load-flow checks skipped.</string>
     <string name="warn_fl_short_fault">The fault was cleared quickly – the window was shifted to fit and accuracy may be lower.</string>
     <string name="warn_fl_unstable">Phasors change during the window (%1$s %%) – CT saturation, evolving fault or breaker opening; verify the result.</string>
     <string name="warn_fl_no_root">The two |V| curves never cross – the closest approach was used. Check the record pairing, CT polarity and line data.</string>
@@ -1083,9 +1088,11 @@
     <string name="warn_fl_pre_v_mismatch">Pre-fault voltages differ (%1$s kV vs %2$s kV) – check the VT ratio/scaling.</string>
     <string name="warn_fl_pre_i_mismatch">Pre-fault load currents differ (%1$s A vs %2$s A) – check the CT ratio/scaling (or a tapped load).</string>
     <string name="warn_fl_pre_polarity">Pre-fault load current flows into the line at both ends – one CT polarity is probably inverted.</string>
+    <string name="warn_fl_sync_pre_mismatch">δ from the pre-fault load flow differs by %1$s° (%2$s ms) from the main method\'s δ – check line Z1/B1, CT polarity or the record pairing.</string>
+    <string name="warn_fl_z1_mismatch">X1 measured from the pre-fault load flow is %1$s Ω/km vs %2$s Ω/km entered (%3$s %%) – check the line data; a Z1 error shifts the km result directly.</string>
 
     <string name="ttl_fl_info">Method</string>
-    <string name="msg_fl_info">Main method: unsynchronised two-ended fault location (IEEE C37.114-2014; Novosel et al. 1996; Tziouvaras, Roberts &amp; Benmouyal 2001).\n\n1. The COMTRADE records of the line relays at substation A and B are read (ASCII, BINARY, BINARY32, FLOAT32, zip) and converted to primary values.\n\n2. Fault inception is detected in each record with a cycle-to-cycle superimposed detector.\n\n3. Fundamental phasors are estimated by a one-cycle least-squares fit (fundamental + 2nd/3rd harmonic + DC trend), so the decaying DC offset of the fault current does not bias them.\n\n4. Symmetrical components are calculated. Unbalanced faults use the negative sequence (V2, I2); three-phase faults use the superimposed positive sequence (fault minus pre-fault).\n\n5. The fault-point voltage is computed by walking the line model from each end: |V2A − m·Z1·I2A| = |V2B − (1−m)·Z1·I2B|. Only magnitudes are compared, so the two relay clocks do NOT need to be synchronised, and the result is not affected by fault resistance, load current or zero-sequence mutual coupling. Long lines can use the distributed (hyperbolic) model.\n\n6. The equation is solved on several consecutive windows; the final result is their median and the spread is shown as ± km.\n\n7. Cross-checks: two-ended positive sequence, two-ended time-synchronised (valid only with GPS-synchronised relays) and single-ended Takagi from each end. A large difference between methods means the data should be checked.\n\n8. Vector synchronisation (voltage only): substation A is fixed at its highest fault current and record B is shifted in time until the V1 and V0 angles of both ends agree, starting from the detected fault inceptions so both records show the same moment. The shift can be adjusted with a slider; the time-synchronised two-ended location is recalculated with the aligned vectors. It assumes both ends\' voltages are close in angle during the fault, so the unsynchronised method stays the default main result.\n\nRequirements: both records belong to the same event, both CTs measure current flowing into the line, and the line impedance is correct. Typical accuracy is 1–2 percent of line length, set mainly by the accuracy of Z1.\n\nTravelling-wave location is not used: relay DFRs sample at 1–4 kHz, far too slow for travelling waves.</string>
+    <string name="msg_fl_info">Main method: unsynchronised two-ended fault location (IEEE C37.114-2014; Novosel et al. 1996; Tziouvaras, Roberts &amp; Benmouyal 2001).\n\n1. The COMTRADE records of the line relays at substation A and B are read (ASCII, BINARY, BINARY32, FLOAT32, zip) and converted to primary values.\n\n2. Fault inception is detected in each record with a cycle-to-cycle superimposed detector.\n\n3. Fundamental phasors are estimated by a one-cycle least-squares fit (fundamental + 2nd/3rd harmonic + DC trend), so the decaying DC offset of the fault current does not bias them.\n\n4. Symmetrical components are calculated. Unbalanced faults use the negative sequence (V2, I2); three-phase faults use the superimposed positive sequence (fault minus pre-fault).\n\n5. The fault-point voltage is computed by walking the line model from each end: |V2A − m·Z1·I2A| = |V2B − (1−m)·Z1·I2B|. Only magnitudes are compared, so the two relay clocks do NOT need to be synchronised, and the result is not affected by fault resistance, load current or zero-sequence mutual coupling. Long lines can use the distributed (hyperbolic) model.\n\n6. The equation is solved on several consecutive windows; the final result is their median and the spread is shown as ± km.\n\n7. Cross-checks: two-ended positive sequence, two-ended time-synchronised (valid only with GPS-synchronised relays) and single-ended Takagi from each end. A large difference between methods means the data should be checked.\n\n8. Sync angle δ: the solution of the main method also gives the B→A phasor rotation, δ = arg VF(A) − arg VF(B) (circular mean over all windows). Record time alignment: τ = δ/ω + k·T, k chosen nearest the fault-inception offset. At this τ both ends are read at the same instant and the time-aligned location equals the main method. The voltage-only alignment (V1/V0 angles of both ends made equal, V1/V0 button) is a comparison only: it is biased by the load angle + line voltage drop (typically 0.2–3 ms, tens of km for a loaded three-phase fault).\n\n9. Pre-fault load-flow check: A\'s pre-fault V1/I1 propagated along the line must reproduce B\'s pre-fault V1, which gives a δ independent of the fault equation. A difference above 4° points at the line data, a CT polarity or the record pairing. With that δ the line Z1 is also measured from the load flow: Z1 = (VA − VB·e^jδ) / I_series (pi equivalent), iterated to convergence (the fixed point is the actual Z1, whatever was entered). The 1σ uncertainty comes from class 0.5 VT/CT errors (0.5 percent, 0.5°) and the δ spread relative to the line voltage drop; the result is rejected above 50 percent and a warning is shown when σ ≤ 10 percent and the measured X1 differs from the entered one by more than max(10 percent, 2σ).\n\nRequirements: both records belong to the same event, both CTs measure current flowing into the line, and the line impedance is correct. Typical accuracy is 1–2 percent of line length, set mainly by the accuracy of Z1.\n\nTravelling-wave location is not used: relay DFRs sample at 1–4 kHz, far too slow for travelling waves.</string>
 
     <string name="help_ttl_fl">FL Double Ended</string>
     <string name="help_sum_fl">Locate a line fault from the DFRs of both substations</string>
@@ -1101,7 +1108,7 @@
     <string name="help_feat_fl_1_title">Locating a Fault</string>
     <string name="help_feat_fl_1_steps">1. Under END A pick the substation and the line relay, then tap Download from relay (or Local file) and choose the fault record.\n2. Do the same under END B - the record closest in time to END A is marked with a star.\n3. Fill in the line length and R1/X1 (per km, or switch on whole-line totals). Add R0/X0 for earth-fault cross-checks and B1 for long lines.\n4. Tap Analyze fault location.</string>
     <string name="help_feat_fl_2_title">Reading the Result</string>
-    <string name="help_feat_fl_2_steps">1. The big numbers are the distance from each substation; the ± value is the spread over several fault windows.\n2. The method comparison shows every result as km from END A with its difference to the main result.\n3. The chart shows the fault-point voltage computed from each end - the crossing is the fault.\n4. Tap Share report to send the result as text.</string>
+    <string name="help_feat_fl_2_steps">1. The big numbers are the distance from each substation; the ± value is the spread over several fault windows.\n2. The method comparison shows every result as km from END A with its difference to the main result.\n3. The chart shows the fault-point |V| computed from each end - the crossing is the fault.\n4. Analysis details list the sync angle δ, its check against the pre-fault load flow and the measured Z1 - compare them with the line data entered.\n5. Tap Share report to send the result as text.</string>
     <string name="help_feat_fl_3_title">When the Result Looks Wrong</string>
     <string name="help_feat_fl_3_steps">1. Read the {ic:warning} warnings under the result.\n2. If one end sees the fault in REVERSE, tap the button to invert that end\'s current polarity and re-analyze.\n3. Check that both records belong to the same event and that the line impedance is primary-side ohms.\n4. Open {ic:settings} Channel mapping if a channel was detected wrongly or the record is in secondary values without ratios.</string>
 
@@ -1168,20 +1175,22 @@
     <string name="msg_line_load_default_ok">%d line(s) loaded from the built-in data</string>
 
     <!-- FL Double Ended: voltage-only vector synchronisation, saving -->
-    <string name="lbl_fl_sync_header">Vector synchronisation (voltage only)</string>
-    <string name="msg_fl_sync_hint">Substation A is fixed at its highest fault current; record B is shifted in time until its V1 and V0 vectors line up with A (voltage only). Auto searches within half a cycle of the fault inception, so both records show the same moment of the fault. Drag the slider to shift B by hand - both relays\' phasors are drawn side by side on the same angle reference (VR of A), so the angle between them is visible.</string>
+    <string name="lbl_fl_sync_header">Record time alignment A–B (phasor sync)</string>
+    <string name="msg_fl_sync_hint">Record A is fixed at its maximum fault current (steady window); record B is shifted by τ. Auto δ: τ = δ/ω from the sync angle of the main method, the whole period chosen nearest the fault-inception offset – no assumption about voltage angles. V1/V0: the τ that makes the V1 (and V0) angles of both ends equal (voltage only) – biased by the load angle + line voltage drop, shown for comparison only. Slider / B ±0.1 ms for manual correction; both relays\' phasors are drawn on the same angle reference (VR of A).</string>
     <string name="val_fl_sync_ref">Reference %1$s: t = %2$s ms, fault current %3$s A</string>
-    <string name="val_fl_sync_shift_ts">Shift %1$s: %2$s ms vs DFR timestamps (auto %3$s ms)</string>
-    <string name="val_fl_sync_shift_inc">Shift %1$s: %2$s ms vs fault inception (auto %3$s ms)</string>
-    <string name="val_fl_sync_angles">Angle difference: V1 %1$s°, V0 %2$s°</string>
-    <string name="val_fl_sync_angles_nov0">Angle difference: V1 %1$s° (V0 ~ 0, not an earth fault)</string>
-    <string name="val_fl_sync_loc">Location (voltage-only sync): %1$s km from %2$s</string>
+    <string name="val_fl_sync_shift_ts">τ %1$s: %2$s ms vs DFR timestamps (auto δ %3$s ms)</string>
+    <string name="val_fl_sync_shift_inc">τ %1$s: %2$s ms vs fault inception (auto δ %3$s ms)</string>
+    <string name="val_fl_sync_tau_sources">τ pre-fault δ %1$s ms • τ V1/V0 %2$s ms</string>
+    <string name="val_fl_sync_angles">Angle difference B−A: V1 %1$s°, V0 %2$s°</string>
+    <string name="val_fl_sync_angles_nov0">Angle difference B−A: V1 %1$s° (V0 ≈ 0, not an earth fault)</string>
+    <string name="val_fl_sync_loc">Time-aligned two-ended location at this τ: %1$s km from %2$s</string>
     <string name="msg_fl_sync_out">At this shift record B has no data - move the slider back.</string>
     <string name="btn_fl_shift_minus">B -0.1 ms</string>
     <string name="btn_fl_shift_plus">B +0.1 ms</string>
-    <string name="btn_fl_shift_auto">Auto</string>
-    <string name="lbl_fl_sync_main">Use the synchronised location as the main result</string>
-    <string name="lbl_fl_method_sync_v">Two-ended, vector-synchronised (voltage only)</string>
+    <string name="btn_fl_shift_auto">Auto δ</string>
+    <string name="btn_fl_shift_volt">V1/V0</string>
+    <string name="lbl_fl_sync_main">Use the time-aligned (τ) location as the main result</string>
+    <string name="lbl_fl_method_sync_v">Two-ended, time-aligned (τ)</string>
     <string name="btn_fl_save">Save result</string>
     <string name="btn_fl_open_pdf">Open PDF</string>
     <string name="cd_fl_history">Saved results</string>
@@ -1189,11 +1198,11 @@
     <string name="msg_fl_history_empty">No saved analysis yet. Tap Save result after an analysis.\n\nLong-press a saved result to delete it.</string>
     <string name="msg_fl_saved">The result is saved in the history (clock icon at the top) and as a PDF report:\n%s</string>
     <string name="msg_fl_save_fail">Saving failed: %s</string>
-    <string name="lbl_fl_saved_banner">Saved result • %1$s (records not loaded, vector shift as saved)</string>
+    <string name="lbl_fl_saved_banner">Saved result • %1$s (records not loaded, τ as saved)</string>
     <string name="ttl_fl_delete_saved">Delete Saved Result</string>
     <string name="msg_fl_delete_saved">Delete the saved analysis %s? The PDF report stays in Download/DFR/FL_Reports.</string>
-    <string name="help_feat_fl_4_title">Vector Synchronisation &amp; Saving</string>
-    <string name="help_feat_fl_4_steps">1. Under Vector synchronisation, substation A is fixed at its highest fault current and B is shifted automatically until the V1/V0 angles agree.\n2. Drag the slider or tap B -0.1 / +0.1 ms to adjust B by hand - the vectors and the synchronised location update immediately.\n3. Switch on "Use the synchronised location as the main result" if you prefer it.\n4. Tap {ic:save} Save result to keep the analysis and write a PDF report; reopen it later with the {ic:history} icon at the top.</string>
+    <string name="help_feat_fl_4_title">Time Alignment &amp; Saving</string>
+    <string name="help_feat_fl_4_steps">1. Under Record time alignment, record A is fixed at its maximum fault current and B is shifted automatically by τ = δ/ω from the sync angle of the main method.\n2. Drag the slider or tap B -0.1 / +0.1 ms for manual correction; V1/V0 applies the voltage-only τ for comparison – the phasors and the time-aligned location update immediately.\n3. Switch on \"Use the time-aligned (τ) location as the main result\" if needed.\n4. Tap {ic:save} Save result to keep the analysis and write a PDF report; reopen it later with the {ic:history} icon at the top.</string>
 
     <string name="lbl_fl_values_primary">Values: primary, instantaneous (from the DFR)</string>
     <string name="lbl_fl_values_no_ratio">Values: SECONDARY - the cfg has no VT/CT ratio, set it in Channel mapping</string>

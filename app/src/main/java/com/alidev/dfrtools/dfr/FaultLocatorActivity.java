@@ -1533,6 +1533,11 @@ public class FaultLocatorActivity extends BaseActivity {
             applyShift(lastResult.tauAuto, true);
             refreshAfterShift();
         });
+        findViewById(R.id.btnFlShiftVolt).setOnClickListener(v -> {
+            if (lastResult == null || Double.isNaN(lastResult.tauVoltage)) return;
+            applyShift(lastResult.tauVoltage, true);
+            refreshAfterShift();
+        });
         SwitchCompat sw = findViewById(R.id.swFlSyncMain);
         sw.setOnCheckedChangeListener((b, checked) -> {
             if (bindingSync || lastResult == null) return;
@@ -1612,6 +1617,9 @@ public class FaultLocatorActivity extends BaseActivity {
         double base = ts ? r.tauTimestamp : r.tauInception;
         sb.append('\n').append(getString(ts ? R.string.val_fl_sync_shift_ts : R.string.val_fl_sync_shift_inc, resultNameB,
                 signed((al.tau - base) * 1000, 2), signed((r.tauAuto - base) * 1000, 2)));
+        sb.append('\n').append(getString(R.string.val_fl_sync_tau_sources,
+                Double.isNaN(r.tauPre) ? "-" : signed((r.tauPre - base) * 1000, 2),
+                Double.isNaN(r.tauVoltage) ? "-" : signed((r.tauVoltage - base) * 1000, 2)));
         sb.append('\n').append(al.v0Used
                 ? getString(R.string.val_fl_sync_angles, signed(al.dV1Deg, 1), signed(al.dV0Deg, 1))
                 : getString(R.string.val_fl_sync_angles_nov0, signed(al.dV1Deg, 1)));
@@ -2324,6 +2332,8 @@ public class FaultLocatorActivity extends BaseActivity {
             case "PRE_V_MISMATCH": return getString(R.string.warn_fl_pre_v_mismatch, fmt((Double) a[0], 1), fmt((Double) a[1], 1));
             case "PRE_I_MISMATCH": return getString(R.string.warn_fl_pre_i_mismatch, fmt((Double) a[0], 0), fmt((Double) a[1], 0));
             case "PRE_POLARITY": return getString(R.string.warn_fl_pre_polarity);
+            case "SYNC_PRE_MISMATCH": return getString(R.string.warn_fl_sync_pre_mismatch, signed((Double) a[0], 1), signed((Double) a[1], 2));
+            case "Z1_MISMATCH": return getString(R.string.warn_fl_z1_mismatch, fmt((Double) a[0], 4), fmt((Double) a[1], 4), signed((Double) a[2], 0));
             default: return null;
         }
     }
@@ -2365,7 +2375,20 @@ public class FaultLocatorActivity extends BaseActivity {
         addRow(box, getString(R.string.lbl_fl_det_rf), Double.isNaN(r.rf) ? getString(R.string.val_fl_na) : fmt(r.rf, 2) + " Ω", false);
         addRow(box, getString(R.string.lbl_fl_det_dir, nameA), dirText(r.dirA), false);
         addRow(box, getString(R.string.lbl_fl_det_dir, nameB), dirText(r.dirB), false);
-        addRow(box, getString(R.string.lbl_fl_det_delta), fmt(r.syncAngleDeg, 1) + "°", false);
+        String delta = fmt(r.syncAngleDeg, 2) + "°";
+        if (!Double.isNaN(r.syncAngleSpreadDeg)) delta += " (±" + fmt(r.syncAngleSpreadDeg, 2) + "°)";
+        addRow(box, getString(R.string.lbl_fl_det_delta), delta, false);
+        if (!Double.isNaN(r.syncAnglePreDeg)) {
+            double diff = wrap180(r.syncAnglePreDeg - r.syncAngleDeg);
+            addRow(box, getString(R.string.lbl_fl_det_delta_pre),
+                    getString(R.string.val_fl_delta_pre, fmt(r.syncAnglePreDeg, 2), signed(diff, 2)), false);
+        }
+        if (!Double.isNaN(r.z1MeasX)) {
+            addRow(box, getString(R.string.lbl_fl_det_z1_meas),
+                    getString(R.string.val_fl_z1_meas, fmt(r.z1MeasR, 4), fmt(r.z1MeasX, 4), fmt(r.z1MeasUnc * 100, 0)), false);
+        } else if (!Double.isNaN(r.z1MeasUnc)) {
+            addRow(box, getString(R.string.lbl_fl_det_z1_meas), getString(R.string.val_fl_z1_meas_na), false);
+        }
         if (!Double.isNaN(r.inceptionDiffMs)) {
             addRow(box, getString(R.string.lbl_fl_det_inc_diff), fmt(r.inceptionDiffMs, 2) + " ms", false);
         }

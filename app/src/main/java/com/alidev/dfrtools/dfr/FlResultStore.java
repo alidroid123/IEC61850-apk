@@ -132,6 +132,13 @@ public class FlResultStore {
         num(o, "tauAuto", r.tauAuto);
         num(o, "tauInception", r.tauInception);
         num(o, "tauTimestamp", r.tauTimestamp);
+        num(o, "tauPre", r.tauPre);
+        num(o, "tauVoltage", r.tauVoltage);
+        num(o, "syncAngleSpreadDeg", r.syncAngleSpreadDeg);
+        num(o, "syncAnglePreDeg", r.syncAnglePreDeg);
+        num(o, "z1MeasR", r.z1MeasR);
+        num(o, "z1MeasX", r.z1MeasX);
+        num(o, "z1MeasUnc", r.z1MeasUnc);
         num(o, "alignRefTimeA", r.alignRefTimeA);
         num(o, "alignRefCurrentA", r.alignRefCurrentA);
         o.put("endA", endToJson(r.endA));
@@ -188,6 +195,13 @@ public class FlResultStore {
         r.tauAuto = o.optDouble("tauAuto", Double.NaN);
         r.tauInception = o.optDouble("tauInception", Double.NaN);
         r.tauTimestamp = o.optDouble("tauTimestamp", Double.NaN);
+        r.tauPre = o.optDouble("tauPre", Double.NaN);
+        r.tauVoltage = o.optDouble("tauVoltage", Double.NaN);
+        r.syncAngleSpreadDeg = o.optDouble("syncAngleSpreadDeg", Double.NaN);
+        r.syncAnglePreDeg = o.optDouble("syncAnglePreDeg", Double.NaN);
+        r.z1MeasR = o.optDouble("z1MeasR", Double.NaN);
+        r.z1MeasX = o.optDouble("z1MeasX", Double.NaN);
+        r.z1MeasUnc = o.optDouble("z1MeasUnc", Double.NaN);
         r.alignRefTimeA = o.optDouble("alignRefTimeA", Double.NaN);
         r.alignRefCurrentA = o.optDouble("alignRefCurrentA", Double.NaN);
         r.endA = endFromJson(o.optJSONObject("endA"));
