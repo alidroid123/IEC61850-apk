@@ -1677,6 +1677,7 @@ public class FaultLocatorActivity extends BaseActivity {
             EndSummary end = ends[e];
             TextView title = new TextView(this);
             title.setText(endNames[e]);
+            title.setTag(PDF_SUBSECTION);
             title.setTypeface(title.getTypeface(), android.graphics.Typeface.BOLD);
             title.setTextColor(resolveColor(com.google.android.material.R.attr.colorPrimary));
             title.setPadding(0, dp(e == 0 ? 2 : 10), 0, dp(2));
@@ -1803,6 +1804,12 @@ public class FaultLocatorActivity extends BaseActivity {
         }
     }
 
+    /**
+     * View tags that steer PDF page breaks: a section title (layout, "pdf_section"), a title inside
+     * a section (per-GI phasor table), and a row that must not end a page (table header rows).
+     */
+    static final String PDF_SECTION = "pdf_section", PDF_SUBSECTION = "pdf_subsection", PDF_KEEP_WITH_NEXT = "pdf_keep";
+
     /** One piece of the result card that goes onto a PDF page whole, at its offset inside the card. */
     private static final class PdfBlock {
         final View view;
@@ -1813,8 +1820,67 @@ public class FaultLocatorActivity extends BaseActivity {
 
         int h() { return view.getHeight(); }
 
-        /** Section titles and table captions stay on the same page as what they introduce. */
-        boolean keepWithNext() { return view instanceof TextView && !(view instanceof Button); }
+        /** 1 = section title, 2 = title inside a section, 0 = content. */
+        int level() {
+            Object t = view.getTag();
+            return PDF_SECTION.equals(t) ? 1 : PDF_SUBSECTION.equals(t) ? 2 : 0;
+        }
+
+        /** Table header rows and bold captions (chart axis label) stay with what follows them. */
+        boolean keepWithNext() {
+            if (PDF_KEEP_WITH_NEXT.equals(view.getTag())) return true;
+            return view instanceof TextView && !(view instanceof Button)
+                    && ((TextView) view).getTypeface() != null && ((TextView) view).getTypeface().isBold();
+        }
+    }
+
+    /** Height from the top of block i to the bottom of block j-1, gaps included (card coordinates). */
+    private static int pdfSpan(List<PdfBlock> bl, int i, int j) {
+        PdfBlock last = bl.get(j - 1);
+        return last.y + last.h() - bl.get(i).y;
+    }
+
+    /**
+     * End (exclusive) of the run of blocks that must start on the same page as block i:
+     * - a section title takes its whole section when that fits on one page, otherwise its lead
+     *   (pdfLeadEnd), so a title is never left alone at the bottom of a page;
+     * - a keep-with-next block takes the following one (unless that starts another section).
+     */
+    private static int pdfKeepEnd(List<PdfBlock> bl, int i, int pageContent) {
+        int n = bl.size();
+        if (bl.get(i).level() > 0) {
+            int end = pdfSectionEnd(bl, i);
+            return pdfSpan(bl, i, end) <= pageContent ? end : pdfLeadEnd(bl, i, end, pageContent);
+        }
+        int k = i + 1;
+        // A chain of keep-with-next rows (two-row table header) ends at the first data row.
+        while (k < n && bl.get(k - 1).keepWithNext() && bl.get(k).level() == 0 && pdfSpan(bl, i, k + 1) <= pageContent) k++;
+        return k;
+    }
+
+    /** First block after section title i that is not part of its section. */
+    private static int pdfSectionEnd(List<PdfBlock> bl, int i) {
+        int level = bl.get(i).level(), end = i + 1;
+        while (end < bl.size() && (bl.get(end).level() == 0 || bl.get(end).level() > level)) end++;
+        return end;
+    }
+
+    /**
+     * Title of a section longer than a page plus at least a third of a page of its content. A
+     * sub-section met on the way comes whole if it fits with the title, else with its own lead.
+     */
+    private static int pdfLeadEnd(List<PdfBlock> bl, int i, int end, int pageContent) {
+        int k = i + 1;
+        while (k < end && pdfSpan(bl, i, k) < pageContent / 3) {
+            if (bl.get(k).level() > 0) {
+                int sub = pdfKeepEnd(bl, k, pageContent);
+                if (pdfSpan(bl, i, sub) > pageContent) sub = pdfLeadEnd(bl, k, pdfSectionEnd(bl, k), pageContent);
+                k = sub;
+                break;
+            }
+            k = pdfKeepEnd(bl, k, pageContent);
+        }
+        return Math.max(k, Math.min(bl.size(), i + 2));
     }
 
     private static final int A4_W = 595, A4_H = 842; // PostScript points
@@ -1849,12 +1915,18 @@ public class FaultLocatorActivity extends BaseActivity {
             List<List<PdfBlock>> pages = new ArrayList<>();
             List<PdfBlock> cur = new ArrayList<>();
             pages.add(cur);
-            int y = hh, pageTop = hh;
+            int y = hh, pageTop = hh, pageContent = bottom - topN, runEnd = 0;
             PdfBlock prev = null;
             for (int i = 0; i < blocks.size(); i++) {
                 PdfBlock b = blocks.get(i);
                 int gap = prev == null ? 0 : Math.max(0, b.y - (prev.y + prev.h()));
-                int need = b.h() + (b.keepWithNext() && i + 1 < blocks.size() ? blocks.get(i + 1).h() : 0);
+                // Inside a run already started on this page (a title and its lead) only a block
+                // that would cross the footer forces a break; otherwise the block's own run must fit.
+                int need = b.h();
+                if (i >= runEnd) {
+                    runEnd = pdfKeepEnd(blocks, i, pageContent);
+                    need = pdfSpan(blocks, i, runEnd);
+                }
                 if (y + gap + need > bottom && y > pageTop) {
                     cur = new ArrayList<>();
                     pages.add(cur);

@@ -49,6 +49,7 @@ final class ValueTable {
     ValueTable header(String[] cells, int[] spans) {
         TableRow row = new TableRow(c);
         row.setBackgroundColor(headerBg);
+        row.setTag(FaultLocatorActivity.PDF_KEEP_WITH_NEXT); // never the last row on a PDF page
         for (int i = 0; i < cells.length; i++) {
             TextView t = cell(cells[i], i == 0 ? Gravity.START : Gravity.CENTER);
             t.setTypeface(Typeface.DEFAULT, Typeface.BOLD);

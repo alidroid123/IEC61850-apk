@@ -413,6 +413,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:letterSpacing="0.1"
+                            android:tag="pdf_section"
                             android:text="@string/lbl_fl_result_header"
                             android:textColor="?attr/colorPrimary"
                             android:textSize="@dimen/text_size_body_small"
@@ -572,6 +573,7 @@
                         <TextView
                             style="@style/SectionLabel"
                             android:layout_marginTop="@dimen/spacing_m"
+                            android:tag="pdf_section"
                             android:text="@string/lbl_fl_methods_header" />
 
                         <LinearLayout
@@ -585,6 +587,7 @@
                         <TextView
                             style="@style/SectionLabel"
                             android:layout_marginTop="@dimen/spacing_m"
+                            android:tag="pdf_section"
                             android:text="@string/lbl_fl_sync_header" />
 
                         <TextView
@@ -698,6 +701,7 @@
                         <TextView
                             style="@style/SectionLabel"
                             android:layout_marginTop="@dimen/spacing_m"
+                            android:tag="pdf_section"
                             android:text="@string/lbl_fl_profile_header" />
 
                         <!-- MPAndroidChart has no axis titles: Y above the chart, X below it. -->
@@ -735,6 +739,7 @@
                         <TextView
                             style="@style/SectionLabel"
                             android:layout_marginTop="@dimen/spacing_m"
+                            android:tag="pdf_section"
                             android:text="@string/lbl_fl_details_header" />
 
                         <LinearLayout
@@ -747,6 +752,7 @@
                         <TextView
                             style="@style/SectionLabel"
                             android:layout_marginTop="@dimen/spacing_m"
+                            android:tag="pdf_section"
                             android:text="@string/lbl_fl_phasor_header" />
 
                         <LinearLayout
