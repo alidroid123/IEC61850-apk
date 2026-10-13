@@ -1803,9 +1803,27 @@ public class FaultLocatorActivity extends BaseActivity {
         }
     }
 
+    /** One piece of the result card that goes onto a PDF page whole, at its offset inside the card. */
+    private static final class PdfBlock {
+        final View view;
+        final int x, y;
+        int pageY;
+
+        PdfBlock(View view, int x, int y) { this.view = view; this.x = x; this.y = y; }
+
+        int h() { return view.getHeight(); }
+
+        /** Section titles and table captions stay on the same page as what they introduce. */
+        boolean keepWithNext() { return view instanceof TextView && !(view instanceof Button); }
+    }
+
+    private static final int A4_W = 595, A4_H = 842; // PostScript points
+
     /**
-     * The result card as a one-page PDF report, without the on-screen-only controls, between a
-     * letterhead (title, line, both DFR files) and a footer (logo, app name + version, analysis time).
+     * The result card as an A4 PDF report, without the on-screen-only controls: a letterhead
+     * (title, line, both DFR files) on the first page and a footer (page number, logo, app name +
+     * version, analysis time) on every page. Pages break only between rows and sections - vertical
+     * containers are split into their children - so no table row or chart is cut in half.
      */
     private File writePdf(FlResultStore.Saved saved) throws Exception {
         View card = cardResult;
@@ -1818,25 +1836,62 @@ public class FaultLocatorActivity extends BaseActivity {
         try {
             int w = card.getWidth();
             View header = buildPdfHeader(saved);
-            View footer = buildPdfFooter(saved);
-            int hh = measureDetached(header, w), fh = measureDetached(footer, w);
+            int hh = measureDetached(header, w), fh = measureDetached(buildPdfFooter(saved, 1, 1), w);
             card.measure(View.MeasureSpec.makeMeasureSpec(w, View.MeasureSpec.EXACTLY),
                     View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED));
             int h = card.getMeasuredHeight();
             card.layout(card.getLeft(), card.getTop(), card.getLeft() + w, card.getTop() + h);
-            float scale = 595f / w;
-            android.graphics.pdf.PdfDocument.PageInfo info =
-                    new android.graphics.pdf.PdfDocument.PageInfo.Builder(595, (int) Math.ceil((hh + h + fh) * scale) + 1, 1).create();
-            android.graphics.pdf.PdfDocument.Page page = doc.startPage(info);
-            android.graphics.Canvas c = page.getCanvas();
-            c.drawColor(ContextCompat.getColor(this, R.color.bg_card));
-            c.scale(scale, scale);
-            header.draw(c);
-            c.translate(0, hh);
-            card.draw(c);
-            c.translate(0, h);
-            footer.draw(c);
-            doc.finishPage(page);
+            float scale = (float) A4_W / w;
+            int pageH = (int) Math.floor(A4_H / scale), bottom = pageH - fh, topN = dp(16);
+
+            List<PdfBlock> blocks = new ArrayList<>();
+            collectPdfBlocks(card, 0, 0, blocks);
+            List<List<PdfBlock>> pages = new ArrayList<>();
+            List<PdfBlock> cur = new ArrayList<>();
+            pages.add(cur);
+            int y = hh, pageTop = hh;
+            PdfBlock prev = null;
+            for (int i = 0; i < blocks.size(); i++) {
+                PdfBlock b = blocks.get(i);
+                int gap = prev == null ? 0 : Math.max(0, b.y - (prev.y + prev.h()));
+                int need = b.h() + (b.keepWithNext() && i + 1 < blocks.size() ? blocks.get(i + 1).h() : 0);
+                if (y + gap + need > bottom && y > pageTop) {
+                    cur = new ArrayList<>();
+                    pages.add(cur);
+                    y = pageTop = topN;
+                    gap = 0;
+                }
+                b.pageY = y + gap;
+                y = b.pageY + b.h();
+                cur.add(b);
+                prev = b;
+            }
+
+            int bg = ContextCompat.getColor(this, R.color.bg_card);
+            for (int p = 0; p < pages.size(); p++) {
+                android.graphics.pdf.PdfDocument.PageInfo info =
+                        new android.graphics.pdf.PdfDocument.PageInfo.Builder(A4_W, A4_H, p + 1).create();
+                android.graphics.pdf.PdfDocument.Page page = doc.startPage(info);
+                android.graphics.Canvas c = page.getCanvas();
+                c.drawColor(bg);
+                c.scale(scale, scale);
+                if (p == 0) header.draw(c);
+                for (PdfBlock b : pages.get(p)) {
+                    c.save();
+                    c.translate(b.x, b.pageY);
+                    // A single block taller than a page (never expected) is clipped, not drawn over the footer.
+                    c.clipRect(0, 0, b.view.getWidth(), bottom - b.pageY);
+                    b.view.draw(c);
+                    c.restore();
+                }
+                View footer = buildPdfFooter(saved, p + 1, pages.size());
+                measureDetached(footer, w);
+                c.save();
+                c.translate(0, pageH - fh);
+                footer.draw(c);
+                c.restore();
+                doc.finishPage(page);
+            }
             File dir = new File(new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), "DFR"), "FL_Reports");
             if (!dir.exists() && !dir.mkdirs()) dir = new File(new File(getExternalFilesDir(null), "DFR"), "FL_Reports");
             if (!dir.exists()) dir.mkdirs();
@@ -1850,6 +1905,26 @@ public class FaultLocatorActivity extends BaseActivity {
             doc.close();
             for (int i = 0; i < hide.length; i++) hide[i].setVisibility(vis[i]);
             card.requestLayout();
+        }
+    }
+
+    /**
+     * Flattens the result card into page-breakable blocks: the card and every vertical container
+     * (section lists, tables) are split into their children; anything else - a table row, a
+     * chart, the two-column distance row - is one block. x/y are offsets inside the card.
+     */
+    private static void collectPdfBlocks(View v, int x, int y, List<PdfBlock> out) {
+        if (v.getVisibility() != View.VISIBLE || v.getHeight() <= 0) return;
+        boolean split = v instanceof com.google.android.material.card.MaterialCardView
+                || (v instanceof LinearLayout && ((LinearLayout) v).getOrientation() == LinearLayout.VERTICAL);
+        if (!split || ((ViewGroup) v).getChildCount() == 0) {
+            out.add(new PdfBlock(v, x, y));
+            return;
+        }
+        ViewGroup g = (ViewGroup) v;
+        for (int i = 0; i < g.getChildCount(); i++) {
+            View ch = g.getChildAt(i);
+            collectPdfBlocks(ch, x + ch.getLeft(), y + ch.getTop(), out);
         }
     }
 
@@ -1898,12 +1973,16 @@ public class FaultLocatorActivity extends BaseActivity {
         return box;
     }
 
-    /** Bottom right: app logo, "name vX.Y.Z" and when the analysis was run. */
-    private View buildPdfFooter(FlResultStore.Saved saved) {
+    /** Bottom left: page number. Bottom right: app logo, "name vX.Y.Z" and when the analysis was run. */
+    private View buildPdfFooter(FlResultStore.Saved saved, int page, int pages) {
         LinearLayout row = new LinearLayout(this);
         row.setOrientation(LinearLayout.HORIZONTAL);
         row.setGravity(android.view.Gravity.END | android.view.Gravity.CENTER_VERTICAL);
         row.setPadding(dp(16), dp(10), dp(16), dp(14));
+        TextView pageNo = pdfText(getString(R.string.lbl_fl_pdf_page, page, pages), 10, false,
+                ContextCompat.getColor(this, R.color.text_secondary));
+        pageNo.setGravity(android.view.Gravity.START | android.view.Gravity.CENTER_VERTICAL);
+        row.addView(pageNo, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
         android.widget.ImageView logo = new android.widget.ImageView(this);
         logo.setImageResource(R.mipmap.ic_launcher);
         LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(dp(28), dp(28));
@@ -2463,16 +2542,26 @@ public class FaultLocatorActivity extends BaseActivity {
         chart.getDescription().setEnabled(false);
         chart.getAxisRight().setEnabled(false);
         chart.getAxisLeft().setTextColor(textColor);
+        // Each curve peaks at the far end, i.e. in a top corner: the headroom keeps both below the
+        // km label, which is drawn along the top edge.
+        chart.getAxisLeft().setSpaceTop(30f);
         chart.getLegend().setTextColor(textColor);
         XAxis x = chart.getXAxis();
         x.setPosition(XAxis.XAxisPosition.BOTTOM);
         x.setTextColor(textColor);
         x.removeAllLimitLines();
-        LimitLine ll = new LimitLine((float) mainKmA(r), fmt(mainKmA(r), 2) + " km");
+        x.setDrawLimitLinesBehindData(false);
+        double km = mainKmA(r);
+        LimitLine ll = new LimitLine((float) km, fmt(km, 2) + " km");
         ll.setLineColor(ContextCompat.getColor(this, R.color.status_danger));
         ll.setTextColor(ContextCompat.getColor(this, R.color.status_danger));
+        ll.setTextStyle(android.graphics.Paint.Style.FILL);
+        ll.setTextSize(11f);
         ll.setLineWidth(1.5f);
         ll.enableDashedLine(10f, 6f, 0f);
+        // Label on the side facing the middle of the chart, so a fault near GI B does not push it
+        // past the right edge (or near GI A past the axis).
+        ll.setLabelPosition(km > r.lengthKm / 2 ? LimitLine.LimitLabelPosition.LEFT_TOP : LimitLine.LimitLabelPosition.RIGHT_TOP);
         x.addLimitLine(ll);
         chart.setTouchEnabled(true);
         chart.setPinchZoom(true);

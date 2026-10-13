@@ -981,6 +981,7 @@
     <string name="lbl_fl_pdf_dfr">DFR %1$s: %2$s</string>
     <string name="lbl_fl_pdf_app">%1$s v%2$s</string>
     <string name="lbl_fl_pdf_analyzed">Dianalisa %s</string>
+    <string name="lbl_fl_pdf_page">Halaman %1$d dari %2$d</string>
     <string name="lbl_fl_axis_x">Jarak dari %s (km)</string>
     <string name="lbl_fl_axis_y">%s titik gangguan (kV)</string>
     <string name="lbl_fl_col_mag">Magnitude</string>

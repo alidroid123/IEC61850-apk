@@ -256,7 +256,15 @@ public class DoubleEndedFaultLocator {
             tauInception = b.t[b.inc] - a.t[a.inc];
             tauTimestamp = a.rec.startMicros != Long.MIN_VALUE && b.rec.startMicros != Long.MIN_VALUE
                     ? (a.rec.startMicros - b.rec.startMicros) / 1e6 : Double.NaN;
-            k0A = peakCurrentWindow(a, Math.min(a.inc + (int) Math.round(off * a.N), a.n - a.N));
+            // Both records only describe the same network while neither breaker has opened: once
+            // one end trips, the other feeds the fault alone (its current often rises) and the
+            // tripped end's VT may read its bus, not the line. The reference window must end
+            // before the first opening of EITHER end - inceptions are the same physical instant,
+            // so "cycles after inception" is a common clock.
+            int kMain = Math.min(a.inc + (int) Math.round(off * a.N), a.n - a.N);
+            double bothClosed = Math.min(closedCycles(a), closedCycles(b));
+            int lastA = a.inc + (int) Math.floor((bothClosed - 1) * a.N);
+            k0A = lastA >= a.inc ? peakCurrentWindow(a, kMain, lastA) : kMain;
             double tA0 = a.t[k0A];
             pa = phasorsAt(a, k0A, tA0);
             refTimeA = tA0;
@@ -270,9 +278,9 @@ public class DoubleEndedFaultLocator {
          * instant is where A's fault current (fundamental, so the DC offset does not count) is
          * highest - searched from inception until the current collapses at breaker opening.
          */
-        private static int peakCurrentWindow(End e, int fallback) {
+        private static int peakCurrentWindow(End e, int fallback, int lastStart) {
             int step = Math.max(1, e.N / 8);
-            int last = Math.min(e.inc + 15 * e.N, e.n - e.N);
+            int last = Math.min(Math.min(e.inc + 15 * e.N, e.n - e.N), lastStart);
             List<Integer> ks = new ArrayList<>();
             List<Phasors> phs = new ArrayList<>();
             double peak = 0;
@@ -299,6 +307,25 @@ public class DoubleEndedFaultLocator {
                 if (stable[i] && maxI(phs.get(i)) >= 0.99 * bestStable) return ks.get(i);
             }
             return fallback;
+        }
+
+        /**
+         * Cycles after this end's inception until its breaker opens (end of record if it never
+         * does). The first one-cycle window whose fundamental current is below half the peak so
+         * far has more than half of its cycle after the opening, so the opening is no later than
+         * half a cycle into that window.
+         */
+        private static double closedCycles(End e) {
+            int step = Math.max(1, e.N / 8);
+            double peak = 0;
+            for (int k = e.inc; k + e.N <= e.n; k += step) {
+                Phasors ph = phasorsAt(e, k, 0);
+                if (ph == null) break;
+                double mag = maxI(ph);
+                if (k >= e.inc + e.N / 2 && mag < 0.5 * peak) return (k - e.inc) / (double) e.N + 0.5;
+                peak = Math.max(peak, mag);
+            }
+            return (e.n - e.inc) / (double) e.N;
         }
 
         private Phasors bAt(double tau) {
