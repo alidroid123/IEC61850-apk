@@ -1463,27 +1463,54 @@ public class DfrViewerActivity extends BaseActivity {
         } catch (Exception e) { return false; }
     }
 
+    /**
+     * Default channel ordering key: {type (0=voltage, 1=current, 2=other), phase (0=A,1=B,2=C,3=N,4=?)}.
+     * Gives the preferred order VA,VB,VC,VN, IA,IB,IC,IN, then any other signals.
+     */
+    private int[] channelSortKey(int i) {
+        String name = (parser.channelNames != null && i < parser.channelNames.length) ? parser.channelNames[i].toUpperCase(java.util.Locale.US) : "";
+        String unit = (parser.analogUnits != null && i < parser.analogUnits.length) ? parser.analogUnits[i].trim().toUpperCase(java.util.Locale.US) : "";
+        boolean unitV = unit.equals("V") || unit.equals("KV") || unit.equals("MV");
+        boolean unitA = unit.equals("A") || unit.equals("KA") || unit.equals("MA");
+        int type;
+        if (unitV) type = 0;
+        else if (unitA) type = 1;
+        else {
+            char c0 = name.isEmpty() ? ' ' : name.charAt(0);
+            type = (c0 == 'V' || c0 == 'U') ? 0 : c0 == 'I' ? 1 : 2;
+        }
+        return new int[]{type, phaseOf(name)};
+    }
+
+    private static int phaseOf(String name) {
+        String s = name;
+        if (!s.isEmpty() && (s.charAt(0) == 'V' || s.charAt(0) == 'U' || s.charAt(0) == 'I')) s = s.substring(1);
+        if (s.startsWith("RES") || s.startsWith("3I0") || s.startsWith("N") || s.startsWith("E") || s.startsWith("G") || s.startsWith("0")) return 3;
+        if (s.startsWith("A") || s.startsWith("R") || s.startsWith("L1") || s.startsWith("1")) return 0;
+        if (s.startsWith("B") || s.startsWith("S") || s.startsWith("L2") || s.startsWith("2")) return 1;
+        if (s.startsWith("C") || s.startsWith("T") || s.startsWith("L3") || s.startsWith("3")) return 2;
+        return 4;
+    }
+
     private void initMappingsForTemplate(String template) {
         mainMappings.clear();
         if (template.equals("NONE")) {
-            // No template: one row per analog channel, labeled exactly as in the Comtrade file,
-            // grouped Current then Voltage. analogIdx is set directly (1:1 with the file) since
-            // there is no template label to fuzzy-match against the channel list.
-            List<MappingItem> currents = new ArrayList<>();
-            List<MappingItem> voltages = new ArrayList<>();
-            List<MappingItem> others = new ArrayList<>();
-            for (int i = 0; i < parser.analogCount; i++) {
+            // No template: one row per analog channel, labeled exactly as in the Comtrade file.
+            // Order: VA,VB,VC,VN then IA,IB,IC,IN then any other signals (file order within a group).
+            List<Integer> order = new ArrayList<>();
+            for (int i = 0; i < parser.analogCount; i++) order.add(i);
+            order.sort((x, y) -> {
+                int[] kx = channelSortKey(x), ky = channelSortKey(y);
+                if (kx[0] != ky[0]) return Integer.compare(kx[0], ky[0]);
+                if (kx[1] != ky[1]) return Integer.compare(kx[1], ky[1]);
+                return Integer.compare(x, y);
+            });
+            for (int i : order) {
                 String label = (parser.channelNames != null && i < parser.channelNames.length) ? parser.channelNames[i] : ("CH" + (i + 1));
-                String lu = label.toUpperCase();
-                boolean isI = lu.contains("I") || lu.contains("A") || lu.contains("CURR");
-                boolean isV = lu.contains("V") || lu.contains("U") || lu.contains("VOLT");
-                MappingItem item = new MappingItem(label, isI);
+                MappingItem item = new MappingItem(label, channelSortKey(i)[0] == 1);
                 item.analogIdx = i;
-                if (isI) currents.add(item); else if (isV) voltages.add(item); else others.add(item);
+                mainMappings.add(item);
             }
-            mainMappings.addAll(currents);
-            mainMappings.addAll(voltages);
-            mainMappings.addAll(others);
         } else if (template.equals("DISTANCE")) {
             mainMappings.add(new MappingItem("IA", true)); mainMappings.add(new MappingItem("IB", true));
             mainMappings.add(new MappingItem("IC", true)); mainMappings.add(new MappingItem("IN", true));

@@ -985,6 +985,9 @@
     <string name="val_fl_bibo_since">sejak %1$s</string>
     <string name="msg_fl_bibo_note">%1$d dari %2$d kanal digital berubah • waktu relatif terhadap %3$s • status yang bertahan ≤ %4$s ms (getaran kontak) diabaikan • durasi langkah terakhir dihitung sampai akhir record</string>
     <string name="val_fl_bibo_no_digital">Record tidak memiliki kanal digital (BI/BO).</string>
+    <string name="lbl_fl_bibo_col_event">Event</string>
+    <string name="lbl_fl_bibo_col_status">Status (ms)</string>
+    <string name="lbl_fl_bibo_col_dur">Durasi</string>
     <string name="lbl_fl_bibo_share_header">🔌 ANALISA EVENT BI/BO (acuan: %1$s)</string>
     <string name="ttl_fl_share_confirm">Bagikan laporan</string>
     <string name="msg_fl_share_confirm">Laporan ringkas (lokasi, arus, cross-check, peringatan) akan dibagikan.</string>

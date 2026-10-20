@@ -177,26 +177,29 @@ public final class BiboReport {
             if (g == null) { g = new ArrayList<>(); byCh.put(ev.idx, g); }
             g.add(ev);
         }
-        int no = 0;
-        for (List<DigitalEvent> g : byCh.values()) {
-            no++;
-            DigitalEvent first = g.get(0);
-            box.addView(tv(c, c.getString(R.string.lbl_fl_bibo_event, no, first.ch), primary, true, false, 8));
-            box.addView(tv(c, c.getString(R.string.msg_fl_bibo_event_ref,
-                    msTxt(first.t - ref.refT, d), ref.refName, clock(end.startMicros, first.t, d)), secondary, false, true, 1));
-            for (int i = 0; i < g.size(); i++) {
-                DigitalEvent ev = g.get(i);
-                DigitalEvent next = i + 1 < g.size() ? g.get(i + 1) : null;
-                double tEnd = next != null ? next.t : b.recordEnd;
-                boolean up = ev.to == 1;
-                String rTo = next != null ? msTxt(next.t - ref.refT, d) + " ms" : c.getString(R.string.val_fl_bibo_step_end);
-                String dur = Double.isNaN(tEnd) ? "–" : (next == null ? "≥ " : "") + fmt((tEnd - ev.t) * 1000, d) + " ms";
-                String clk = next != null
-                        ? clock(end.startMicros, ev.t, d) + " ➡️ " + clock(end.startMicros, next.t, d)
-                        : c.getString(R.string.val_fl_bibo_since, clock(end.startMicros, ev.t, d));
-                box.addView(tv(c, (up ? "🟢 " : "🔴 ") + ev.from + "->" + ev.to + "   " + msTxt(ev.t - ref.refT, d) + " ➡️ " + rTo + "   " + dur,
-                        up ? primary : textPrimary, false, false, 4));
-                box.addView(tv(c, "🕒 " + clk, secondary, false, true, 0));
+        // Events: one row per channel, with the status chain shown inline (🟢 energise / 🔴 drop /
+        // 🏁 still on at record end) and ValueTable's zebra rows separating events - systematic, compact.
+        if (!byCh.isEmpty()) {
+            android.widget.TableLayout table = new android.widget.TableLayout(c);
+            LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+            lp.topMargin = dp(c, 6);
+            box.addView(table, lp);
+            ValueTable t = new ValueTable(c, table).header(new String[]{
+                    c.getString(R.string.lbl_fl_bibo_col_event),
+                    c.getString(R.string.lbl_fl_bibo_col_status),
+                    c.getString(R.string.lbl_fl_bibo_col_dur)}, null);
+            int no = 0;
+            for (List<DigitalEvent> g : byCh.values()) {
+                no++;
+                DigitalEvent first = g.get(0), last = g.get(g.size() - 1);
+                boolean open = g.size() < 2;
+                double endT = open ? b.recordEnd : last.t;
+                String status = (first.to == 1 ? "🟢 " : "🔴 ") + msTxt(first.t - ref.refT, d) + " ➡️ "
+                        + (open ? "🏁 " + c.getString(R.string.val_fl_bibo_step_end)
+                                : (last.to == 1 ? "🟢 " : "🔴 ") + msTxt(last.t - ref.refT, d));
+                String dur = Double.isNaN(endT) ? "–" : (open ? "≥ " : "") + fmt((endT - first.t) * 1000, d) + " ms";
+                t.row(no + " · " + first.ch, status, dur);
             }
         }
 
@@ -230,19 +233,15 @@ public final class BiboReport {
         int no = 0;
         for (List<DigitalEvent> g : byCh.values()) {
             no++;
-            DigitalEvent first = g.get(0);
-            sb.append("▪️ ").append(c.getString(R.string.lbl_fl_bibo_event, no, first.ch)).append("  (")
-                    .append(c.getString(R.string.msg_fl_bibo_event_ref, msTxt(first.t - ref.refT, d), ref.refName,
-                            clock(end.startMicros, first.t, d))).append(")\n");
-            for (int i = 0; i < g.size(); i++) {
-                DigitalEvent ev = g.get(i);
-                DigitalEvent next = i + 1 < g.size() ? g.get(i + 1) : null;
-                double tEnd = next != null ? next.t : b.recordEnd;
-                String rTo = next != null ? msTxt(next.t - ref.refT, d) + " ms" : c.getString(R.string.val_fl_bibo_step_end);
-                String dur = Double.isNaN(tEnd) ? "–" : (next == null ? "≥ " : "") + fmt((tEnd - ev.t) * 1000, d) + " ms";
-                sb.append("   ").append(ev.to == 1 ? "🟢 " : "🔴 ").append(ev.from).append("->").append(ev.to).append("  ")
-                        .append(msTxt(ev.t - ref.refT, d)).append(" ➡️ ").append(rTo).append("  ").append(dur).append('\n');
-            }
+            DigitalEvent first = g.get(0), last = g.get(g.size() - 1);
+            boolean open = g.size() < 2;
+            double endT = open ? b.recordEnd : last.t;
+            String startS = (first.to == 1 ? "🟢 " : "🔴 ") + msTxt(first.t - ref.refT, d) + " ms";
+            String endS = open ? "🏁 " + c.getString(R.string.val_fl_bibo_step_end)
+                    : (last.to == 1 ? "🟢 " : "🔴 ") + msTxt(last.t - ref.refT, d) + " ms";
+            String dur = Double.isNaN(endT) ? "–" : (open ? "≥ " : "") + fmt((endT - first.t) * 1000, d) + " ms";
+            sb.append("▪️ ").append(no).append(" · ").append(first.ch).append(": ")
+                    .append(startS).append(" ➡️ ").append(endS).append("  (").append(dur).append(")\n");
         }
     }
 }

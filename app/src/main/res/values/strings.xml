@@ -1019,6 +1019,9 @@
     <string name="val_fl_bibo_since">since %1$s</string>
     <string name="msg_fl_bibo_note">%1$d of %2$d digital channels changed • time relative to %3$s • states lasting ≤ %4$s ms (contact bounce) ignored • the last step is timed to the end of the record</string>
     <string name="val_fl_bibo_no_digital">Record has no digital channels (BI/BO).</string>
+    <string name="lbl_fl_bibo_col_event">Event</string>
+    <string name="lbl_fl_bibo_col_status">Status (ms)</string>
+    <string name="lbl_fl_bibo_col_dur">Duration</string>
     <string name="lbl_fl_bibo_share_header">🔌 BI/BO EVENT ANALYSIS (reference: %1$s)</string>
     <string name="ttl_fl_share_confirm">Share report</string>
     <string name="msg_fl_share_confirm">The summary report (location, current, cross-check, warnings) will be shared.</string>
