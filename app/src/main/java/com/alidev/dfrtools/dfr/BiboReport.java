@@ -185,7 +185,9 @@ public final class BiboReport {
                     ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
             lp.topMargin = dp(c, 6);
             box.addView(table, lp);
-            ValueTable t = new ValueTable(c, table).header(new String[]{
+            // Fixed column widths + 3-line ellipsised event name, so long channel names can't crowd
+            // the Status/Duration columns.
+            ValueTable t = new ValueTable(c, table).columns(2.0f, 2.5f, 1.5f).labelLines(3).header(new String[]{
                     c.getString(R.string.lbl_fl_bibo_col_event),
                     c.getString(R.string.lbl_fl_bibo_col_status),
                     c.getString(R.string.lbl_fl_bibo_col_dur)}, null);

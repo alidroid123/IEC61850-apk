@@ -26,6 +26,10 @@ final class ValueTable {
     private final TableLayout table;
     private final int primary, textPrimary, textSecondary, headerBg, zebraBg, dividerColor, highlightBg, highlightText;
     private int bodyRows;
+    /** Fixed proportional column widths (opt-in); null keeps the default stretch-to-fit behaviour. */
+    private float[] colWeights;
+    /** Max lines for the label column before it ellipsizes (0 = unlimited). */
+    private int labelMaxLines;
 
     ValueTable(Context c, TableLayout table) {
         this.c = c;
@@ -45,6 +49,20 @@ final class ValueTable {
         highlightBg = ColorUtils.setAlphaComponent(highlightText, 38);
     }
 
+    /** Fixes proportional column widths (one weight per column), so a long cell can't crowd the rest. */
+    ValueTable columns(float... weights) {
+        colWeights = weights;
+        table.setStretchAllColumns(false);
+        table.setShrinkAllColumns(false);
+        return this;
+    }
+
+    /** Ellipsizes the label column after this many lines (so long names wrap then end in "..."). */
+    ValueTable labelLines(int maxLines) {
+        labelMaxLines = maxLines;
+        return this;
+    }
+
     /** A header row; spans[i] is how many columns cells[i] covers (null = 1 each). */
     ValueTable header(String[] cells, int[] spans) {
         TableRow row = new TableRow(c);
@@ -56,10 +74,18 @@ final class ValueTable {
             t.setTextColor(primary);
             TableRow.LayoutParams lp = new TableRow.LayoutParams();
             if (spans != null) lp.span = spans[i];
+            else applyWeight(lp, i);
             row.addView(t, lp);
         }
         table.addView(row);
         return this;
+    }
+
+    private void applyWeight(TableRow.LayoutParams lp, int col) {
+        if (colWeights != null && col < colWeights.length) {
+            lp.width = 0;
+            lp.weight = colWeights[col];
+        }
     }
 
     /** A body row: bold label, then right-aligned values. */
@@ -76,14 +102,22 @@ final class ValueTable {
         TextView l = cell(label, Gravity.START);
         l.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
         if (highlight) l.setTextColor(highlightText);
-        row.addView(l);
-        for (String v : values) {
-            TextView t = cell(v, Gravity.END);
+        if (labelMaxLines > 0) {
+            l.setMaxLines(labelMaxLines);
+            l.setEllipsize(android.text.TextUtils.TruncateAt.END);
+        }
+        TableRow.LayoutParams llp = new TableRow.LayoutParams();
+        applyWeight(llp, 0);
+        row.addView(l, llp);
+        for (int i = 0; i < values.length; i++) {
+            TextView t = cell(values[i], Gravity.END);
             if (highlight) {
                 t.setTextColor(highlightText);
                 t.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
             }
-            row.addView(t);
+            TableRow.LayoutParams vlp = new TableRow.LayoutParams();
+            applyWeight(vlp, i + 1);
+            row.addView(t, vlp);
         }
         table.addView(row);
         return this;
