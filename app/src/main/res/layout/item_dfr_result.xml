@@ -25,6 +25,72 @@
         android:background="#777777"
         android:layout_marginBottom="@dimen/spacing_s" />
 
+    <!-- Automatic analysis (same engine as the double-ended fault locator) -->
+    <LinearLayout
+        android:id="@+id/layoutAutoAnalysis"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:visibility="gone">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/lbl_view_auto_analysis"
+            android:textColor="@color/brand_primary"
+            android:textSize="@dimen/text_size_body_small"
+            android:textStyle="bold"
+            android:letterSpacing="0.1"
+            android:layout_marginTop="@dimen/spacing_xs"
+            android:layout_marginBottom="@dimen/spacing_xs" />
+
+        <LinearLayout
+            android:id="@+id/containerAutoSummary"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" />
+
+        <RadioGroup
+            android:id="@+id/rgViewerBiboRef"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_s"
+            android:orientation="horizontal">
+
+            <RadioButton
+                android:id="@+id/rbViewerBiboRise"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:checked="true"
+                android:text="@string/lbl_fl_bibo_ref_rise"
+                android:textColor="@color/dfr_text_primary"
+                android:textSize="@dimen/text_size_caption" />
+
+            <RadioButton
+                android:id="@+id/rbViewerBiboTrig"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/lbl_fl_bibo_ref_trig"
+                android:textColor="@color/dfr_text_primary"
+                android:textSize="@dimen/text_size_caption" />
+        </RadioGroup>
+
+        <LinearLayout
+            android:id="@+id/containerViewerBibo"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="2dp"
+            android:background="#777777"
+            android:layout_marginTop="@dimen/spacing_m"
+            android:layout_marginBottom="@dimen/spacing_s" />
+    </LinearLayout>
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

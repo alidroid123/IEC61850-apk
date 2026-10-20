@@ -162,6 +162,11 @@ public class DfrViewerActivity extends BaseActivity {
 
     private boolean isAutoLoading = false;
     private Uri pendingDatUri = null;
+    /** The loaded record's cfg/dat, kept so the automatic analysis can re-read them with the robust parser. */
+    private Uri loadedCfgUri, loadedDatUri;
+    private DoubleEndedFaultLocator.SingleResult autoResult;
+    /** IO analysis time reference: "rise" (fault current rise) or "trig" (DFR trigger). */
+    private String viewerBiboRef = "rise";
     private static final String[] COMPANION_EXTENSIONS = {".hdr", ".inf", ".xml"};
     private final java.util.LinkedHashMap<String, Uri> companionFileUris = new java.util.LinkedHashMap<>();
 
@@ -731,7 +736,8 @@ public class DfrViewerActivity extends BaseActivity {
                 mainMappings.clear();
                 extraAnalogIndices.clear();
                 getSharedPreferences("dfr_prefs", MODE_PRIVATE).edit().putString("last_cfg_uri", uri.toString()).apply();
-                
+                loadedCfgUri = uri;
+
                 // Try to find matching .dat if not already pending, and pick up any companion
                 // files (.hdr/.inf/.xml - vendor/standard auxiliary files that sometimes ship
                 // alongside a COMTRADE record) sitting next to the .cfg, via findSiblingFile().
@@ -825,7 +831,9 @@ public class DfrViewerActivity extends BaseActivity {
                 while ((line = reader.readLine()) != null) datLines.add(line);
                 reader.close();
                 getSharedPreferences("dfr_prefs", MODE_PRIVATE).edit().putString("last_dat_uri", uri.toString()).apply();
-                
+                loadedDatUri = uri;
+                computeAutoAnalysis();
+
                 runOnUiThread(() -> {
                     if (isFinishing()) return;
                     progressBar.setVisibility(View.GONE);
@@ -846,6 +854,172 @@ public class DfrViewerActivity extends BaseActivity {
                 });
             }
         });
+    }
+
+    /**
+     * Runs the double-ended engine's single-record analysis (fault type, pre-fault/fault phasors,
+     * voltage sag, BI/BO) on the loaded record, using the robust ComtradeRecord parser so binary
+     * .dat files work too. Result is rendered in the result card.
+     */
+    private void computeAutoAnalysis() {
+        final Uri cfg = loadedCfgUri, dat = loadedDatUri;
+        if (cfg == null || dat == null) return;
+        safeExecute(() -> {
+            DoubleEndedFaultLocator.SingleResult res = null;
+            try {
+                ComtradeRecord rec = ComtradeRecord.load(readUri(cfg), readUri(dat));
+                res = DoubleEndedFaultLocator.analyzeSingle(rec, DoubleEndedFaultLocator.autoMap(rec));
+            } catch (Exception ignored) { }
+            final DoubleEndedFaultLocator.SingleResult fr = res;
+            runOnUiThread(() -> {
+                if (isFinishing()) return;
+                autoResult = (fr != null && fr.error == null) ? fr : null;
+                if (adapter != null) adapter.notifyDataSetChanged();
+            });
+        });
+    }
+
+    private byte[] readUri(Uri uri) throws Exception {
+        try (InputStream is = getContentResolver().openInputStream(uri)) {
+            if (is == null) throw new Exception(getString(R.string.msg_view_file_not_found));
+            return ComtradeRecord.readAll(is);
+        }
+    }
+
+    /** Builds the automatic fault summary + phasor table + pre-fault/fault phasor diagram, like the double-ended result. */
+    private void buildAutoSummary(LinearLayout container, DoubleEndedFaultLocator.SingleResult sr) {
+        DoubleEndedFaultLocator.EndSummary e = sr.end;
+        autoRow(container, getString(R.string.lbl_view_faulted_phase),
+                getString(R.string.lbl_fl_fault_type, rstNameV(sr.faultType), sr.faultType));
+        String cur = autoFaultCurrent(e, sr.faultType);
+        if (!cur.isEmpty()) autoRow(container, getString(R.string.lbl_fl_fault_current), cur);
+        autoRow(container, getString(R.string.lbl_view_voltage_drop),
+                Double.isNaN(sr.voltageSag) ? "-" : fmtV(sr.voltageSag * 100, 1) + " %");
+
+        // Phasor magnitude & angle table (pre-fault + fault), same layout as the double-ended report.
+        android.widget.TableLayout table = new android.widget.TableLayout(this);
+        LinearLayout.LayoutParams tlp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        tlp.topMargin = dpv(8);
+        container.addView(table, tlp);
+        String mag = getString(R.string.lbl_fl_col_mag), ang = getString(R.string.lbl_fl_col_angle);
+        String[] names = {"Va", "Vb", "Vc", "Ia", "Ib", "Ic", "V1", "V2", "V0", "I1", "I2", "I0"};
+        boolean[] faulted = faultedPhasesV(sr.faultType);
+        ValueTable t = new ValueTable(this, table)
+                .header(new String[]{"", getString(R.string.lbl_fl_prefault), getString(R.string.lbl_fl_fault)}, new int[]{1, 2, 2})
+                .header(new String[]{"", mag, ang, mag, ang}, null);
+        for (int k = 0; k < names.length; k++) {
+            if (k == 3 || k == 6 || k == 9) t.divider();
+            boolean isV = names[k].startsWith("V");
+            DoubleEndedFaultLocator.Cx pre = e.hasPrefault && e.pre != null ? pickCx(e.pre, k) : null;
+            DoubleEndedFaultLocator.Cx flt = e.flt != null ? pickCx(e.flt, k) : null;
+            t.row(k < 6 && faulted[k % 3], names[k] + (isV ? " (kV)" : " (A)"),
+                    pre != null ? magTextV(pre, isV) : "-", pre != null ? angleTextV(pre, e.displayRefAngle) : "-",
+                    flt != null ? magTextV(flt, isV) : "-", flt != null ? angleTextV(flt, e.displayRefAngle) : "-");
+        }
+
+        // Pre-fault & fault phasor diagram.
+        if (e.flt != null) {
+            RelayPhasorView rp = new RelayPhasorView(this);
+            LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dpv(240));
+            lp.topMargin = dpv(8);
+            rp.setLayoutParams(lp);
+            rp.setRelays(e.hasPrefault ? e.pre : null, e.flt, getString(R.string.lbl_fl_prefault), getString(R.string.lbl_fl_fault));
+            container.addView(rp);
+        }
+    }
+
+    private void autoRow(LinearLayout box, String label, String value) {
+        LinearLayout row = new LinearLayout(this);
+        row.setOrientation(LinearLayout.HORIZONTAL);
+        row.setPadding(0, dpv(4), 0, dpv(4));
+        TextView l = new TextView(this);
+        l.setText(label);
+        l.setTextColor(ContextCompat.getColor(this, R.color.dfr_text_secondary));
+        l.setTextSize(android.util.TypedValue.COMPLEX_UNIT_PX, getResources().getDimension(R.dimen.text_size_body_small));
+        row.addView(l, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1.2f));
+        TextView vtv = new TextView(this);
+        vtv.setText(value);
+        vtv.setGravity(android.view.Gravity.END);
+        vtv.setTextColor(ContextCompat.getColor(this, R.color.dfr_text_primary));
+        vtv.setTextSize(android.util.TypedValue.COMPLEX_UNIT_PX, getResources().getDimension(R.dimen.text_size_body_small));
+        vtv.setTypeface(vtv.getTypeface(), android.graphics.Typeface.BOLD);
+        row.addView(vtv, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+        box.addView(row);
+    }
+
+    private String autoFaultCurrent(DoubleEndedFaultLocator.EndSummary e, String type) {
+        if (e.flt == null) return "";
+        String[] rst = {"IR", "IS", "IT"};
+        boolean[] faulted = faultedPhasesV(type);
+        int strongest = 0;
+        for (int p = 0; p < 3; p++) if (e.flt.i[p].abs() > e.flt.i[strongest].abs()) strongest = p;
+        StringBuilder sb = new StringBuilder();
+        for (int p = 0; p < 3; p++) {
+            boolean show = faulted[0] || faulted[1] || faulted[2] ? faulted[p] : p == strongest;
+            if (!show) continue;
+            if (sb.length() > 0) sb.append(" · ");
+            sb.append(rst[p]).append(' ').append(fmtV(e.flt.i[p].abs(), 0)).append(" A");
+        }
+        if (type != null && type.endsWith("G") && e.flt.i0 != null) sb.append(" · IN ").append(fmtV(3 * e.flt.i0.abs(), 0)).append(" A");
+        return sb.toString();
+    }
+
+    private static boolean[] faultedPhasesV(String type) {
+        boolean[] f = new boolean[3];
+        if (type == null || type.equals("?")) return f;
+        f[0] = type.contains("A");
+        f[1] = type.contains("B");
+        f[2] = type.contains("C");
+        return f;
+    }
+
+    private static DoubleEndedFaultLocator.Cx pickCx(DoubleEndedFaultLocator.Phasors p, int k) {
+        switch (k) {
+            case 0: case 1: case 2: return p.v[k];
+            case 3: case 4: case 5: return p.i[k - 3];
+            case 6: return p.v1;
+            case 7: return p.v2;
+            case 8: return p.v0;
+            case 9: return p.i1;
+            case 10: return p.i2;
+            default: return p.i0;
+        }
+    }
+
+    private static String magTextV(DoubleEndedFaultLocator.Cx x, boolean isV) {
+        return isV ? String.format(java.util.Locale.US, "%.2f", x.abs() / 1000) : String.format(java.util.Locale.US, "%.1f", x.abs());
+    }
+
+    private static String angleTextV(DoubleEndedFaultLocator.Cx x, double ref) {
+        double d = Math.toDegrees(x.arg() - ref);
+        while (d > 180) d -= 360;
+        while (d <= -180) d += 360;
+        return String.format(java.util.Locale.US, "%.1f°", d);
+    }
+
+    private static String fmtV(double v, int dec) {
+        if (Double.isNaN(v)) return "-";
+        return String.format(java.util.Locale.US, "%." + dec + "f", v);
+    }
+
+    private int dpv(int v) {
+        return (int) (v * getResources().getDisplayMetrics().density);
+    }
+
+    private static String rstNameV(String type) {
+        switch (type) {
+            case "AG": return "R-N";
+            case "BG": return "S-N";
+            case "CG": return "T-N";
+            case "AB": return "R-S";
+            case "BC": return "S-T";
+            case "CA": return "R-T";
+            case "ABG": return "RS-N";
+            case "BCG": return "ST-N";
+            case "CAG": return "RT-N";
+            case "ABC": return "R-S-T";
+            default: return "?";
+        }
     }
 
     private void showSingleChannelMappingDialog(ChartModel m) {
@@ -1824,10 +1998,20 @@ public class DfrViewerActivity extends BaseActivity {
 
         class ResultViewHolder extends RecyclerView.ViewHolder {
             LinearLayout containerAnalog, containerDigital; EditText etNote;
+            LinearLayout layoutAutoAnalysis, containerAutoSummary, containerViewerBibo;
+            RadioGroup rgViewerBiboRef;
 
             ResultViewHolder(View v) {
-                super(v); containerAnalog = v.findViewById(R.id.containerAnalogAssessment); containerDigital = v.findViewById(R.id.containerDigitalAssessment); 
+                super(v); containerAnalog = v.findViewById(R.id.containerAnalogAssessment); containerDigital = v.findViewById(R.id.containerDigitalAssessment);
                 etNote = v.findViewById(R.id.etNote);
+                layoutAutoAnalysis = v.findViewById(R.id.layoutAutoAnalysis);
+                containerAutoSummary = v.findViewById(R.id.containerAutoSummary);
+                containerViewerBibo = v.findViewById(R.id.containerViewerBibo);
+                rgViewerBiboRef = v.findViewById(R.id.rgViewerBiboRef);
+                rgViewerBiboRef.setOnCheckedChangeListener((group, id) -> {
+                    viewerBiboRef = id == R.id.rbViewerBiboTrig ? "trig" : "rise";
+                    renderViewerBibo();
+                });
 
                 v.findViewById(R.id.btnExportPdf).setOnClickListener(v1 -> exportPdf()); v.findViewById(R.id.btnDownloadImg).setOnClickListener(v1 -> downloadImage());
 
@@ -1838,8 +2022,24 @@ public class DfrViewerActivity extends BaseActivity {
                 });
             }
 
+            void renderViewerBibo() {
+                containerViewerBibo.removeAllViews();
+                if (autoResult != null) BiboReport.render(DfrViewerActivity.this, containerViewerBibo, parser.stationName, autoResult.end, viewerBiboRef);
+            }
+
+            void renderAuto() {
+                boolean show = autoResult != null;
+                layoutAutoAnalysis.setVisibility(show ? View.VISIBLE : View.GONE);
+                containerAutoSummary.removeAllViews();
+                containerViewerBibo.removeAllViews();
+                if (!show) return;
+                buildAutoSummary(containerAutoSummary, autoResult);
+                renderViewerBibo();
+            }
+
             void bind() {
                 containerAnalog.removeAllViews(); containerDigital.removeAllViews();
+                renderAuto();
                 etTopTitle.setText(assessmentState.title); etNote.setText(assessmentState.note);
                 
                 final String[] phasaOptions;

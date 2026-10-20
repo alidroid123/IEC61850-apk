@@ -55,6 +55,15 @@
             </LinearLayout>
 
             <ImageButton
+                android:id="@+id/btnRenameFolder"
+                android:layout_width="@dimen/icon_size_l"
+                android:layout_height="@dimen/icon_size_l"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/btn_file_rename_folder"
+                android:src="@drawable/ic_edit_small"
+                app:tint="?attr/colorPrimary" />
+
+            <ImageButton
                 android:id="@+id/btnShareAll"
                 android:layout_width="@dimen/icon_size_l"
                 android:layout_height="@dimen/icon_size_l"

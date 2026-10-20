@@ -988,6 +988,51 @@
     <string name="lbl_fl_phasor_header">Phasors (primary, angle ref. Va pre-fault)</string>
     <string name="lbl_fl_prefault">Pre-fault</string>
     <string name="lbl_fl_fault">Fault</string>
+
+    <!-- IO analysis (BI/BO digital events + current-rise timing) -->
+    <string name="lbl_fl_bibo_header">IO analysis (BI/BO)</string>
+    <string name="lbl_fl_bibo_ref_rise">⚡ Fault current rise</string>
+    <string name="lbl_fl_bibo_ref_trig">🎯 DFR trigger</string>
+    <string name="val_fl_bibo_ref_rise_name">current rise</string>
+    <string name="val_fl_bibo_ref_trig_name">DFR trigger</string>
+    <string name="msg_fl_bibo_fs">%1$s Hz • time resolution %2$s ms (1 sample)</string>
+    <string name="lbl_fl_bibo_gap">⏱️ Current rise → trigger</string>
+    <string name="msg_fl_bibo_gap_na">⏱️ Current rise → trigger: cannot be computed (%1$s)</string>
+    <string name="val_fl_bibo_gap_no_trig">trigger not available</string>
+    <string name="val_fl_bibo_gap_no_rise">current rise not detected</string>
+    <string name="val_fl_bibo_gap_coincident">trigger coincides with current rise</string>
+    <string name="val_fl_bibo_gap_detail">trigger %1$s ms %2$s current rise</string>
+    <string name="val_fl_bibo_after">after</string>
+    <string name="val_fl_bibo_before">before</string>
+    <string name="lbl_fl_bibo_rise">⚡ Significant current rise</string>
+    <string name="val_fl_bibo_rise_val">%1$s (t = %2$s, phase %3$s)</string>
+    <string name="val_fl_bibo_rise_none">not detected — current did not rise significantly (weak infeed?)</string>
+    <string name="warn_fl_bibo_rise_low">Current rise weak vs noise (SNR %1$s) — timing precision reduced.</string>
+    <string name="lbl_fl_bibo_trig">🎯 DFR trigger</string>
+    <string name="val_fl_bibo_trig_val">%1$s (t = %2$s)</string>
+    <string name="val_fl_bibo_trig_none">not available</string>
+    <string name="val_fl_bibo_note_rise_fallback">current rise not detected — reference uses DFR trigger</string>
+    <string name="val_fl_bibo_note_trig_fallback">trigger time not available — reference uses current rise</string>
+    <string name="lbl_fl_bibo_event">Event %1$d · %2$s</string>
+    <string name="msg_fl_bibo_event_ref">starts %1$s ms from %2$s • %3$s</string>
+    <string name="val_fl_bibo_step_end">end of record</string>
+    <string name="val_fl_bibo_since">since %1$s</string>
+    <string name="msg_fl_bibo_note">%1$d of %2$d digital channels changed • time relative to %3$s • states lasting ≤ %4$s ms (contact bounce) ignored • the last step is timed to the end of the record</string>
+    <string name="val_fl_bibo_no_digital">Record has no digital channels (BI/BO).</string>
+    <string name="lbl_fl_bibo_share_header">🔌 BI/BO EVENT ANALYSIS (reference: %1$s)</string>
+    <string name="ttl_fl_share_confirm">Share report</string>
+    <string name="msg_fl_share_confirm">The summary report (location, current, cross-check, warnings) will be shared.</string>
+    <string name="chk_fl_share_events">Include BI/BO event analysis</string>
+    <string name="chk_fl_share_events_none">Include BI/BO event analysis (no events)</string>
+    <string name="btn_file_rename_folder">Rename folder</string>
+    <string name="ttl_file_rename_folder">Rename folder</string>
+    <string name="msg_file_rename_hint">Folder name</string>
+    <string name="msg_file_rename_exists">A folder with that name already exists.</string>
+    <string name="msg_file_rename_invalid">The name may not be empty or contain / or \\.</string>
+    <string name="msg_file_rename_fail">Could not rename the folder.</string>
+    <string name="lbl_view_auto_analysis">AUTOMATIC ANALYSIS</string>
+    <string name="lbl_view_faulted_phase">Faulted phase</string>
+    <string name="lbl_view_voltage_drop">Voltage drop (V1)</string>
     <string name="btn_fl_share">Share report</string>
     <string name="btn_fl_fix_polarity">Invert current polarity of %s &amp; re-analyze</string>
     <string name="ttl_fl_report">Double-ended fault location report</string>

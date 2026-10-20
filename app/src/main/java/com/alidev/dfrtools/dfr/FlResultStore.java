@@ -3,8 +3,12 @@ package com.alidev.dfrtools.dfr;
 import android.content.Context;
 
 import com.alidev.dfrtools.dfr.DoubleEndedFaultLocator.Alignment;
+import com.alidev.dfrtools.dfr.DoubleEndedFaultLocator.Bibo;
+import com.alidev.dfrtools.dfr.DoubleEndedFaultLocator.CurrentRise;
 import com.alidev.dfrtools.dfr.DoubleEndedFaultLocator.Cx;
+import com.alidev.dfrtools.dfr.DoubleEndedFaultLocator.DigitalEvent;
 import com.alidev.dfrtools.dfr.DoubleEndedFaultLocator.EndSummary;
+import com.alidev.dfrtools.dfr.DoubleEndedFaultLocator.PhaseRise;
 import com.alidev.dfrtools.dfr.DoubleEndedFaultLocator.Phasors;
 import com.alidev.dfrtools.dfr.DoubleEndedFaultLocator.Result;
 import com.alidev.dfrtools.dfr.DoubleEndedFaultLocator.Warning;
@@ -242,9 +246,96 @@ public class FlResultStore {
         o.put("hasPrefault", e.hasPrefault);
         num(o, "displayRefAngle", e.displayRefAngle);
         o.put("secondaryWithoutRatio", e.secondaryWithoutRatio);
+        if (e.startMicros != Long.MIN_VALUE) o.put("startMicros", e.startMicros);
+        if (e.bibo != null) o.put("bibo", biboToJson(e.bibo));
         if (e.pre != null) o.put("pre", phasorsToJson(e.pre));
         if (e.flt != null) o.put("flt", phasorsToJson(e.flt));
         return o;
+    }
+
+    private static JSONObject biboToJson(Bibo b) throws JSONException {
+        JSONObject o = new JSONObject();
+        num(o, "trigger", b.trigger);
+        o.put("channels", b.channels);
+        o.put("changed", b.changed);
+        num(o, "recordEnd", b.recordEnd);
+        num(o, "fs", b.fs);
+        num(o, "debounceMs", b.debounceMs);
+        if (b.rise != null) {
+            JSONObject r = new JSONObject();
+            r.put("phase", b.rise.phase);
+            num(r, "t", b.rise.t);
+            num(r, "snr", b.rise.snr);
+            num(r, "resolution", b.rise.resolution);
+            JSONArray ph = new JSONArray();
+            for (PhaseRise p : b.rise.phases) {
+                JSONObject po = new JSONObject();
+                po.put("phase", p.phase);
+                po.put("idx", p.idx);
+                num(po, "t", p.t);
+                ph.put(po);
+            }
+            r.put("phases", ph);
+            o.put("rise", r);
+        }
+        JSONArray ev = new JSONArray();
+        for (DigitalEvent e : b.events) {
+            JSONObject eo = new JSONObject();
+            eo.put("ch", e.ch);
+            eo.put("idx", e.idx);
+            eo.put("from", e.from);
+            eo.put("to", e.to);
+            num(eo, "t", e.t);
+            if (e.normal != null) eo.put("normal", (int) e.normal);
+            ev.put(eo);
+        }
+        o.put("events", ev);
+        return o;
+    }
+
+    private static Bibo biboFromJson(JSONObject o) throws JSONException {
+        Bibo b = new Bibo();
+        b.trigger = o.optDouble("trigger", Double.NaN);
+        b.channels = o.optInt("channels", 0);
+        b.changed = o.optInt("changed", 0);
+        b.recordEnd = o.optDouble("recordEnd", Double.NaN);
+        b.fs = o.optDouble("fs", 0);
+        b.debounceMs = o.optDouble("debounceMs", 2);
+        JSONObject r = o.optJSONObject("rise");
+        if (r != null) {
+            CurrentRise cr = new CurrentRise();
+            cr.phase = r.optInt("phase", 0);
+            cr.t = r.optDouble("t", Double.NaN);
+            cr.snr = r.optDouble("snr", Double.POSITIVE_INFINITY);
+            cr.resolution = r.optDouble("resolution", Double.NaN);
+            JSONArray ph = r.optJSONArray("phases");
+            if (ph != null) {
+                for (int i = 0; i < ph.length(); i++) {
+                    JSONObject po = ph.getJSONObject(i);
+                    PhaseRise p = new PhaseRise();
+                    p.phase = po.optInt("phase", 0);
+                    p.idx = po.optInt("idx", -1);
+                    p.t = po.optDouble("t", Double.NaN);
+                    cr.phases.add(p);
+                }
+            }
+            b.rise = cr;
+        }
+        JSONArray ev = o.optJSONArray("events");
+        if (ev != null) {
+            for (int i = 0; i < ev.length(); i++) {
+                JSONObject eo = ev.getJSONObject(i);
+                DigitalEvent e = new DigitalEvent();
+                e.ch = eo.optString("ch", "");
+                e.idx = eo.optInt("idx", 0);
+                e.from = eo.optInt("from", 0);
+                e.to = eo.optInt("to", 0);
+                e.t = eo.optDouble("t", Double.NaN);
+                e.normal = eo.has("normal") ? eo.optInt("normal") : null;
+                b.events.add(e);
+            }
+        }
+        return b;
     }
 
     private static EndSummary endFromJson(JSONObject o) throws JSONException {
@@ -261,6 +352,8 @@ public class FlResultStore {
         e.hasPrefault = o.optBoolean("hasPrefault", false);
         e.displayRefAngle = o.optDouble("displayRefAngle", 0);
         e.secondaryWithoutRatio = o.optBoolean("secondaryWithoutRatio", false);
+        e.startMicros = o.optLong("startMicros", Long.MIN_VALUE);
+        if (o.has("bibo")) e.bibo = biboFromJson(o.getJSONObject("bibo"));
         if (o.has("pre")) e.pre = phasorsFromJson(o.getJSONObject("pre"));
         if (o.has("flt")) e.flt = phasorsFromJson(o.getJSONObject("flt"));
         return e;

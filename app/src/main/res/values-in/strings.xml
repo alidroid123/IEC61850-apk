@@ -954,6 +954,51 @@
     <string name="lbl_fl_phasor_header">Fasor (primer, referensi sudut Va prefault)</string>
     <string name="lbl_fl_prefault">Prefault</string>
     <string name="lbl_fl_fault">Fault</string>
+
+    <!-- Analisa IO (event digital BI/BO + waktu kenaikan arus) -->
+    <string name="lbl_fl_bibo_header">Analisa IO (BI/BO)</string>
+    <string name="lbl_fl_bibo_ref_rise">⚡ Kenaikan arus gangguan</string>
+    <string name="lbl_fl_bibo_ref_trig">🎯 Trigger DFR</string>
+    <string name="val_fl_bibo_ref_rise_name">kenaikan arus</string>
+    <string name="val_fl_bibo_ref_trig_name">trigger DFR</string>
+    <string name="msg_fl_bibo_fs">%1$s Hz • resolusi waktu %2$s ms (1 sampel)</string>
+    <string name="lbl_fl_bibo_gap">⏱️ Arus naik → trigger</string>
+    <string name="msg_fl_bibo_gap_na">⏱️ Arus naik → trigger: tidak dapat dihitung (%1$s)</string>
+    <string name="val_fl_bibo_gap_no_trig">trigger tidak tersedia</string>
+    <string name="val_fl_bibo_gap_no_rise">kenaikan arus tidak terdeteksi</string>
+    <string name="val_fl_bibo_gap_coincident">trigger bersamaan dengan arus naik</string>
+    <string name="val_fl_bibo_gap_detail">trigger %1$s ms %2$s arus naik</string>
+    <string name="val_fl_bibo_after">sesudah</string>
+    <string name="val_fl_bibo_before">sebelum</string>
+    <string name="lbl_fl_bibo_rise">⚡ Kenaikan arus signifikan</string>
+    <string name="val_fl_bibo_rise_val">%1$s (t = %2$s, fasa %3$s)</string>
+    <string name="val_fl_bibo_rise_none">tidak terdeteksi — arus tidak naik signifikan (weak infeed?)</string>
+    <string name="warn_fl_bibo_rise_low">Kenaikan arus lemah terhadap noise (SNR %1$s) — presisi waktu menurun.</string>
+    <string name="lbl_fl_bibo_trig">🎯 Trigger DFR</string>
+    <string name="val_fl_bibo_trig_val">%1$s (t = %2$s)</string>
+    <string name="val_fl_bibo_trig_none">tidak tersedia</string>
+    <string name="val_fl_bibo_note_rise_fallback">kenaikan arus tidak terdeteksi — acuan memakai trigger DFR</string>
+    <string name="val_fl_bibo_note_trig_fallback">waktu trigger tidak tersedia — acuan memakai kenaikan arus</string>
+    <string name="lbl_fl_bibo_event">Event %1$d · %2$s</string>
+    <string name="msg_fl_bibo_event_ref">mulai %1$s ms dari %2$s • %3$s</string>
+    <string name="val_fl_bibo_step_end">akhir record</string>
+    <string name="val_fl_bibo_since">sejak %1$s</string>
+    <string name="msg_fl_bibo_note">%1$d dari %2$d kanal digital berubah • waktu relatif terhadap %3$s • status yang bertahan ≤ %4$s ms (getaran kontak) diabaikan • durasi langkah terakhir dihitung sampai akhir record</string>
+    <string name="val_fl_bibo_no_digital">Record tidak memiliki kanal digital (BI/BO).</string>
+    <string name="lbl_fl_bibo_share_header">🔌 ANALISA EVENT BI/BO (acuan: %1$s)</string>
+    <string name="ttl_fl_share_confirm">Bagikan laporan</string>
+    <string name="msg_fl_share_confirm">Laporan ringkas (lokasi, arus, cross-check, peringatan) akan dibagikan.</string>
+    <string name="chk_fl_share_events">Sertakan analisa event BI/BO</string>
+    <string name="chk_fl_share_events_none">Sertakan analisa event BI/BO (tidak ada event)</string>
+    <string name="btn_file_rename_folder">Ubah nama folder</string>
+    <string name="ttl_file_rename_folder">Ubah nama folder</string>
+    <string name="msg_file_rename_hint">Nama folder</string>
+    <string name="msg_file_rename_exists">Folder dengan nama itu sudah ada.</string>
+    <string name="msg_file_rename_invalid">Nama tidak boleh kosong atau mengandung / atau \\.</string>
+    <string name="msg_file_rename_fail">Gagal mengubah nama folder.</string>
+    <string name="lbl_view_auto_analysis">ANALISA OTOMATIS</string>
+    <string name="lbl_view_faulted_phase">Fasa terganggu</string>
+    <string name="lbl_view_voltage_drop">Drop tegangan (V1)</string>
     <string name="btn_fl_share">Bagikan laporan</string>
     <string name="btn_fl_fix_polarity">Balik polaritas arus %s &amp; analisa ulang</string>
     <string name="ttl_fl_report">Laporan lokasi gangguan dua ujung</string>

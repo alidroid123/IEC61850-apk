@@ -762,6 +762,47 @@
                             android:layout_marginTop="@dimen/spacing_xs"
                             android:orientation="vertical" />
 
+                        <TextView
+                            android:id="@+id/tvFlBiboHeader"
+                            style="@style/SectionLabel"
+                            android:layout_marginTop="@dimen/spacing_m"
+                            android:tag="pdf_section"
+                            android:text="@string/lbl_fl_bibo_header" />
+
+                        <RadioGroup
+                            android:id="@+id/rgFlBiboRef"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="@dimen/spacing_xs"
+                            android:orientation="horizontal">
+
+                            <RadioButton
+                                android:id="@+id/rbFlBiboRise"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:checked="true"
+                                android:text="@string/lbl_fl_bibo_ref_rise"
+                                android:textColor="@color/text_primary"
+                                android:textSize="@dimen/text_size_body_small" />
+
+                            <RadioButton
+                                android:id="@+id/rbFlBiboTrig"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="@string/lbl_fl_bibo_ref_trig"
+                                android:textColor="@color/text_primary"
+                                android:textSize="@dimen/text_size_body_small" />
+                        </RadioGroup>
+
+                        <LinearLayout
+                            android:id="@+id/containerFlBibo"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="@dimen/spacing_xs"
+                            android:orientation="vertical" />
+
                         <LinearLayout
                             android:id="@+id/layoutFlResultActions"
                             android:layout_width="match_parent"

@@ -95,6 +95,7 @@ public class DeviceListActivity extends BaseActivity {
         setContentView(R.layout.activity_device_list);
 
         initViews();
+        findViewById(R.id.btnBack).setOnClickListener(v -> finish());
         loadDevices();
         loadPingResults();
         setupFilters();

@@ -13,8 +13,11 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.SeekBar;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -113,6 +116,8 @@ public class FaultLocatorActivity extends BaseActivity {
     private DoubleEndedFaultLocator.Alignment currentAlignment;
     /** Main result = voltage-only synchronised location instead of the unsynchronised one. */
     private boolean syncAsMain, bindingSync;
+    /** IO analysis time reference: "rise" (fault current rise) or "trig" (DFR trigger). */
+    private String biboRef = "rise";
     private double shiftLo;
     private static final double SHIFT_STEP = 0.00005; // 0.05 ms per slider step (0.9 deg at 50 Hz)
     private String resultNameA = "", resultNameB = "";
@@ -180,6 +185,10 @@ public class FaultLocatorActivity extends BaseActivity {
         findViewById(R.id.btnFlSave).setOnClickListener(v -> saveResult());
         findViewById(R.id.btnFlHistory).setOnClickListener(v -> showHistory());
         setupSyncControls();
+        ((RadioGroup) findViewById(R.id.rgFlBiboRef)).setOnCheckedChangeListener((group, id) -> {
+            biboRef = id == R.id.rbFlBiboTrig ? "trig" : "rise";
+            if (lastResult != null) renderBibo(lastResult, resultNameA, resultNameB);
+        });
 
         inboxDir = new File(getCacheDir(), "fl_inbox_" + System.currentTimeMillis());
         if (savedInstanceState == null) {
@@ -1474,6 +1483,7 @@ public class FaultLocatorActivity extends BaseActivity {
         renderChart(r, nameA, nameB);
         renderDetails(r, nameA, nameB);
         renderPhasorTables(r, nameA, nameB);
+        renderBibo(r, nameA, nameB);
 
         if (!scrollToResult) return;
         View scroll = findViewById(R.id.scrollFl);
@@ -1895,7 +1905,8 @@ public class FaultLocatorActivity extends BaseActivity {
         View card = cardResult;
         TextView banner = findViewById(R.id.tvFlSavedBanner);
         View[] hide = {findViewById(R.id.layoutFlResultActions), findViewById(R.id.layoutFlSyncControls),
-                findViewById(R.id.btnFlFixPolarity), findViewById(R.id.tvFlSyncHint), findViewById(R.id.swFlSyncMain), banner};
+                findViewById(R.id.btnFlFixPolarity), findViewById(R.id.tvFlSyncHint), findViewById(R.id.swFlSyncMain),
+                findViewById(R.id.rgFlBiboRef), banner};
         int[] vis = new int[hide.length];
         for (int i = 0; i < hide.length; i++) { vis[i] = hide[i].getVisibility(); hide[i].setVisibility(View.GONE); }
         android.graphics.pdf.PdfDocument doc = new android.graphics.pdf.PdfDocument();
@@ -2582,6 +2593,23 @@ public class FaultLocatorActivity extends BaseActivity {
         box.addView(div, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 1));
     }
 
+    // ------------------------------------------------------------------
+    // IO analysis (BI/BO) rendering - mirrors the GAS biboModel/biboHtml
+    // ------------------------------------------------------------------
+
+    private void renderBibo(Result r, String nameA, String nameB) {
+        LinearLayout container = findViewById(R.id.containerFlBibo);
+        container.removeAllViews();
+        boolean any = (r.endA != null && r.endA.bibo != null) || (r.endB != null && r.endB.bibo != null);
+        int vis = any ? View.VISIBLE : View.GONE;
+        findViewById(R.id.tvFlBiboHeader).setVisibility(vis);
+        findViewById(R.id.rgFlBiboRef).setVisibility(vis);
+        container.setVisibility(vis);
+        if (!any) return;
+        BiboReport.render(this, container, nameA, r.endA, biboRef);
+        BiboReport.render(this, container, nameB, r.endB, biboRef);
+    }
+
     private void renderChart(Result r, String nameA, String nameB) {
         LineChart chart = findViewById(R.id.chartFlProfile);
         // The curves are the sequence the main method solved with (see DoubleEndedFaultLocator).
@@ -2707,6 +2735,35 @@ public class FaultLocatorActivity extends BaseActivity {
     private void shareReport() {
         Result r = lastResult;
         if (r == null) return;
+        boolean hasEvents = hasBiboEvents(r);
+        LinearLayout body = new LinearLayout(this);
+        body.setOrientation(LinearLayout.VERTICAL);
+        int pad = dp(20);
+        body.setPadding(pad, dp(8), pad, 0);
+        TextView msg = new TextView(this);
+        msg.setText(R.string.msg_fl_share_confirm);
+        msg.setTextColor(ContextCompat.getColor(this, R.color.text_primary));
+        body.addView(msg);
+        CheckBox chk = new CheckBox(this);
+        chk.setText(getString(hasEvents ? R.string.chk_fl_share_events : R.string.chk_fl_share_events_none));
+        chk.setEnabled(hasEvents);
+        LinearLayout.LayoutParams clp = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        clp.topMargin = dp(12);
+        body.addView(chk, clp);
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.ttl_fl_share_confirm)
+                .setView(body)
+                .setNegativeButton(android.R.string.cancel, null)
+                .setPositiveButton(R.string.btn_fl_share, (d, w) -> doShareReport(r, hasEvents && chk.isChecked()))
+                .show();
+    }
+
+    private boolean hasBiboEvents(Result r) {
+        return BiboReport.hasEvents(r.endA) || BiboReport.hasEvents(r.endB);
+    }
+
+    private void doShareReport(Result r, boolean withEvents) {
         String nameA = resultNameA, nameB = resultNameB;
         StringBuilder sb = new StringBuilder();
         sb.append(getString(R.string.ttl_fl_report)).append('\n');
@@ -2730,6 +2787,7 @@ public class FaultLocatorActivity extends BaseActivity {
         appendRows(sb, findViewById(R.id.containerFlMethods));
         sb.append('\n').append(getString(R.string.lbl_fl_details_header)).append('\n');
         appendRows(sb, findViewById(R.id.containerFlDetails));
+        if (withEvents) appendBiboEvents(sb, r, nameA, nameB);
         LinearLayout warn = findViewById(R.id.containerFlWarnings);
         if (warn.getChildCount() > 0) {
             sb.append('\n');
@@ -2750,6 +2808,12 @@ public class FaultLocatorActivity extends BaseActivity {
         intent.putExtra(Intent.EXTRA_SUBJECT, getString(R.string.ttl_fl_report) + " " + nameA + " – " + nameB);
         intent.putExtra(Intent.EXTRA_TEXT, sb.toString());
         startActivity(Intent.createChooser(intent, getString(R.string.btn_fl_share)));
+    }
+
+    private void appendBiboEvents(StringBuilder sb, Result r, String nameA, String nameB) {
+        sb.append('\n').append(getString(R.string.lbl_fl_bibo_share_header, BiboReport.refDisplayName(this, biboRef))).append('\n');
+        BiboReport.appendEvents(this, sb, nameA, r.endA, biboRef);
+        BiboReport.appendEvents(this, sb, nameB, r.endB, biboRef);
     }
 
     private static void appendRows(StringBuilder sb, LinearLayout box) {

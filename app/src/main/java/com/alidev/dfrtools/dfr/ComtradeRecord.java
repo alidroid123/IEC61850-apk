@@ -86,6 +86,24 @@ public class ComtradeRecord {
     public int revYear = 1991;
     public final List<AnalogChannel> analogs = new ArrayList<>();
     public final List<String> digitalNames = new ArrayList<>();
+
+    /**
+     * One digital (status) channel stored run-length: the value at sample 0 plus every change
+     * afterwards. Mirrors the GAS engine's {init, changes:[[k,v]]} so the BI/BO analysis is
+     * identical - the full per-sample array is never materialised.
+     */
+    public static final class DigitalChannel {
+        public int init;
+        /** Sample index of each change. */
+        public int[] k = new int[0];
+        /** New value (0/1) at each change. */
+        public int[] v = new int[0];
+    }
+
+    /** One entry per digital channel (empty until the .dat is parsed). */
+    public DigitalChannel[] digitalData = new DigitalChannel[0];
+    /** Normal (de-energised) state per digital channel: 0, 1, or -1 when the cfg leaves it blank. */
+    public int[] digitalNormal = new int[0];
     public double lineFrequency = 50;
     public double[] sampleRates = new double[0];
     public long[] rateEndSamples = new long[0];
@@ -118,6 +136,14 @@ public class ComtradeRecord {
         r.sourceName = cfgFile.getName();
         r.parseCfg(readLines(readAll(cfgFile)));
         r.parseDat(readAll(datFile));
+        return r;
+    }
+
+    /** Loads from already-read cfg/dat bytes (e.g. a content:// URI stream). */
+    public static ComtradeRecord load(byte[] cfgBytes, byte[] datBytes) throws IOException {
+        ComtradeRecord r = new ComtradeRecord();
+        r.parseCfg(readLines(cfgBytes));
+        r.parseDat(datBytes);
         return r;
     }
 
@@ -209,9 +235,12 @@ public class ComtradeRecord {
             }
             analogs.add(ch);
         }
+        digitalNormal = new int[nD];
         for (int i = 0; i < nD; i++) {
             String[] p = splitCsv(cfg.get(li++));
             digitalNames.add(p.length > 1 ? p[1] : ("D" + (i + 1)));
+            // Normal state = last field (y), per COMTRADE; blank/non-binary -> unknown (-1).
+            digitalNormal[i] = parseBinaryState(p.length > 0 ? p[p.length - 1] : "");
         }
 
         lineFrequency = parseDoubleSafe(cfg.get(li++), 50);
@@ -247,6 +276,12 @@ public class ComtradeRecord {
         int nA = analogs.size();
         int nD = digitalNames.size();
         double[] stamps;
+        // Digital channels accumulated run-length (value at 0 + changes), like the GAS parser.
+        int[] dInit = new int[nD];
+        java.util.Arrays.fill(dInit, -1);
+        @SuppressWarnings("unchecked")
+        List<int[]>[] dChg = new List[nD];
+        for (int c = 0; c < nD; c++) dChg[c] = new ArrayList<>();
         if (fileType.startsWith("ASCII")) {
             List<String> lines = readLines(dat);
             List<float[]> rows = new ArrayList<>(lines.size());
@@ -266,6 +301,13 @@ public class ComtradeRecord {
                     if (Double.isNaN(x) || (revYear < 2013 && x == 99999)) row[j] = last[j];
                     else row[j] = (float) (x * analogs.get(j).a + analogs.get(j).b);
                     last[j] = row[j];
+                }
+                int kk = rows.size();
+                for (int c = 0; c < nD; c++) {
+                    int col = 2 + nA + c;
+                    if (col >= p.length) continue;
+                    int dv = parseBinaryState(p[col]);
+                    if (dv >= 0) digAccumulate(dInit, dChg, c, kk, dv);
                 }
                 rows.add(row);
             }
@@ -316,9 +358,25 @@ public class ComtradeRecord {
                     values[j][k] = missing ? last[j] : (float) (x * ch.a + ch.b);
                     last[j] = values[j][k];
                 }
+                // Digital: 16-bit little-endian words after the analog block, bit 0 = first channel.
+                int digBase = base + 8 + width * nA;
+                for (int c = 0; c < nD; c++) {
+                    int word = bb.getShort(digBase + 2 * (c >> 4)) & 0xFFFF;
+                    digAccumulate(dInit, dChg, c, k, (word >> (c & 15)) & 1);
+                }
             }
         }
         if (sampleCount < 2) throw new IOException("DAT has no samples");
+        digitalData = new DigitalChannel[nD];
+        for (int c = 0; c < nD; c++) {
+            DigitalChannel dc = new DigitalChannel();
+            dc.init = dInit[c] < 0 ? 0 : dInit[c];
+            List<int[]> chg = dChg[c];
+            dc.k = new int[chg.size()];
+            dc.v = new int[chg.size()];
+            for (int j = 0; j < chg.size(); j++) { dc.k[j] = chg.get(j)[0]; dc.v[j] = chg.get(j)[1]; }
+            digitalData[c] = dc;
+        }
         buildTimeAxis(stamps);
     }
 
@@ -362,6 +420,19 @@ public class ComtradeRecord {
 
     private static int parseIntSafe(String s) {
         try { return Integer.parseInt(s.trim()); } catch (Exception e) { return (int) parseDoubleSafe(s, 0); }
+    }
+
+    /** Returns 0 or 1 when the text is exactly that, else -1 (unknown). */
+    private static int parseBinaryState(String s) {
+        try { int v = Integer.parseInt(s.trim()); return v == 0 || v == 1 ? v : -1; } catch (Exception e) { return -1; }
+    }
+
+    /** Run-length accumulator shared by the ASCII and binary digital readers. */
+    private static void digAccumulate(int[] dInit, List<int[]>[] dChg, int c, int k, int val) {
+        if (dInit[c] < 0) { dInit[c] = val; return; }
+        List<int[]> ch = dChg[c];
+        int last = ch.isEmpty() ? dInit[c] : ch.get(ch.size() - 1)[1];
+        if (val != last) ch.add(new int[]{k, val});
     }
 
     private static double parseDoubleSafe(String s, double def) {

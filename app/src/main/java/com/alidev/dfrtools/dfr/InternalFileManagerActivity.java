@@ -44,39 +44,17 @@ public class InternalFileManagerActivity extends BaseActivity {
         View openFolderAction = findViewById(R.id.headerAction);
         if (openFolderAction != null) {
             openFolderAction.setOnClickListener(v -> {
-                try {
-                    File downloadDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
-                    File baseDir = new File(downloadDir, "DFR");
-                    if (!baseDir.exists()) baseDir.mkdirs();
-
-                    // Hand off a FileProvider content:// Uri (with an explicit read-grant flag) to
-                    // whichever external file manager the user picks, instead of a raw file:// Uri
-                    // - a raw file:// Uri risks FileUriExposedException/SecurityException once it
-                    // leaves this app's process on API 24+, and isn't readable by the other app
-                    // without an explicit permission grant anyway.
-                    // "vnd.android.document/directory" is Android's actual documented MIME type
-                    // for a folder (DocumentsContract.Document.MIME_TYPE_DIR) - not every file
-                    // manager supports it, so resolveActivity() is checked first: previously this
-                    // used a made-up "resource/folder" type that matched zero apps on any device,
-                    // which is what produced the "no app can open this" system message.
-                    Uri uri = FileProvider.getUriForFile(this, getPackageName() + ".fileprovider", baseDir);
-                    Intent intent = new Intent(Intent.ACTION_VIEW);
-                    intent.setDataAndType(uri, "vnd.android.document/directory");
-                    intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                    if (intent.resolveActivity(getPackageManager()) != null) {
-                        startActivity(Intent.createChooser(intent, getString(R.string.ttl_file_open_chooser)));
-                    } else {
-                        // A Toast here got clipped/dismissed before the full folder path could be
-                        // read - a dialog stays on screen until the user dismisses it themselves.
-                        new AlertDialog.Builder(this, R.style.Theme_Comtrade_AlertDialog)
-                                .setTitle(R.string.ttl_file_open_chooser)
-                                .setMessage(getString(R.string.msg_file_open_folder_unsupported, baseDir.getAbsolutePath()))
-                                .setPositiveButton(android.R.string.ok, null)
-                                .show();
-                    }
-                } catch (Exception e) {
-                    Toast.makeText(this, getString(R.string.msg_view_general_error, e.getMessage()), Toast.LENGTH_SHORT).show();
-                }
+                File downloadDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+                File baseDir = new File(downloadDir, "DFR");
+                if (!baseDir.exists()) baseDir.mkdirs();
+                if (openDfrFolder(baseDir)) return;
+                // Nothing on this device can browse to the folder - a dialog stays up until the
+                // user dismisses it (a Toast got clipped before the full path could be read).
+                new AlertDialog.Builder(this, R.style.Theme_Comtrade_AlertDialog)
+                        .setTitle(R.string.ttl_file_open_chooser)
+                        .setMessage(getString(R.string.msg_file_open_folder_unsupported, baseDir.getAbsolutePath()))
+                        .setPositiveButton(android.R.string.ok, null)
+                        .show();
             });
         }
 
@@ -86,6 +64,40 @@ public class InternalFileManagerActivity extends BaseActivity {
         rvFolders.setAdapter(adapter);
 
         ((TextView) findViewById(R.id.tvFolderSummary)).setText(getString(R.string.lbl_file_folder_count, folders.size()));
+    }
+
+    /**
+     * Opens the Downloads/DFR folder in whatever can browse it, trying the most specific option
+     * first: the exact folder in the system Documents UI (Files app), then the system Downloads
+     * screen, then a FileProvider content:// folder Uri. Returns false only when none resolve.
+     */
+    private boolean openDfrFolder(File baseDir) {
+        // 1) The exact folder in the system Documents UI (the "Files" app on most devices).
+        try {
+            Uri docUri = android.provider.DocumentsContract.buildDocumentUri(
+                    "com.android.externalstorage.documents", "primary:Download/DFR");
+            Intent i = new Intent(Intent.ACTION_VIEW);
+            i.setDataAndType(docUri, "vnd.android.document/directory");
+            i.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            if (i.resolveActivity(getPackageManager()) != null) { startActivity(i); return true; }
+        } catch (Exception ignored) { }
+        // 2) The system Downloads screen (DFR records live under Download/).
+        try {
+            Intent i = new Intent(android.app.DownloadManager.ACTION_VIEW_DOWNLOADS);
+            if (i.resolveActivity(getPackageManager()) != null) { startActivity(i); return true; }
+        } catch (Exception ignored) { }
+        // 3) A FileProvider content:// folder Uri handed to any file manager that accepts it.
+        try {
+            Uri uri = FileProvider.getUriForFile(this, getPackageName() + ".fileprovider", baseDir);
+            Intent i = new Intent(Intent.ACTION_VIEW);
+            i.setDataAndType(uri, "vnd.android.document/directory");
+            i.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            if (i.resolveActivity(getPackageManager()) != null) {
+                startActivity(Intent.createChooser(i, getString(R.string.ttl_file_open_chooser)));
+                return true;
+            }
+        } catch (Exception ignored) { }
+        return false;
     }
 
     private void checkPermissions() {
@@ -194,6 +206,41 @@ public class InternalFileManagerActivity extends BaseActivity {
         });
     }
 
+    private void showRenameFolder(File folder) {
+        final android.widget.EditText input = new android.widget.EditText(this);
+        input.setText(folder.getName());
+        input.setSelection(input.getText().length());
+        input.setHint(R.string.msg_file_rename_hint);
+        int pad = (int) (20 * getResources().getDisplayMetrics().density);
+        android.widget.FrameLayout wrap = new android.widget.FrameLayout(this);
+        wrap.setPadding(pad, pad / 2, pad, 0);
+        wrap.addView(input);
+        new AlertDialog.Builder(this, R.style.Theme_Comtrade_AlertDialog)
+                .setTitle(R.string.ttl_file_rename_folder)
+                .setView(wrap)
+                .setNegativeButton(android.R.string.cancel, null)
+                .setPositiveButton(android.R.string.ok, (d, w) -> {
+                    String name = input.getText().toString().trim();
+                    if (name.isEmpty() || name.contains("/") || name.contains("\\")) {
+                        Toast.makeText(this, R.string.msg_file_rename_invalid, Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                    if (name.equals(folder.getName())) return;
+                    File target = new File(folder.getParentFile(), name);
+                    if (target.exists()) {
+                        Toast.makeText(this, R.string.msg_file_rename_exists, Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                    if (folder.renameTo(target)) {
+                        loadFolders();
+                        adapter.notifyDataSetChanged();
+                    } else {
+                        Toast.makeText(this, R.string.msg_file_rename_fail, Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .show();
+    }
+
     private void recursiveDelete(File file) {
         File[] children = file.listFiles();
         if (children != null) {
@@ -219,6 +266,7 @@ public class InternalFileManagerActivity extends BaseActivity {
             holder.tvName.setText(folder.getName());
             holder.btnShare.setOnClickListener(v -> shareAllInFolder(folder));
             holder.btnDelete.setOnClickListener(v -> deleteFolder(folder));
+            holder.btnRename.setOnClickListener(v -> showRenameFolder(folder));
 
             holder.containerFiles.removeAllViews();
             File[] files = folder.listFiles(f -> !f.isDirectory());
@@ -274,7 +322,7 @@ public class InternalFileManagerActivity extends BaseActivity {
         class VH extends RecyclerView.ViewHolder {
             TextView tvName, tvFileCount;
             LinearLayout containerFiles;
-            View btnShare, btnDelete;
+            View btnShare, btnDelete, btnRename;
             VH(View v) {
                 super(v);
                 tvName = v.findViewById(R.id.tvFolderName);
@@ -282,6 +330,7 @@ public class InternalFileManagerActivity extends BaseActivity {
                 containerFiles = v.findViewById(R.id.containerFiles);
                 btnShare = v.findViewById(R.id.btnShareAll);
                 btnDelete = v.findViewById(R.id.btnDeleteFolder);
+                btnRename = v.findViewById(R.id.btnRenameFolder);
             }
         }
     }

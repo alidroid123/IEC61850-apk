@@ -134,6 +134,55 @@ public class DoubleEndedFaultLocator {
         /** Angle (rad) all displayed phasors of this end are rotated by, so Va(pre-fault) sits at 0 deg. */
         public double displayRefAngle;
         public boolean secondaryWithoutRatio;
+        /** Naive microseconds of the first sample (for wall-clock timestamps in the IO analysis). */
+        public long startMicros = Long.MIN_VALUE;
+        /** Digital (BI/BO) and current-rise timing analysis for this end (null if not computed). */
+        public Bibo bibo;
+    }
+
+    // ------------------------------------------------------------------
+    // IO analysis (BI/BO digital events + significant current rise timing)
+    // ------------------------------------------------------------------
+
+    /** Significant current rise of one phase: onset sample/time and signal-to-noise quality. */
+    public static class PhaseRise {
+        public int phase;              // 0 = A/R, 1 = B/S, 2 = C/T
+        public int idx = -1;           // onset sample, -1 when the phase did not rise
+        public double t = Double.NaN;  // onset time (s)
+        public double peak;
+        public double snr = Double.POSITIVE_INFINITY;
+    }
+
+    /** Earliest significant current rise across the three phases, with the per-phase detail. */
+    public static class CurrentRise {
+        public int phase;              // earliest phase
+        public int idx;
+        public double t;
+        public double snr;
+        public double resolution;      // 1/fs (s), the time resolution of the onset
+        public final List<PhaseRise> phases = new ArrayList<>();
+    }
+
+    /** One status change of one digital channel that outlasted the debounce window. */
+    public static class DigitalEvent {
+        public String ch = "";
+        public int idx;                // channel index
+        public int from, to;           // 0/1
+        public int k;                  // sample index of the new state
+        public double t;               // time of the new state (s)
+        public Integer normal;         // normal state (0/1) or null when the cfg leaves it blank
+    }
+
+    /** Per-end IO analysis: current-rise reference, DFR trigger, and the debounced digital events. */
+    public static class Bibo {
+        public CurrentRise rise;           // null when no phase rose significantly
+        public double trigger = Double.NaN; // trigger time relative to the first sample (s)
+        public int channels;               // number of digital channels in the record
+        public int changed;                // channels that changed (after debounce)
+        public final List<DigitalEvent> events = new ArrayList<>();
+        public double recordEnd = Double.NaN; // time of the last sample (s)
+        public double fs;
+        public double debounceMs;
     }
 
     public static class Warning {
@@ -534,6 +583,7 @@ public class DoubleEndedFaultLocator {
         String incSource;
         boolean hasPre;
         Phasors pre;
+        int preStart = -1;
     }
 
     private static End prepare(ComtradeRecord rec, ChannelMap map, boolean isA, Result res) {
@@ -580,6 +630,7 @@ public class DoubleEndedFaultLocator {
         }
         EndSummary s = isA ? res.endA : res.endB;
         s.secondaryWithoutRatio = secNoRatio;
+        s.startMicros = rec.startMicros;
         s.station = rec.stationName;
         s.triggerText = rec.triggerText;
         s.fileType = rec.fileType;
@@ -843,6 +894,165 @@ public class DoubleEndedFaultLocator {
     private static double angDiff(double a, double b) { return Math.abs(wrapDeg(a - b)); }
 
     // ------------------------------------------------------------------
+    // IO analysis (BI/BO) engine - ported 1:1 from the GAS reference
+    // ------------------------------------------------------------------
+
+    /** Digital changes that outlast this are treated as contact bounce and dropped. */
+    private static final double DEBOUNCE_S = 0.002;
+
+    /** p-th percentile (0..1) of d over [from, to), nearest-rank; 0 for an empty range. */
+    private static double percentile(double[] d, int from, int to, double p) {
+        int len = Math.max(0, to - from);
+        if (len == 0) return 0;
+        double[] a = new double[len];
+        System.arraycopy(d, from, a, 0, len);
+        java.util.Arrays.sort(a);
+        int idx = (int) Math.min(len - 1, Math.max(0, Math.round(p * (len - 1))));
+        return a[idx];
+    }
+
+    /**
+     * Time of the first significant current rise per phase (resolution 1 sample). The superimposed
+     * cycle-to-cycle magnitude d[k] = |i[k] - i[k-N]| is ~0 while steady and jumps at the fault.
+     * The threshold per phase comes from the record's own pre-fault noise (95th percentile) so
+     * harmonics, CT/ADC noise and load swings are not read as a rise; after the threshold is
+     * crossed the onset is placed by a CUSUM change point on d^2 vs the pre-fault noise variance.
+     */
+    private static CurrentRise currentRise(End e) {
+        int N = e.N, n = e.n, s0 = e.inc;
+        int preEnd = Math.min(n, Math.max(N + 8, s0 - N / 4));
+        double[][] dAll = new double[3][];
+        double[] noiseArr = new double[3], peakArr = new double[3], sig2Arr = new double[3];
+        double maxPeak = 0;
+        for (int p = 0; p < 3; p++) {
+            double[] x = e.i[p], d = new double[n];
+            for (int k = N; k < n; k++) d[k] = Math.abs(x[k] - x[k - N]);
+            double peak = 0;
+            for (int k = Math.max(N, s0); k < Math.min(n, s0 + 2 * N); k++) if (d[k] > peak) peak = d[k];
+            // Pre-fault noise variance = mean of d^2 excluding its top 5 % (for the CUSUM drift).
+            int len = Math.max(0, preEnd - N);
+            double[] sq = new double[len];
+            for (int k = 0; k < len; k++) { double vv = d[N + k]; sq[k] = vv * vv; }
+            java.util.Arrays.sort(sq);
+            int keep = Math.max(1, (int) Math.floor(len * 0.95));
+            double sum = 0;
+            for (int k = 0; k < keep; k++) sum += sq[k];
+            double sig2 = len > 0 ? sum / keep : 0;
+            dAll[p] = d;
+            noiseArr[p] = percentile(d, N, preEnd, 0.95);
+            peakArr[p] = peak;
+            sig2Arr[p] = sig2;
+            if (peak > maxPeak) maxPeak = peak;
+        }
+        if (!(maxPeak > 0)) return null;
+        int span = Math.max(2, N / 8), back = N / 4;
+        CurrentRise out = new CurrentRise();
+        int bestIdx = Integer.MAX_VALUE;
+        for (int p = 0; p < 3; p++) {
+            double[] d = dAll[p];
+            double noise = noiseArr[p], peak = peakArr[p], sig2 = sig2Arr[p];
+            PhaseRise pr = new PhaseRise();
+            pr.phase = p;
+            pr.peak = peak;
+            if (!(peak >= 0.1 * maxPeak && peak > 5 * noise)) { out.phases.add(pr); continue; }
+            double thr = Math.max(3 * noise, 0.04 * peak), floor = Math.max(1.5 * noise, 0.01 * peak);
+            int found = -1, to = Math.min(n - span, s0 + 2 * N);
+            for (int k = Math.max(N, s0 - N); k < to; k++) {
+                if (d[k] <= thr) continue;
+                int cnt = 0;
+                for (int j = k; j < k + span; j++) if (d[j] > thr) cnt++;
+                if (cnt >= 0.6 * span) { found = k; break; }
+            }
+            if (found < 0) { out.phases.add(pr); continue; }
+            int K = N >= 40 ? 6 : 9, on = found, w0 = Math.max(N, found - N / 2), last0 = w0 - 1;
+            double S = 0;
+            for (int kk = w0; kk <= found; kk++) {
+                S = Math.max(0, S + d[kk] * d[kk] - K * sig2);
+                if (S == 0) last0 = kk;
+            }
+            on = Math.min(found, last0 + 1);
+            if (!(sig2 > 0)) { on = found; while (on - 1 >= N && found - (on - 1) <= back && d[on - 1] > floor) on--; }
+            pr.idx = on;
+            pr.t = e.t[on];
+            pr.snr = noise > 0 ? peak / noise : Double.POSITIVE_INFINITY;
+            out.phases.add(pr);
+            if (on < bestIdx) {
+                bestIdx = on;
+                out.phase = p;
+                out.idx = on;
+                out.t = e.t[on];
+                out.snr = pr.snr;
+            }
+        }
+        if (bestIdx == Integer.MAX_VALUE) return null;
+        out.resolution = e.fs > 0 ? 1.0 / e.fs : Double.NaN;
+        return out;
+    }
+
+    /**
+     * Debounced BI/BO status changes (0->1 / 1->0) that lasted > 2 ms, sorted by time. Pulses that
+     * are too short are dropped (shortest first), then neighbouring equal segments are merged.
+     */
+    private static void digitalEvents(ComtradeRecord rec, Bibo out) {
+        ComtradeRecord.DigitalChannel[] dd = rec.digitalData;
+        double[] t = rec.time;
+        int n = t != null ? t.length : 0;
+        out.channels = dd != null ? dd.length : 0;
+        out.changed = 0;
+        if (dd == null || dd.length == 0 || n == 0) return;
+        for (int c = 0; c < dd.length; c++) {
+            ComtradeRecord.DigitalChannel ch = dd[c];
+            List<int[]> seg = new ArrayList<>(); // each = {value, sampleIndex}
+            seg.add(new int[]{ch.init, 0});
+            for (int j = 0; j < ch.k.length; j++) seg.add(new int[]{ch.v[j], ch.k[j]});
+            for (;;) {
+                int minI = -1;
+                double minD = Double.POSITIVE_INFINITY;
+                for (int i = 1; i < seg.size(); i++) {
+                    double end = i + 1 < seg.size() ? t[seg.get(i + 1)[1]] : t[n - 1];
+                    double dur = end - t[seg.get(i)[1]];
+                    if (dur <= DEBOUNCE_S + 1e-9 && dur < minD) { minD = dur; minI = i; }
+                }
+                if (minI < 0) break;
+                seg.remove(minI);
+                for (int i = seg.size() - 1; i > 0; i--) if (seg.get(i)[0] == seg.get(i - 1)[0]) seg.remove(i);
+            }
+            if (seg.size() > 1) out.changed++;
+            String name = c < rec.digitalNames.size() ? rec.digitalNames.get(c) : ("D" + (c + 1));
+            Integer normal = rec.digitalNormal != null && c < rec.digitalNormal.length && rec.digitalNormal[c] >= 0
+                    ? rec.digitalNormal[c] : null;
+            for (int m = 1; m < seg.size(); m++) {
+                DigitalEvent ev = new DigitalEvent();
+                ev.ch = name;
+                ev.idx = c;
+                ev.from = seg.get(m - 1)[0];
+                ev.to = seg.get(m)[0];
+                ev.k = seg.get(m)[1];
+                ev.t = t[seg.get(m)[1]];
+                ev.normal = normal;
+                out.events.add(ev);
+            }
+        }
+        out.events.sort((x, y) -> {
+            int cmp = Double.compare(x.t, y.t);
+            return cmp != 0 ? cmp : Integer.compare(x.idx, y.idx);
+        });
+    }
+
+    private static Bibo biboAnalysis(End e) {
+        Bibo b = new Bibo();
+        b.rise = currentRise(e);
+        ComtradeRecord rec = e.rec;
+        b.trigger = rec.startMicros != Long.MIN_VALUE && rec.triggerMicros != Long.MIN_VALUE
+                ? (rec.triggerMicros - rec.startMicros) / 1e6 : Double.NaN;
+        digitalEvents(rec, b);
+        b.recordEnd = rec.time != null && rec.time.length > 0 ? rec.time[rec.time.length - 1] : Double.NaN;
+        b.fs = e.fs;
+        b.debounceMs = DEBOUNCE_S * 1000;
+        return b;
+    }
+
+    // ------------------------------------------------------------------
     // Main entry point
     // ------------------------------------------------------------------
 
@@ -876,11 +1086,16 @@ public class DoubleEndedFaultLocator {
         for (End e : new End[]{a, b}) {
             int preStart = e.inc - (int) Math.round(1.5 * e.N);
             if (preStart < 0 && e.inc - e.N - 1 >= 0) preStart = e.inc - e.N - 1;
+            e.preStart = preStart;
             e.pre = preStart >= 0 ? phasorsAt(e, preStart, 0) : null;
             e.hasPre = e.pre != null;
         }
         if (!a.hasPre) res.warnings.add(new Warning("NO_PREFAULT_A"));
         if (!b.hasPre) res.warnings.add(new Warning("NO_PREFAULT_B"));
+
+        // IO analysis (current-rise timing + debounced digital events), independent of the location math.
+        res.endA.bibo = biboAnalysis(a);
+        res.endB.bibo = biboAnalysis(b);
 
         // ---- fault window: same post-inception offset at both ends, most stable phasors ----
         double off;
@@ -1010,7 +1225,7 @@ public class DoubleEndedFaultLocator {
         }
 
         // ---- cross-check: time-synchronised (only meaningful with GPS/PTP-synced relays) ----
-        computeSynchronised(res, a, b, off, s, lm, L);
+        computeSynchronised(res, a, b, off, s, superimposed, lm, L);
 
         // ---- fault type at the fault point (both ends' superimposed currents, aligned by delta) ----
         Cx iF1 = dI1a.add(dI1b.mul(rot)), iF2 = dI2a.add(dI2b.mul(rot)), iF0 = dI0a.add(dI0b.mul(rot));
@@ -1066,6 +1281,96 @@ public class DoubleEndedFaultLocator {
         res.alignRefTimeA = session.refTimeA;
         res.alignRefCurrentA = session.refCurrentA;
         return res;
+    }
+
+    // ------------------------------------------------------------------
+    // Single-record analysis (for the DFR viewer) - the same per-end quantities the double-ended
+    // result carries, classified from one record alone. No location (that needs two ends).
+    // ------------------------------------------------------------------
+
+    public static class SingleResult {
+        /** ERR_* code when the record could not be analysed; null on success. */
+        public String error;
+        public final EndSummary end = new EndSummary();
+        public String faultType = "?";
+        /** Faulted-phase positive-sequence voltage sag vs pre-fault (fraction, NaN if no pre-fault). */
+        public double voltageSag = Double.NaN;
+        /** Fault-window start, cycles after inception. */
+        public double offsetCycles;
+        public final List<Warning> warnings = new ArrayList<>();
+    }
+
+    /** Runs only the IO (BI/BO) analysis on one record (null if the record is unusable). */
+    public static Bibo analyzeIo(ComtradeRecord rec, ChannelMap map) {
+        if (map == null || !map.complete(rec.analogCount())) return null;
+        End e = prepare(rec, map, true, new Result());
+        if (e == null) return null;
+        detectInception(e);
+        int ps = e.inc - (int) Math.round(1.5 * e.N);
+        if (ps < 0 && e.inc - e.N - 1 >= 0) ps = e.inc - e.N - 1;
+        e.preStart = ps;
+        return biboAnalysis(e);
+    }
+
+    /**
+     * Automatic single-record assessment: pre-fault and fault phasors, fault-type classification
+     * from this record's superimposed sequence currents, the faulted-phase voltage sag, and the
+     * BI/BO analysis - everything the double-ended result shows per end, for one DFR.
+     */
+    public static SingleResult analyzeSingle(ComtradeRecord rec, ChannelMap map) {
+        SingleResult sr = new SingleResult();
+        if (map == null || !map.complete(rec.analogCount())) { sr.error = ERR_MAPPING_A; return sr; }
+        Result scratch = new Result();
+        scratch.endA = sr.end; // prepare() fills res.endA - point it at our output summary
+        End e = prepare(rec, map, true, scratch);
+        if (e == null) { sr.error = scratch.error; return sr; }
+
+        detectInception(e);
+        int ps = e.inc - (int) Math.round(1.5 * e.N);
+        if (ps < 0 && e.inc - e.N - 1 >= 0) ps = e.inc - e.N - 1;
+        e.preStart = ps;
+        e.pre = ps >= 0 ? phasorsAt(e, ps, 0) : null;
+        e.hasPre = e.pre != null;
+
+        // Fault window: most stable one-cycle window after inception (single-ended form of analyze()).
+        double maxOff = (e.n - e.N - e.inc) / (double) e.N;
+        if (maxOff < 0) { sr.error = ERR_SHORT_A; return sr; }
+        double off = 1.0, best = Double.MAX_VALUE;
+        Phasors ref = faultPhasors(e, 1.0);
+        for (int j = 0; j <= 8; j++) {
+            double o = 1.0 + 0.125 * j;
+            Phasors pa = faultPhasors(e, o), pa2 = faultPhasors(e, o + 0.25);
+            if (pa == null || pa2 == null) break;
+            if (ref != null && maxI(pa2) < 0.5 * maxI(ref)) break;
+            double metric = relChange(pa, pa2);
+            if (metric < best - 0.005) { best = metric; off = o; }
+        }
+        if (off > maxOff) off = Math.floor(maxOff * 8) / 8;
+        sr.offsetCycles = off;
+        Phasors flt = faultPhasors(e, off);
+        if (flt == null) { sr.error = ERR_SHORT_A; return sr; }
+
+        // Fault type from this record's superimposed sequence currents (fault minus pre-fault).
+        Cx dI0 = e.hasPre ? flt.i0.sub(e.pre.i0) : flt.i0;
+        Cx dI1 = e.hasPre ? flt.i1.sub(e.pre.i1) : flt.i1;
+        Cx dI2 = e.hasPre ? flt.i2.sub(e.pre.i2) : flt.i2;
+        sr.faultType = classify(dI1, dI2, dI0);
+
+        EndSummary s = sr.end; // prepare() already filled station/fs/f0/N/startMicros/secNoRatio
+        s.inceptionSource = e.incSource;
+        s.inceptionTime = e.t[e.inc];
+        s.hasPrefault = e.hasPre;
+        s.pre = e.pre;
+        s.flt = flt;
+        s.displayRefAngle = (e.hasPre ? e.pre.v[0] : flt.v1).arg();
+        s.bibo = biboAnalysis(e);
+
+        // Faulted-phase voltage sag: fault vs pre-fault positive-sequence magnitude.
+        if (e.hasPre && e.pre.v1.abs() > 0) sr.voltageSag = 1 - flt.v1.abs() / e.pre.v1.abs();
+
+        if ("T".equals(e.incSource)) sr.warnings.add(new Warning("INC_TRIGGER_A"));
+        if (!e.hasPre) sr.warnings.add(new Warning("NO_PREFAULT_A"));
+        return sr;
     }
 
     private static class Solution {
@@ -1140,7 +1445,7 @@ public class DoubleEndedFaultLocator {
         return xA.sub(xB.mul(rot)).abs() / ref;
     }
 
-    private static void computeSynchronised(Result res, End a, End b, double off, int s, LineModel lm, double L) {
+    private static void computeSynchronised(Result res, End a, End b, double off, int s, boolean superimposed, LineModel lm, double L) {
         if (a.rec.startMicros == Long.MIN_VALUE || b.rec.startMicros == Long.MIN_VALUE) return;
         double startDiff = (a.rec.startMicros - b.rec.startMicros) / 1e6; // add to A-relative time -> B-relative
         double incAbsDiff = (a.t[a.inc] - b.t[b.inc]) + startDiff;
@@ -1157,8 +1462,19 @@ public class DoubleEndedFaultLocator {
         Phasors pa = phasorsAt(a, k0A, tA0);
         Phasors pb = phasorsAt(b, k0B, tB0);
         if (pa == null || pb == null) return;
-        final Cx vA = pa.v(s), iA = pa.i(s), vB = pb.v(s), iB = pb.i(s);
-        res.mSync = argMin(m -> lm.walk(vA, iA, m * L).sub(lm.walk(vB, iB, (1 - m) * L)).abs(), -0.25, 1.25, 1500);
+        // A balanced fault walks the superimposed positive sequence; pre-fault is read at the same
+        // aligned instants so the subtraction is consistent. Everything else walks the sequence s.
+        Cx vA, iA, vB, iB;
+        Phasors preSA = superimposed && a.preStart >= 0 ? phasorsAt(a, a.preStart, tA0) : null;
+        Phasors preSB = superimposed && b.preStart >= 0 ? phasorsAt(b, b.preStart, tB0) : null;
+        if (superimposed && preSA != null && preSB != null) {
+            vA = pa.v1.sub(preSA.v1); iA = pa.i1.sub(preSA.i1);
+            vB = pb.v1.sub(preSB.v1); iB = pb.i1.sub(preSB.i1);
+        } else {
+            vA = pa.v(s); iA = pa.i(s); vB = pb.v(s); iB = pb.i(s);
+        }
+        final Cx fvA = vA, fiA = iA, fvB = vB, fiB = iB;
+        res.mSync = argMin(m -> lm.walk(fvA, fiA, m * L).sub(lm.walk(fvB, fiB, (1 - m) * L)).abs(), -0.25, 1.25, 1500);
         // Both inceptions are the same physical instant (line transit < 1 ms), so their
         // timestamp gap is a direct read of the two relays' clock offset.
         boolean signalsBased = !"T".equals(a.incSource) && !"T".equals(b.incSource);
@@ -1306,6 +1622,9 @@ public class DoubleEndedFaultLocator {
         Cx z = lp.z1PerKm();
         LineModel lmIt = lm;
         double dIt = delta, unc = Double.NaN;
+        // Only report Z1 once an iteration has produced a fresh z, so the entered value never shows
+        // up as "measured" (assumption 2 of the GAS reference).
+        boolean measured = false;
         for (int it = 0; it < 12; it++) {
             Cx rot = Cx.polar(1, dIt);
             Cx vBa = vB.mul(rot), iBa = iB.mul(rot);
@@ -1319,6 +1638,7 @@ public class DoubleEndedFaultLocator {
             if (!(zNew.im > 0)) break;
             boolean done = zNew.sub(z).abs() < 1e-4 * z.abs();
             z = zNew;
+            measured = true;
             if (done) break;
             LineParams lpIt = lp.withZ1(z);
             lmIt = new LineModel(lpIt);
@@ -1327,7 +1647,7 @@ public class DoubleEndedFaultLocator {
             dIt = dNext;
         }
         res.z1MeasUnc = unc;
-        if (!(unc <= 0.5)) return;
+        if (!measured || !(unc <= 0.5)) return;
         res.z1MeasR = z.re;
         res.z1MeasX = z.im;
         double devX = (z.im - lp.x1) / lp.x1;
