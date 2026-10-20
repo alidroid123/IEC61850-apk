@@ -91,6 +91,14 @@
             android:layout_marginBottom="@dimen/spacing_s" />
     </LinearLayout>
 
+    <!-- Manual assessment table: superseded by the automatic analysis above, kept hidden. -->
+    <LinearLayout
+        android:id="@+id/layoutManualAssessment"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:visibility="gone">
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -175,6 +183,7 @@
         android:textSize="@dimen/text_size_caption"
         android:layout_marginTop="@dimen/spacing_l"
         android:gravity="center_horizontal" />
+    </LinearLayout>
 
     <TextView
         android:layout_width="match_parent"

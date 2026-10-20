@@ -192,11 +192,11 @@ public final class BiboReport {
                 String rTo = next != null ? msTxt(next.t - ref.refT, d) + " ms" : c.getString(R.string.val_fl_bibo_step_end);
                 String dur = Double.isNaN(tEnd) ? "–" : (next == null ? "≥ " : "") + fmt((tEnd - ev.t) * 1000, d) + " ms";
                 String clk = next != null
-                        ? clock(end.startMicros, ev.t, d) + " → " + clock(end.startMicros, next.t, d)
+                        ? clock(end.startMicros, ev.t, d) + " ➡️ " + clock(end.startMicros, next.t, d)
                         : c.getString(R.string.val_fl_bibo_since, clock(end.startMicros, ev.t, d));
-                box.addView(tv(c, (up ? "▲ " : "▼ ") + ev.from + "→" + ev.to + "   " + msTxt(ev.t - ref.refT, d) + " → " + rTo + "   " + dur,
+                box.addView(tv(c, (up ? "🟢 " : "🔴 ") + ev.from + "->" + ev.to + "   " + msTxt(ev.t - ref.refT, d) + " ➡️ " + rTo + "   " + dur,
                         up ? primary : textPrimary, false, false, 4));
-                box.addView(tv(c, clk, secondary, false, true, 0));
+                box.addView(tv(c, "🕒 " + clk, secondary, false, true, 0));
             }
         }
 
@@ -240,8 +240,8 @@ public final class BiboReport {
                 double tEnd = next != null ? next.t : b.recordEnd;
                 String rTo = next != null ? msTxt(next.t - ref.refT, d) + " ms" : c.getString(R.string.val_fl_bibo_step_end);
                 String dur = Double.isNaN(tEnd) ? "–" : (next == null ? "≥ " : "") + fmt((tEnd - ev.t) * 1000, d) + " ms";
-                sb.append("   ").append(ev.to == 1 ? "🟢 " : "🟠 ").append(ev.from).append("→").append(ev.to).append("  ")
-                        .append(msTxt(ev.t - ref.refT, d)).append(" → ").append(rTo).append("  ").append(dur).append('\n');
+                sb.append("   ").append(ev.to == 1 ? "🟢 " : "🔴 ").append(ev.from).append("->").append(ev.to).append("  ")
+                        .append(msTxt(ev.t - ref.refT, d)).append(" ➡️ ").append(rTo).append("  ").append(dur).append('\n');
             }
         }
     }

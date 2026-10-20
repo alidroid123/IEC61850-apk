@@ -996,8 +996,8 @@
     <string name="val_fl_bibo_ref_rise_name">current rise</string>
     <string name="val_fl_bibo_ref_trig_name">DFR trigger</string>
     <string name="msg_fl_bibo_fs">%1$s Hz • time resolution %2$s ms (1 sample)</string>
-    <string name="lbl_fl_bibo_gap">⏱️ Current rise → trigger</string>
-    <string name="msg_fl_bibo_gap_na">⏱️ Current rise → trigger: cannot be computed (%1$s)</string>
+    <string name="lbl_fl_bibo_gap">⏱️ Current rise ➡️ trigger</string>
+    <string name="msg_fl_bibo_gap_na">⏱️ Current rise ➡️ trigger: cannot be computed (%1$s)</string>
     <string name="val_fl_bibo_gap_no_trig">trigger not available</string>
     <string name="val_fl_bibo_gap_no_rise">current rise not detected</string>
     <string name="val_fl_bibo_gap_coincident">trigger coincides with current rise</string>

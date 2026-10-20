@@ -962,8 +962,8 @@
     <string name="val_fl_bibo_ref_rise_name">kenaikan arus</string>
     <string name="val_fl_bibo_ref_trig_name">trigger DFR</string>
     <string name="msg_fl_bibo_fs">%1$s Hz • resolusi waktu %2$s ms (1 sampel)</string>
-    <string name="lbl_fl_bibo_gap">⏱️ Arus naik → trigger</string>
-    <string name="msg_fl_bibo_gap_na">⏱️ Arus naik → trigger: tidak dapat dihitung (%1$s)</string>
+    <string name="lbl_fl_bibo_gap">⏱️ Arus naik ➡️ trigger</string>
+    <string name="msg_fl_bibo_gap_na">⏱️ Arus naik ➡️ trigger: tidak dapat dihitung (%1$s)</string>
     <string name="val_fl_bibo_gap_no_trig">trigger tidak tersedia</string>
     <string name="val_fl_bibo_gap_no_rise">kenaikan arus tidak terdeteksi</string>
     <string name="val_fl_bibo_gap_coincident">trigger bersamaan dengan arus naik</string>
