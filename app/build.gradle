@@ -19,13 +19,14 @@ if (hasSigningConfig) {
 }
 
 android {
-    namespace 'com.alidev.dfrtools'
-    compileSdk 34
+    namespace 'com.mdproject.dfrtools'
+    compileSdk 36
+    ndkVersion '25.1.8937393'
 
     defaultConfig {
-        applicationId "com.alidev.dfrtools"
+        applicationId "com.mdproject.dfrtool"
         minSdk 24
-        targetSdk 34
+        targetSdk 36
         versionCode vMajor * 10000 + vMinor * 100 + vPatch
         versionName "${vMajor}.${vMinor}.${vPatch}"
 
@@ -62,8 +63,26 @@ android {
         // in update notifications. UpdateChecker compares the numeric part only.
         debug {
             versionNameSuffix "-dev"
+            buildConfigField 'boolean', 'SELF_UPDATE', 'true'
+        }
+        // Google Play build (./gradlew bundlePlay): same signing as release, but Play forbids an app
+        // from updating itself outside Play, so the GitHub APK updater and the install-packages
+        // permission (src/play/AndroidManifest.xml) are switched off. Not wired to publishReleaseToGit.
+        play {
+            initWith release
+            matchingFallbacks = ['release']
+            buildConfigField 'boolean', 'SELF_UPDATE', 'false'
+            // R8 shrinks/obfuscates the Play build; the mapping file travels inside the AAB so
+            // Play Console can deobfuscate crashes/ANRs. Native symbols go in for the same reason.
+            minifyEnabled true
+            shrinkResources true
+            ndk { debugSymbolLevel 'SYMBOL_TABLE' }
+            if (hasSigningConfig) {
+                signingConfig signingConfigs.release
+            }
         }
         release {
+            buildConfigField 'boolean', 'SELF_UPDATE', 'true'
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             if (hasSigningConfig) {
@@ -79,6 +98,7 @@ android {
 
     buildFeatures {
         viewBinding false
+        buildConfig true
     }
 }
 

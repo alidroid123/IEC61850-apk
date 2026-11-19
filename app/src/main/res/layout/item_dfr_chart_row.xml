@@ -44,7 +44,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <com.alidev.dfrtools.dfr.DfrLineChart
+        <com.mdproject.dfrtools.dfr.DfrLineChart
             android:id="@+id/rowChart"
             android:layout_width="match_parent"
             android:layout_height="130dp"
@@ -52,7 +52,7 @@
 
         <!-- Opaque background so the transparent DfrLineChart underneath (kept alive purely to
              drive drag/pinch-zoom gestures for digital rows) never shows through. -->
-        <com.alidev.dfrtools.dfr.DfrDigitalView
+        <com.mdproject.dfrtools.dfr.DfrDigitalView
             android:id="@+id/rowDigitalView"
             android:layout_width="match_parent"
             android:layout_height="@dimen/spacing_ms"
@@ -61,7 +61,7 @@
             android:visibility="gone" />
     </FrameLayout>
 
-    <com.alidev.dfrtools.dfr.DfrDigitalDimensionView
+    <com.mdproject.dfrtools.dfr.DfrDigitalDimensionView
         android:id="@+id/rowDimensionLine"
         android:layout_width="match_parent"
         android:layout_height="20dp"

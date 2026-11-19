@@ -408,7 +408,7 @@
     <string name="msg_dev_import_ok">Berhasil mengimpor/update %d device</string>
     <string name="msg_dev_ping_start">Memulai Bulk Ping...</string>
     <string name="msg_dev_ping_confirm">Apakah anda yakin ingin melakukan PING ke %d device?</string>
-    <string name="msg_dev_intranet_fail">Tidak terhubung ke Intranet (172.20.89.1). Hubungkan ke VPN dahulu?</string>
+    <string name="msg_dev_intranet_fail">Tidak terhubung ke Intranet (172.20.79.1). Hubungkan ke VPN dahulu?</string>
     <string name="msg_dev_ping_precheck">Mengecek koneksi intranet...</string>
     <string name="ttl_dev_ping_confirm">Konfirmasi Ping</string>
     <string name="ttl_dev_vpn_needed">VPN Dibutuhkan</string>
@@ -651,7 +651,7 @@
     <string name="help_sum_home">Menu utama dan pintasan ke semua fitur</string>
     <string name="help_func_home">Halaman utama yang muncul setelah splash screen. Berisi kartu-kartu akses cepat ke fitur utama aplikasi serta menu samping untuk pengaturan dan fitur lainnya.</string>
     <string name="help_cmp_home_1_name">Ikon Menu</string>
-    <string name="help_cmp_home_1_desc">Membuka menu samping berisi ganti tema, Pengaturan, IED Monitoring, Edit Template, VPN, dan Tentang Aplikasi.</string>
+    <string name="help_cmp_home_1_desc">Membuka menu samping berisi ganti tema, Pengaturan, Edit Template, VPN, dan Tentang Aplikasi.</string>
     <string name="help_cmp_home_2_name">Kartu Menu</string>
     <string name="help_cmp_home_2_desc">Download DFR, Riwayat File, DFR Viewer, Daftar Relay, IED Explorer, dan IED Monitoring - ketuk kartu mana pun untuk langsung membuka fitur tersebut.</string>
     <string name="help_cmp_home_3_name">Banner Ringkasan</string>
@@ -663,7 +663,7 @@
     <string name="help_feat_home_1_title">Membuka Fitur</string>
     <string name="help_feat_home_1_steps">1. Ketuk kartu menu mana pun untuk langsung membuka fitur tersebut.\n2. Banner ringkasan di bawah kartu ({ic:location} gardu induk, {ic:list} device, {ic:warning} alarm aktif) menampilkan gambaran cepat seluruh armada - buka Daftar Relay atau IED Monitoring untuk detail lengkap di balik angka-angka ini.</string>
     <string name="help_feat_home_2_title">Menu Samping</string>
-    <string name="help_feat_home_2_steps">1. Ketuk {ic:menu} di pojok kiri atas untuk membuka menu samping.\n2. Dari sana Anda bisa mengganti mode Terang/Gelap dan tema warna, membuka Pengaturan, IED Monitoring, atau Edit Template, menyambung ke VPN, atau melihat halaman Tentang Aplikasi.</string>
+    <string name="help_feat_home_2_steps">1. Ketuk {ic:menu} di pojok kiri atas untuk membuka menu samping.\n2. Dari sana Anda bisa mengganti mode Terang/Gelap dan tema warna, membuka Pengaturan atau Edit Template, menyambung ke VPN, atau melihat halaman Tentang Aplikasi.</string>
 
     <string name="help_ttl_download">Comtrade Downloader</string>
     <string name="help_sum_download">Unduh file COMTRADE (DFR) dari relay via MMS</string>
@@ -1221,4 +1221,11 @@
 
     <string name="lbl_fl_values_primary">Nilai: primer, sesaat (instantaneous) dari DFR</string>
     <string name="lbl_fl_values_no_ratio">Nilai: SEKUNDER - cfg tidak punya rasio VT/CT, isi di Mapping kanal</string>
+    <string name="lbl_set_section_demo">DATA DEMO</string>
+    <string name="lbl_set_demo_desc">Tidak ada relay? Muat dua relay simulasi (GI DEMO A dan GI DEMO B, 192.0.2.x) lengkap dengan titik pantau contoh, saluran contoh, dan rekaman COMTRADE contoh yang bisa diunduh, sehingga semua fitur bisa dicoba. Tidak ada koneksi ke perangkat nyata.</string>
+    <string name="btn_set_demo_load">Muat data demo</string>
+    <string name="btn_set_demo_remove">Hapus data demo</string>
+    <string name="msg_demo_loaded">Data demo dimuat. Coba: Unduh COMTRADE dari GI DEMO A dan GI DEMO B, lalu buka FL Double Ended.</string>
+    <string name="msg_demo_removed">Data demo dihapus. File demo yang sudah diunduh tetap ada di Download/DFR.</string>
+    <string name="btn_home_first_run_demo">COBA DENGAN DATA DEMO</string>
 </resources>

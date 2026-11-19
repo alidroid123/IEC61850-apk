@@ -16,6 +16,7 @@
     </queries>
 
     <application
+        android:name=".DfrApp"
         android:allowBackup="true"
         android:requestLegacyExternalStorage="true"
         android:icon="@mipmap/ic_launcher"
@@ -134,8 +135,8 @@
                 <data android:pathPattern=".*\\..*\\..*\\..*\\.RAR" />
             </intent-filter>
             <!-- Chat/cloud apps (WhatsApp, Telegram, Drive, ...) hand out content://.../<id> URIs with no
-                 extension, so match by type: archives, and octet-stream for .cfg/.dat (no registered
-                 type). The real file name is checked once opened. -->
+                 extension, so match by type: archives, plain text, csv, and octet-stream for .cfg/.dat/.hdr.
+                 The real file name is checked once opened. -->
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
@@ -146,6 +147,15 @@
                 <data android:mimeType="application/x-rar" />
                 <data android:mimeType="application/x-rar-compressed" />
                 <data android:mimeType="application/octet-stream" />
+                <data android:mimeType="text/plain" />
+                <data android:mimeType="text/csv" />
+                <data android:mimeType="text/comma-separated-values" />
+                <data android:mimeType="text/cfg" />
+                <data android:mimeType="text/x-cfg" />
+                <data android:mimeType="application/x-cfg" />
+                <data android:mimeType="application/cfg" />
+                <data android:mimeType="application/x-comtrade" />
+                <data android:mimeType="application/comtrade" />
             </intent-filter>
         </activity>
 
@@ -262,8 +272,8 @@
                 <data android:pathPattern=".*\\..*\\..*\\..*\\.RAR" />
             </intent-filter>
             <!-- Chat/cloud apps (WhatsApp, Telegram, Drive, ...) hand out content://.../<id> URIs with no
-                 extension, so match by type: archives, and octet-stream for .cfg/.dat (no registered
-                 type). The real file name is checked once opened. -->
+                 extension, so match by type: archives, plain text, csv, and octet-stream for .cfg/.dat/.hdr.
+                 The real file name is checked once opened. -->
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
@@ -274,6 +284,15 @@
                 <data android:mimeType="application/x-rar" />
                 <data android:mimeType="application/x-rar-compressed" />
                 <data android:mimeType="application/octet-stream" />
+                <data android:mimeType="text/plain" />
+                <data android:mimeType="text/csv" />
+                <data android:mimeType="text/comma-separated-values" />
+                <data android:mimeType="text/cfg" />
+                <data android:mimeType="text/x-cfg" />
+                <data android:mimeType="application/x-cfg" />
+                <data android:mimeType="application/cfg" />
+                <data android:mimeType="application/x-comtrade" />
+                <data android:mimeType="application/comtrade" />
             </intent-filter>
         </activity>
 

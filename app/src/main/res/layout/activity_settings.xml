@@ -240,6 +240,53 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
+            <!-- Demo data Section -->
+            <TextView
+                style="@style/SectionLabel"
+                android:text="@string/lbl_set_section_demo"
+                android:layout_marginStart="@dimen/spacing_s"
+                android:layout_marginBottom="@dimen/spacing_s" />
+
+            <com.google.android.material.card.MaterialCardView
+                style="@style/Widget.DFRtools.CardView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/spacing_xl">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="@dimen/spacing_l">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/lbl_set_demo_desc"
+                        android:textColor="@color/text_secondary"
+                        android:textSize="@dimen/text_size_body_small"
+                        android:layout_marginBottom="@dimen/spacing_m" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnDemoLoad"
+                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/standard_button_height"
+                        android:text="@string/btn_set_demo_load"
+                        app:cornerRadius="@dimen/card_corner_radius_medium" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnDemoRemove"
+                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/standard_button_height"
+                        android:layout_marginTop="@dimen/spacing_s"
+                        android:text="@string/btn_set_demo_remove"
+                        app:cornerRadius="@dimen/card_corner_radius_medium" />
+
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
             <!-- Backup & Restore Section -->
             <TextView
                 style="@style/SectionLabel"

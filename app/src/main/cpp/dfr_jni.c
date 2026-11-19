@@ -12,7 +12,7 @@
  * would have silently broken vendor detection on some substations.
  * New: nativeGetLogicalDevices(), nativeReadDataAttribute().
  *
- * Thin JNI bridge between com.alidev.dfrtools.dfr.Iec61850DfrClient (Java)
+ * Thin JNI bridge between com.mdproject.dfrtools.dfr.Iec61850DfrClient (Java)
  * and libiec61850's blocking IedConnection client API.
  *
  * Design choice: every native method here is BLOCKING (connect, list,
@@ -101,7 +101,7 @@ static const char* errorToString(IedClientError err) {
 }
 
 JNIEXPORT jlong JNICALL
-Java_com_alidev_dfrtools_dfr_Iec61850DfrClient_nativeConnect(JNIEnv* env, jobject thiz,
+Java_com_mdproject_dfrtools_dfr_Iec61850DfrClient_nativeConnect(JNIEnv* env, jobject thiz,
         jstring jHost, jint port, jint timeoutMs, jint profile) {
     const char* host = (*env)->GetStringUTFChars(env, jHost, NULL);
 
@@ -159,7 +159,7 @@ Java_com_alidev_dfrtools_dfr_Iec61850DfrClient_nativeConnect(JNIEnv* env, jobjec
 }
 
 JNIEXPORT void JNICALL
-Java_com_alidev_dfrtools_dfr_Iec61850DfrClient_nativeDisconnect(JNIEnv* env, jobject thiz, jlong handle) {
+Java_com_mdproject_dfrtools_dfr_Iec61850DfrClient_nativeDisconnect(JNIEnv* env, jobject thiz, jlong handle) {
     DfrHandle* h = (DfrHandle*)(intptr_t) handle;
     if (h == NULL) return;
 
@@ -174,7 +174,7 @@ Java_com_alidev_dfrtools_dfr_Iec61850DfrClient_nativeDisconnect(JNIEnv* env, job
 }
 
 JNIEXPORT jstring JNICALL
-Java_com_alidev_dfrtools_dfr_Iec61850DfrClient_nativeGetLastError(JNIEnv* env, jobject thiz, jlong handle) {
+Java_com_mdproject_dfrtools_dfr_Iec61850DfrClient_nativeGetLastError(JNIEnv* env, jobject thiz, jlong handle) {
     DfrHandle* h = (DfrHandle*)(intptr_t) handle;
     if (h == NULL) return (*env)->NewStringUTF(env, "Handle tidak valid");
     return (*env)->NewStringUTF(env, h->lastError);
@@ -187,7 +187,7 @@ Java_com_alidev_dfrtools_dfr_Iec61850DfrClient_nativeGetLastError(JNIEnv* env, j
  * wrapper (Iec61850DfrClient) parses these into DfrFileEntry objects.
  */
 JNIEXPORT jobjectArray JNICALL
-Java_com_alidev_dfrtools_dfr_Iec61850DfrClient_nativeListFiles(JNIEnv* env, jobject thiz,
+Java_com_mdproject_dfrtools_dfr_Iec61850DfrClient_nativeListFiles(JNIEnv* env, jobject thiz,
         jlong handle, jstring jDirectory) {
     DfrHandle* h = (DfrHandle*)(intptr_t) handle;
     jclass stringClass = (*env)->FindClass(env, "java/lang/String");
@@ -256,7 +256,7 @@ static bool downloadFileHandler(void* parameter, uint8_t* buffer, uint32_t bytes
 }
 
 JNIEXPORT jboolean JNICALL
-Java_com_alidev_dfrtools_dfr_Iec61850DfrClient_nativeDownloadFile(JNIEnv* env, jobject thiz,
+Java_com_mdproject_dfrtools_dfr_Iec61850DfrClient_nativeDownloadFile(JNIEnv* env, jobject thiz,
         jlong handle, jstring jRemoteFileName, jstring jLocalFilePath) {
     DfrHandle* h = (DfrHandle*)(intptr_t) handle;
     if (h == NULL) return JNI_FALSE;
@@ -292,7 +292,7 @@ Java_com_alidev_dfrtools_dfr_Iec61850DfrClient_nativeDownloadFile(JNIEnv* env, j
 }
 
 JNIEXPORT jboolean JNICALL
-Java_com_alidev_dfrtools_dfr_Iec61850DfrClient_nativeIsConnected(JNIEnv* env, jobject thiz, jlong handle) {
+Java_com_mdproject_dfrtools_dfr_Iec61850DfrClient_nativeIsConnected(JNIEnv* env, jobject thiz, jlong handle) {
     DfrHandle* h = (DfrHandle*)(intptr_t) handle;
     if (h == NULL) return JNI_FALSE;
     return IedConnection_getState(h->con) == IED_STATE_CONNECTED ? JNI_TRUE : JNI_FALSE;
@@ -306,7 +306,7 @@ Java_com_alidev_dfrtools_dfr_Iec61850DfrClient_nativeIsConnected(JNIEnv* env, jo
  * "IEDRCD"), Java picks a Logical Device from this list at runtime.
  */
 JNIEXPORT jobjectArray JNICALL
-Java_com_alidev_dfrtools_dfr_Iec61850DfrClient_nativeGetLogicalDevices(JNIEnv* env, jobject thiz, jlong handle) {
+Java_com_mdproject_dfrtools_dfr_Iec61850DfrClient_nativeGetLogicalDevices(JNIEnv* env, jobject thiz, jlong handle) {
     DfrHandle* h = (DfrHandle*)(intptr_t) handle;
     jclass stringClass = (*env)->FindClass(env, "java/lang/String");
 
@@ -354,7 +354,7 @@ Java_com_alidev_dfrtools_dfr_Iec61850DfrClient_nativeGetLogicalDevices(JNIEnv* e
  * future feature needs to read from another FC.
  */
 JNIEXPORT jstring JNICALL
-Java_com_alidev_dfrtools_dfr_Iec61850DfrClient_nativeReadDataAttribute(JNIEnv* env, jobject thiz,
+Java_com_mdproject_dfrtools_dfr_Iec61850DfrClient_nativeReadDataAttribute(JNIEnv* env, jobject thiz,
         jlong handle, jstring jObjectRef, jstring jFc) {
     DfrHandle* h = (DfrHandle*)(intptr_t) handle;
     if (h == NULL) return NULL;
@@ -395,7 +395,7 @@ Java_com_alidev_dfrtools_dfr_Iec61850DfrClient_nativeReadDataAttribute(JNIEnv* e
  */
 
 JNIEXPORT jobjectArray JNICALL
-Java_com_alidev_dfrtools_dfr_Iec61850DfrClient_nativeGetLogicalDeviceDirectory(JNIEnv* env, jobject thiz,
+Java_com_mdproject_dfrtools_dfr_Iec61850DfrClient_nativeGetLogicalDeviceDirectory(JNIEnv* env, jobject thiz,
         jlong handle, jstring jLdName) {
     DfrHandle* h = (DfrHandle*)(intptr_t) handle;
     jclass stringClass = (*env)->FindClass(env, "java/lang/String");
@@ -429,7 +429,7 @@ Java_com_alidev_dfrtools_dfr_Iec61850DfrClient_nativeGetLogicalDeviceDirectory(J
 }
 
 JNIEXPORT jobjectArray JNICALL
-Java_com_alidev_dfrtools_dfr_Iec61850DfrClient_nativeGetLogicalNodeDirectory(JNIEnv* env, jobject thiz,
+Java_com_mdproject_dfrtools_dfr_Iec61850DfrClient_nativeGetLogicalNodeDirectory(JNIEnv* env, jobject thiz,
         jlong handle, jstring jLnRef) {
     DfrHandle* h = (DfrHandle*)(intptr_t) handle;
     jclass stringClass = (*env)->FindClass(env, "java/lang/String");
@@ -463,7 +463,7 @@ Java_com_alidev_dfrtools_dfr_Iec61850DfrClient_nativeGetLogicalNodeDirectory(JNI
 }
 
 JNIEXPORT jobjectArray JNICALL
-Java_com_alidev_dfrtools_dfr_Iec61850DfrClient_nativeGetDataDirectory(JNIEnv* env, jobject thiz,
+Java_com_mdproject_dfrtools_dfr_Iec61850DfrClient_nativeGetDataDirectory(JNIEnv* env, jobject thiz,
         jlong handle, jstring jDataRef) {
     DfrHandle* h = (DfrHandle*)(intptr_t) handle;
     jclass stringClass = (*env)->FindClass(env, "java/lang/String");
@@ -515,7 +515,7 @@ static const char* dataAccessErrorToString(MmsDataAccessError err) {
 }
 
 JNIEXPORT jobjectArray JNICALL
-Java_com_alidev_dfrtools_dfr_Iec61850DfrClient_nativeGetDeviceVariables(JNIEnv* env, jobject thiz,
+Java_com_mdproject_dfrtools_dfr_Iec61850DfrClient_nativeGetDeviceVariables(JNIEnv* env, jobject thiz,
         jlong handle, jstring jLdName) {
     DfrHandle* h = (DfrHandle*)(intptr_t) handle;
     jclass stringClass = (*env)->FindClass(env, "java/lang/String");
@@ -616,7 +616,7 @@ static void formatMmsValueRecursive(MmsValue* value, char* buf, size_t bufSize) 
 }
 
 JNIEXPORT jstring JNICALL
-Java_com_alidev_dfrtools_dfr_Iec61850DfrClient_nativeReadValueFormatted(JNIEnv* env, jobject thiz,
+Java_com_mdproject_dfrtools_dfr_Iec61850DfrClient_nativeReadValueFormatted(JNIEnv* env, jobject thiz,
         jlong handle, jstring jObjectRef, jstring jFc) {
     DfrHandle* h = (DfrHandle*)(intptr_t) handle;
     if (h == NULL) return NULL;

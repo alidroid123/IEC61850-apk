@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Google Play build only: the app never installs APKs itself (Play policy), so the permission
+     the GitHub self-updater needs is dropped from the merged manifest. -->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" tools:node="remove" />
+    <!-- No ads in this app (Firebase Analytics only): declare "no advertising ID" in Play Console. -->
+    <uses-permission android:name="com.google.android.gms.permission.AD_ID" tools:node="remove" />
+    <uses-permission android:name="android.permission.ACCESS_ADSERVICES_ATTRIBUTION" tools:node="remove" />
+    <uses-permission android:name="android.permission.ACCESS_ADSERVICES_AD_ID" tools:node="remove" />
+
+    <application>
+        <!-- The GitHub APK updater is never started in this build; keep its dataSync foreground
+             service out of the Play manifest so only the two real data-sync tasks are declared. -->
+        <service android:name=".update.UpdateDownloadService" tools:node="remove" />
+        <receiver android:name=".update.UpdateInstalledReceiver" tools:node="remove" />
+    </application>
+</manifest>

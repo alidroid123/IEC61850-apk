@@ -438,7 +438,7 @@
     <string name="msg_dev_import_ok">Successfully imported/updated %d devices</string>
     <string name="msg_dev_ping_start">Starting Bulk Ping...</string>
     <string name="msg_dev_ping_confirm">Are you sure you want to PING %d devices?</string>
-    <string name="msg_dev_intranet_fail">Not connected to Intranet (172.20.89.1). Connect to VPN first?</string>
+    <string name="msg_dev_intranet_fail">Not connected to Intranet (172.20.79.1). Connect to VPN first?</string>
     <string name="msg_dev_ping_precheck">Checking intranet connection...</string>
     <string name="ttl_dev_ping_confirm">Ping Confirmation</string>
     <string name="ttl_dev_vpn_needed">VPN Required</string>
@@ -685,7 +685,7 @@
     <string name="help_sum_home">Main menu and shortcuts to every feature</string>
     <string name="help_func_home">The main dashboard shown right after the splash screen. It gives quick-access cards to the app\'s core features and a side menu for settings and other tools.</string>
     <string name="help_cmp_home_1_name">Menu icon</string>
-    <string name="help_cmp_home_1_desc">Opens the side drawer with theme switch, Settings, IED Monitoring, Edit Template, VPN, and About.</string>
+    <string name="help_cmp_home_1_desc">Opens the side drawer with theme switch, Settings, Edit Template, VPN, and About.</string>
     <string name="help_cmp_home_2_name">Menu cards</string>
     <string name="help_cmp_home_2_desc">Download DFR, File History, DFR Viewer, Relay List, IED Explorer, and IED Monitoring - tap any card to jump straight into that feature.</string>
     <string name="help_cmp_home_3_name">Summary banner</string>
@@ -697,7 +697,7 @@
     <string name="help_feat_home_1_title">Opening a Feature</string>
     <string name="help_feat_home_1_steps">1. Tap any menu card to open that feature directly.\n2. The summary banner below the cards ({ic:location} substations, {ic:list} devices, {ic:warning} active alarms) gives an instant fleet-wide overview - open Relay List or IED Monitoring for the full detail behind these numbers.</string>
     <string name="help_feat_home_2_title">Side Drawer</string>
-    <string name="help_feat_home_2_steps">1. Tap {ic:menu} in the top-left corner to open the side drawer.\n2. From there you can switch Light/Dark mode and color theme, open Settings, IED Monitoring, or Edit Template, connect to VPN, or view About.</string>
+    <string name="help_feat_home_2_steps">1. Tap {ic:menu} in the top-left corner to open the side drawer.\n2. From there you can switch Light/Dark mode and color theme, open Settings or Edit Template, connect to VPN, or view About.</string>
 
     <string name="help_ttl_download">Comtrade Downloader</string>
     <string name="help_sum_download">Download COMTRADE (DFR) files from a relay over MMS</string>
@@ -1255,4 +1255,11 @@
 
     <string name="lbl_fl_values_primary">Values: primary, instantaneous (from the DFR)</string>
     <string name="lbl_fl_values_no_ratio">Values: SECONDARY - the cfg has no VT/CT ratio, set it in Channel mapping</string>
+    <string name="lbl_set_section_demo">DEMO DATA</string>
+    <string name="lbl_set_demo_desc">No relay at hand? Load two simulated relays (GI DEMO A and GI DEMO B, 192.0.2.x) with sample monitored points, a sample line and downloadable sample COMTRADE records, so every feature can be tried. Nothing connects to a real device.</string>
+    <string name="btn_set_demo_load">Load demo data</string>
+    <string name="btn_set_demo_remove">Remove demo data</string>
+    <string name="msg_demo_loaded">Demo data loaded. Try: Download COMTRADE from GI DEMO A and GI DEMO B, then FL Double Ended.</string>
+    <string name="msg_demo_removed">Demo data removed. Downloaded demo files remain in Download/DFR.</string>
+    <string name="btn_home_first_run_demo">TRY WITH DEMO DATA</string>
 </resources>

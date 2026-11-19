@@ -1,0 +1,8 @@
+Catatan Rilis v1.0.89:
+
+• Support COMTRADE biner 16-bit/32-bit (BINARY/FLOAT32) dari relay NR, Siemens, ABB, Schneider, GE (fix mismatch).
+• Deteksi otomatis file .dat/.hdr saat buka .cfg dari WhatsApp/Telegram/File Explorer.
+• Ekstensi .cfg/.dat/.hdr 100% case-insensitive.
+• Multi-select & pengurutan file DFR terbaru di paling atas.
+• Laporan PDF & PNG disempurnakan (analisa BI/BO, vektor phasa, tinggi baris DI/DO ringkas).
+• MMS Explorer (real-time search) & IED Monitoring (real-time status/DiffUtil).

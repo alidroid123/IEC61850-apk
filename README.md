@@ -4,7 +4,7 @@
 COMTRADE, menjelajahi struktur data IED secara langsung, dan memantau pengukuran/alarm dari
 banyak gardu induk sekaligus, semuanya lewat protokol **IEC 61850 MMS**.
 
-developed by **alidev (Mahmud Sulaiman A)** — package `com.alidev.dfrtools`
+developed by **alidev (Mahmud Sulaiman A)** — applicationId `com.mdproject.dfrtool` (paket Java `com.mdproject.dfrtools`)
 
 ---
 
@@ -20,7 +20,9 @@ developed by **alidev (Mahmud Sulaiman A)** — package `com.alidev.dfrtools`
    untuk CMake mem-build `libiec61850` + JNI bridge menjadi `libdfr_jni.so`.
 4. Jalankan ke emulator/device lewat tombol **Run ▶**.
 
-Requirement: `compileSdk 34`, `minSdk 24` (Android 7.0+), `targetSdk 34`, Java 8 source/target.
+Requirement: `compileSdk 36`, `minSdk 24` (Android 7.0+), `targetSdk 36`, Java 8 source/target, AGP 8.13 + Gradle 8.13+.
+
+Build untuk Google Play: `gradle :app:bundlePlay` (AAB bertanda tangan `keystore.properties`; updater APK GitHub dan izin `REQUEST_INSTALL_PACKAGES` dimatikan). Build `assembleRelease` tetap memakai alur GitHub Release.
 
 ---
 
@@ -46,7 +48,7 @@ Requirement: `compileSdk 34`, `minSdk 24` (Android 7.0+), `targetSdk 34`, Java 8
 ## 3. Struktur Kode
 
 ```
-app/src/main/java/com/alidev/dfrtools/
+app/src/main/java/com/mdproject/dfrtools/
  ├─ dfr/                     <- seluruh Activity utama & logic domain
  │   ├─ HomeActivity, DfrDownloadActivity, DfrViewerActivity
  │   ├─ MmsExplorerActivity, IEDMonitoringActivity, RelayTemplateEditActivity

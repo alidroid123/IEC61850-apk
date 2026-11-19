@@ -28,7 +28,7 @@ std::u16string jstringToUtf16(JNIEnv *env, jstring s) {
 // stores the first error met in error[0] (0 = none), so a damaged or partly encrypted archive
 // still yields whatever records could be read.
 extern "C" JNIEXPORT jobjectArray JNICALL
-Java_com_alidev_dfrtools_dfr_RarExtractor_nativeExtract(JNIEnv *env, jclass, jstring jArchive,
+Java_com_mdproject_dfrtools_dfr_RarExtractor_nativeExtract(JNIEnv *env, jclass, jstring jArchive,
                                                        jstring jOutDir, jlong maxBytes,
                                                        jintArray jError) {
     RarExtractResult r = extractRar(jstringToUtf8(env, jArchive), jstringToUtf8(env, jOutDir),
