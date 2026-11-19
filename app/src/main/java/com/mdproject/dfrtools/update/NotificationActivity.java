@@ -36,6 +36,13 @@ public class NotificationActivity extends BaseActivity {
             AppNotifications.markAllRead(this);
             reload();
         });
+        View btnClearAll = findViewById(R.id.btnClearAll);
+        if (btnClearAll != null) {
+            btnClearAll.setOnClickListener(v -> {
+                AppNotifications.clearAll(this);
+                reload();
+            });
+        }
 
         layoutEmpty = findViewById(R.id.layoutNotifEmpty);
         RecyclerView rv = findViewById(R.id.rvNotifications);
@@ -102,6 +109,7 @@ public class NotificationActivity extends BaseActivity {
         final ImageView imgIcon;
         final TextView txtTitle, txtMessage, txtTime;
         final View dotUnread;
+        final View btnDelete;
 
         NotifVH(@NonNull View v) {
             super(v);
@@ -110,6 +118,7 @@ public class NotificationActivity extends BaseActivity {
             txtMessage = v.findViewById(R.id.txtNotifMessage);
             txtTime = v.findViewById(R.id.txtNotifTime);
             dotUnread = v.findViewById(R.id.dotNotifItemUnread);
+            btnDelete = v.findViewById(R.id.btnDeleteNotif);
         }
 
         void bind(AppNotifications.Item item) {
@@ -124,6 +133,12 @@ public class NotificationActivity extends BaseActivity {
             dotUnread.setVisibility(item.read ? View.GONE : View.VISIBLE);
             imgIcon.setImageResource(R.drawable.ic_download);
             itemView.setOnClickListener(v -> onItemClicked(item));
+            if (btnDelete != null) {
+                btnDelete.setOnClickListener(v -> {
+                    AppNotifications.remove(NotificationActivity.this, item.id);
+                    reload();
+                });
+            }
         }
     }
 }

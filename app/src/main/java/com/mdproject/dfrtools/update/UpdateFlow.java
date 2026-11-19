@@ -71,8 +71,11 @@ public class UpdateFlow {
 
         AlertDialog dialog = new AlertDialog.Builder(activity, R.style.Theme_Comtrade_Dialog)
                 .setView(dialogView)
-                .setCancelable(false)
+                .setCancelable(true)
                 .create();
+
+        dialog.setCanceledOnTouchOutside(true);
+        dialog.setOnCancelListener(dialogInterface -> UpdatePrefs.onDismissed(activity));
 
         dialogView.findViewById(R.id.btnUpdateLater).setOnClickListener(v -> {
             UpdatePrefs.onDismissed(activity);

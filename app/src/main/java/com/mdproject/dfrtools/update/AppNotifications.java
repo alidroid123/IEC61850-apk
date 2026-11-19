@@ -117,6 +117,23 @@ public class AppNotifications {
         if (changed) save(context, items);
     }
 
+    public static synchronized void remove(Context context, String id) {
+        List<Item> items = getAll(context);
+        boolean changed = false;
+        for (int i = 0; i < items.size(); i++) {
+            if (items.get(i).id.equals(id)) {
+                items.remove(i);
+                changed = true;
+                break;
+            }
+        }
+        if (changed) save(context, items);
+    }
+
+    public static synchronized void clearAll(Context context) {
+        prefs(context).edit().remove(KEY_ITEMS).apply();
+    }
+
     private static void save(Context context, List<Item> items) {
         Collections.sort(items, (a, b) -> Long.compare(b.timestampMillis, a.timestampMillis));
         JSONArray arr = new JSONArray();

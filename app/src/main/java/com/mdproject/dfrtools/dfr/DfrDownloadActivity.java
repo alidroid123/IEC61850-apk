@@ -171,6 +171,7 @@ public class DfrDownloadActivity extends BaseActivity {
         btnSaveDevice.setOnClickListener(v -> onSaveDeviceClicked());
         btnOpenList.setOnClickListener(v -> onOpenListClicked());
         btnCloseOverlay.setOnClickListener(v -> hideProgress());
+        overlayProgress.setOnClickListener(v -> hideProgress());
         btnOpenFolder.setOnClickListener(v -> {
             hideProgress();
             startActivity(new Intent(this, InternalFileManagerActivity.class));
