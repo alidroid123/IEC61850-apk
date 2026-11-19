@@ -84,10 +84,27 @@ public class UpdateFlow {
 
         dialogView.findViewById(R.id.btnUpdateNow).setOnClickListener(v -> {
             dialog.dismiss();
-            startDownload(info);
+            openPlayStore(activity);
         });
 
         dialog.show();
+    }
+
+    public static void openPlayStore(Activity activity) {
+        String packageName = "com.mdproject.dfrtool";
+        try {
+            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + packageName));
+            intent.setPackage("com.android.vending");
+            activity.startActivity(intent);
+        } catch (Exception e) {
+            try {
+                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + packageName));
+                activity.startActivity(intent);
+            } catch (Exception e2) {
+                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=" + packageName));
+                activity.startActivity(intent);
+            }
+        }
     }
 
     private void startDownload(UpdateChecker.UpdateInfo info) {

@@ -85,10 +85,7 @@ public class NotificationActivity extends BaseActivity {
         reload();
 
         if (item.id.startsWith("update_")) {
-            UpdateChecker.checkForUpdate(this, info -> {
-                if (info == null || isFinishing()) return;
-                updateFlow.showUpdateDialog(info);
-            });
+            UpdateFlow.openPlayStore(this);
         }
     }
 
